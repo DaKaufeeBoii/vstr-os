@@ -110,11 +110,18 @@ export default function AboutApp() {
           <span>📧</span> saitarunrdy@gmail.com
         </a>
         <a
-          href="tel:+917043692980"
-          id="about-phone-link"
+          href="https://linkedin.com/in/sai-tarun-reddy-velagala-24135229b/"
+          id="about-linkedin-link"
           style={linkStyle}
         >
-          <span>📞</span> +91 70436 92980
+          <span><img src="/resume_res/icons/logo-Lin.jpg" alt="LinkedIn" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> LinkedIn
+        </a>
+        <a
+          href="https://github.com/DaKaufeeBoii"
+          id="about-github-link"
+          style={linkStyle}
+        >
+          <span><img src="/resume_res/icons/logo-GitHub.png" alt="GitHub" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> GitHub
         </a>
         <a
           href="/resume.pdf"
@@ -123,7 +130,7 @@ export default function AboutApp() {
           id="about-resume-link"
           style={{ ...linkStyle, background: "var(--os-cyan-dim)", borderColor: "rgba(0,212,255,0.3)", color: "var(--os-cyan)" }}
         >
-          <span>📄</span> Download Resume
+          <span>📄</span> Download My Resume
         </a>
       </div>
     </div>
