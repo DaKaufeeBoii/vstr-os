@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 const CONTACTS = [
   {
-    icon: "📧",
+    icon: "/resume_res/icons/logo-Gmail.svg",
     label: "Email",
     value: "saitarunrdy@gmail.com",
     href: "mailto:saitarunrdy@gmail.com",
@@ -14,28 +14,19 @@ const CONTACTS = [
     border: "rgba(0,212,255,0.25)",
   },
   {
-    icon: "📞",
-    label: "Phone",
-    value: "+91 7043692980",
-    href: "tel:+917043692980",
-    color: "var(--os-green)",
-    bg: "var(--os-green-dim)",
-    border: "rgba(16,185,129,0.25)",
-  },
-  {
-    icon: "🔗",
+    icon: "/resume_res/icons/logo-Lin.jpg",
     label: "LinkedIn",
-    value: "linkedin.com/in/sai-tarun-reddy",
-    href: "https://linkedin.com/in/sai-tarun-reddy",
+    value: "linkedin.com/in/sai-tarun-reddy-velagala-24135229b/",
+    href: "https://linkedin.com/in/sai-tarun-reddy-velagala-24135229b/",
     color: "#a78bfa",
     bg: "var(--os-purple-dim)",
     border: "rgba(124,58,237,0.3)",
   },
   {
-    icon: "🐙",
+    icon: "/resume_res/icons/logo-GitHub.png",
     label: "GitHub",
-    value: "github.com/saitarun",
-    href: "https://github.com/saitarun",
+    value: "github.com/DaKaufeeBoii",
+    href: "https://github.com/DaKaufeeBoii",
     color: "var(--os-text-muted)",
     bg: "rgba(255,255,255,0.04)",
     border: "var(--os-border)",
@@ -82,8 +73,12 @@ export default function ContactApp() {
               transition: "all 0.15s",
             }}
           >
-            <span style={{ fontSize: 22 }}>{c.icon}</span>
-            <div>
+            {c.icon.includes('.') ? (
+              <img src={c.icon} alt={c.label} style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} />
+            ) : (
+              <span style={{ fontSize: 22 }}>{c.icon}</span>
+            )}
+            <div style={{ flex: 1 }}>
               <p style={{ fontSize: 10, color: "var(--os-text-dim)", fontFamily: "var(--font-mono)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 {c.label}
               </p>

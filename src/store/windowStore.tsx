@@ -17,9 +17,15 @@ export const WINDOW_CONFIGS: WindowConfig[] = [
   { id: "achievements", title: "Achievements.txt", icon: "🏆", defaultW: 480, defaultH: 380 },
   { id: "terminal",     title: "Terminal",         icon: "⌨️", defaultW: 560, defaultH: 400 },
   { id: "contact",      title: "Contact.app",      icon: "📧", defaultW: 400, defaultH: 360 },
+  { id: "flappy",       title: "Flappy.exe",       icon: "🎮", defaultW: 400, defaultH: 500 },
+  { id: "hintmaster",   title: "HintMaster.exe",   icon: "🪙", defaultW: 400, defaultH: 360 },
+  { id: "settings",     title: "Settings.sys",     icon: "⚙️", defaultW: 400, defaultH: 300 },
+  { id: "photo_viewer", title: "real.png",         icon: "🖼️", defaultW: 360, defaultH: 480 },
 ];
 
 /* ── Types ──────────────────────────────────────────────────────── */
+export type Theme = "cyberpunk" | "retro" | "light";
+
 interface WindowState {
   id: WindowId;
   isOpen: boolean;
@@ -32,6 +38,7 @@ interface WindowState {
 interface OSState {
   windows: WindowState[];
   topZ: number;
+  theme: Theme;
 }
 
 type OSAction =
@@ -40,7 +47,8 @@ type OSAction =
   | { type: "MINIMIZE"; id: WindowId }
   | { type: "FOCUS";    id: WindowId }
   | { type: "RESTORE";  id: WindowId }
-  | { type: "MOVE";     id: WindowId; x: number; y: number };
+  | { type: "MOVE";     id: WindowId; x: number; y: number }
+  | { type: "SET_THEME"; theme: Theme };
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 function cascadeOffset(openCount: number) {
@@ -60,6 +68,7 @@ function buildInitial(): OSState {
       y: 0,
     })),
     topZ: 10,
+    theme: "cyberpunk",
   };
 }
 
@@ -121,6 +130,8 @@ function reducer(state: OSState, action: OSAction): OSState {
           w.id === action.id ? { ...w, x: action.x, y: action.y } : w
         ),
       };
+    case "SET_THEME":
+      return { ...state, theme: action.theme };
     default:
       return state;
   }
@@ -129,6 +140,7 @@ function reducer(state: OSState, action: OSAction): OSState {
 /* ── Context ────────────────────────────────────────────────────── */
 interface OSContextValue {
   windows: WindowState[];
+  theme: Theme;
   openWindow:    (id: WindowId) => void;
   closeWindow:   (id: WindowId) => void;
   minimizeWindow:(id: WindowId) => void;
@@ -136,6 +148,7 @@ interface OSContextValue {
   focusWindow:   (id: WindowId) => void;
   moveWindow:    (id: WindowId, x: number, y: number) => void;
   getWindow:     (id: WindowId) => WindowState | undefined;
+  setTheme:      (theme: Theme) => void;
 }
 
 const OSContext = createContext<OSContextValue | null>(null);
@@ -156,11 +169,14 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
     (id: WindowId) => state.windows.find((w) => w.id === id),
     [state.windows]
   );
+  const setTheme = useCallback((theme: Theme) => dispatch({ type: "SET_THEME", theme }), []);
 
   return (
     <OSContext.Provider value={{
       windows: state.windows,
+      theme: state.theme,
       openWindow, closeWindow, minimizeWindow, restoreWindow, focusWindow, moveWindow, getWindow,
+      setTheme,
     }}>
       {children}
     </OSContext.Provider>

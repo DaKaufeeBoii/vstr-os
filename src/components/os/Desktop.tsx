@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import DesktopIcon from "./DesktopIcon";
 import Taskbar from "./Taskbar";
 import Window from "./Window";
-import { WINDOW_CONFIGS } from "@/store/windowStore";
+import BootScreen from "./BootScreen";
+import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
 
 // App components
 import AboutApp      from "@/components/apps/AboutApp";
@@ -15,6 +17,12 @@ import AchievementsApp from "@/components/apps/AchievementsApp";
 import TerminalApp   from "@/components/apps/TerminalApp";
 import ContactApp    from "@/components/apps/ContactApp";
 
+import FlappyGameApp from "@/components/apps/FlappyGameApp";
+import HintMasterApp from "@/components/apps/HintMasterApp";
+import PhotoViewerApp from "@/components/apps/PhotoViewerApp";
+
+import SettingsApp   from "@/components/apps/SettingsApp";
+
 const APP_CONTENT: Record<string, React.ReactNode> = {
   about:        <AboutApp />,
   projects:     <ProjectsApp />,
@@ -23,20 +31,43 @@ const APP_CONTENT: Record<string, React.ReactNode> = {
   achievements: <AchievementsApp />,
   terminal:     <TerminalApp />,
   contact:      <ContactApp />,
+  flappy:       <FlappyGameApp />,
+  hintmaster:   <HintMasterApp />,
+  settings:     <SettingsApp />,
+  photo_viewer: <PhotoViewerApp />,
 };
 
 export default function Desktop() {
+  const [booting, setBooting] = useState(true);
+  const { theme } = useOS();
+
+  // Ordered so Contact is next to About (2nd item)
+  const orderedConfigs = [
+    WINDOW_CONFIGS.find(c => c.id === "about"),
+    WINDOW_CONFIGS.find(c => c.id === "contact"),
+    WINDOW_CONFIGS.find(c => c.id === "projects"),
+    WINDOW_CONFIGS.find(c => c.id === "skills"),
+    WINDOW_CONFIGS.find(c => c.id === "experience"),
+    WINDOW_CONFIGS.find(c => c.id === "achievements"),
+    WINDOW_CONFIGS.find(c => c.id === "terminal"),
+  ].filter(Boolean) as typeof WINDOW_CONFIGS;
+
   return (
     <div
       id="os-desktop"
+      data-theme={theme}
       style={{
         position: "relative",
         width: "100%",
         height: "100vh",
         overflow: "hidden",
+        background: "var(--os-bg)",
+        color: "var(--os-text)",
       }}
     >
-      {/* Aurora wallpaper */}
+      {booting && <BootScreen onComplete={() => setBooting(false)} />}
+      
+      {/* Default Aurora wallpaper is always in the background */}
       <div className="wallpaper" />
 
       {/* Desktop hint */}
@@ -65,20 +96,21 @@ export default function Desktop() {
         </p>
       </div>
 
-      {/* Desktop icons grid */}
+      {/* Desktop icons grid: Max 6 per column */}
       <div
         id="desktop-icons"
         style={{
           position: "absolute",
           top: 20,
           left: 20,
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
+          display: "grid",
+          gridTemplateRows: "repeat(6, auto)",
+          gridAutoFlow: "column",
+          gap: "8px 24px",
           zIndex: 2,
         }}
       >
-        {WINDOW_CONFIGS.map((cfg) => (
+        {orderedConfigs.map((cfg) => (
           <DesktopIcon
             key={cfg.id}
             id={cfg.id}

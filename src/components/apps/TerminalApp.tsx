@@ -69,7 +69,10 @@ const BOOT_LINES: TerminalLine[] = [
   { type: "dim", text: "" },
 ];
 
+import { useOS } from "@/store/windowStore";
+
 export default function TerminalApp() {
+  const { openWindow } = useOS();
   const [lines, setLines] = useState<TerminalLine[]>(BOOT_LINES);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([]);
@@ -131,6 +134,18 @@ export default function TerminalApp() {
         break;
       case "sudo rm -rf /":
         push({ type: "error", text: "Nice try 😄  Permission denied." });
+        break;
+      case "play flappy":
+        push({ type: "success", text: "Launching Flappy.exe..." });
+        openWindow("flappy");
+        break;
+      case "ask hintmaster":
+        push({ type: "success", text: "Summoning the HintMaster..." });
+        openWindow("hintmaster");
+        break;
+      case "play victory.fight":
+        push({ type: "success", text: "Redirecting to Fighter Arena..." });
+        window.open("/games/fighter", "_blank");
         break;
       default:
         push({

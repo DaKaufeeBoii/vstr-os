@@ -22,6 +22,43 @@
   --titlebar-h:   32px;
 }
 
+/* ── Theme Overrides ────────────────────────────────────────────── */
+[data-theme="light"] {
+  --os-bg:        #f3f4f6;
+  --os-surface:   rgba(255, 255, 255, 0.85);
+  --os-border:    rgba(0, 0, 0, 0.15);
+  --os-glass:     rgba(255, 255, 255, 0.6);
+  --os-cyan:      #0284c7;
+  --os-cyan-dim:  rgba(2, 132, 199, 0.15);
+  --os-purple:    #9333ea;
+  --os-purple-dim:rgba(147, 51, 234, 0.15);
+  --os-green:     #059669;
+  --os-green-dim: rgba(5, 150, 105, 0.15);
+  --os-yellow:    #d97706;
+  --os-red:       #dc2626;
+  --os-text:      #111827;
+  --os-text-muted:#4b5563;
+  --os-text-dim:  #9ca3af;
+}
+
+[data-theme="retro"] {
+  --os-bg:        #008080;
+  --os-surface:   #c0c0c0;
+  --os-border:    #000000;
+  --os-glass:     #c0c0c0;
+  --os-cyan:      #000080;
+  --os-cyan-dim:  rgba(0, 0, 128, 0.15);
+  --os-purple:    #800080;
+  --os-purple-dim:rgba(128, 0, 128, 0.15);
+  --os-green:     #008000;
+  --os-green-dim: rgba(0, 128, 0, 0.15);
+  --os-yellow:    #808000;
+  --os-red:       #ff0000;
+  --os-text:      #000000;
+  --os-text-muted:#333333;
+  --os-text-dim:  #666666;
+}
+
 /* ── Reset & Base ───────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;

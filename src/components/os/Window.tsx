@@ -96,6 +96,10 @@ export default function Window({
             width: defaultW,
             height: defaultH,
             zIndex: win.zIndex,
+            resize: "both",
+            overflow: "hidden",
+            minWidth: 300,
+            minHeight: 200,
           }}
           onMouseDown={() => focusWindow(id)}
         >

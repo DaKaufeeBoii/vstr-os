@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { useOS } from "@/store/windowStore";
 
 export default function AboutApp() {
-  const [showReal, setShowReal] = useState(false);
+  const { openWindow } = useOS();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -25,7 +26,7 @@ export default function AboutApp() {
               boxShadow: "0 0 20px rgba(0,212,255,0.15)",
             }}
             whileHover={{ scale: 1.04, boxShadow: "0 0 28px rgba(0,212,255,0.35)" }}
-            onClick={() => setShowReal(true)}
+            onClick={() => openWindow("photo_viewer")}
             title="Click to reveal real photo"
           >
             <Image
@@ -125,87 +126,6 @@ export default function AboutApp() {
           <span>📄</span> Download Resume
         </a>
       </div>
-
-      {/* Real Photo reveal window */}
-      <AnimatePresence>
-        {showReal && (
-          <motion.div
-            className="photo-reveal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowReal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.88, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 320, damping: 26 }}
-              style={{
-                position: "relative",
-                borderRadius: 16,
-                overflow: "hidden",
-                border: "2px solid rgba(0,212,255,0.4)",
-                boxShadow: "0 0 60px rgba(0,212,255,0.2), 0 40px 100px rgba(0,0,0,0.8)",
-                maxWidth: 360,
-                width: "85vw",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Simulated window title bar */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "8px 12px",
-                  background: "rgba(22,27,34,0.98)",
-                  borderBottom: "1px solid var(--os-border)",
-                }}
-              >
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button
-                    onClick={() => setShowReal(false)}
-                    style={{ width: 12, height: 12, borderRadius: "50%", background: "var(--os-red)", border: "none", cursor: "pointer" }}
-                  />
-                  <div style={{ width: 12, height: 12, borderRadius: "50%", background: "var(--os-yellow)" }} />
-                  <div style={{ width: 12, height: 12, borderRadius: "50%", background: "var(--os-green)" }} />
-                </div>
-                <span style={{ flex: 1, textAlign: "center", fontSize: 12, color: "var(--os-text-muted)", fontFamily: "var(--font-mono)" }}>
-                  real.png — Photo Viewer
-                </span>
-                <div style={{ width: 52 }} />
-              </div>
-
-              <div style={{ position: "relative", width: "100%", aspectRatio: "3/4" }}>
-                <Image
-                  src="/real.png"
-                  alt="Real photo of Sai Tarun Reddy Velagala"
-                  fill
-                  style={{ objectFit: "cover" }}
-                  priority
-                />
-              </div>
-              <div
-                style={{
-                  padding: "10px 14px",
-                  background: "rgba(13,17,23,0.95)",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span style={{ fontSize: 12, color: "var(--os-text-muted)", fontFamily: "var(--font-mono)" }}>
-                  Sai Tarun Reddy Velagala
-                </span>
-                <span style={{ fontSize: 11, color: "var(--os-text-dim)", fontFamily: "var(--font-mono)" }}>
-                  real.png · 1.9 MB
-                </span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

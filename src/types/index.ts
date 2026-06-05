@@ -37,7 +37,11 @@ export type WindowId =
   | "experience"
   | "achievements"
   | "terminal"
-  | "contact";
+  | "contact"
+  | "flappy"
+  | "hintmaster"
+  | "settings"
+  | "photo_viewer";
 
 export interface WindowConfig {
   id: WindowId;
