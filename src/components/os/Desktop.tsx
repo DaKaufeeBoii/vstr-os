@@ -41,15 +41,16 @@ export default function Desktop() {
   const [booting, setBooting] = useState(true);
   const { theme } = useOS();
 
-  // Ordered so Contact is next to About (2nd item)
+  // Ordered as per user request
   const orderedConfigs = [
     WINDOW_CONFIGS.find(c => c.id === "about"),
-    WINDOW_CONFIGS.find(c => c.id === "contact"),
-    WINDOW_CONFIGS.find(c => c.id === "projects"),
     WINDOW_CONFIGS.find(c => c.id === "skills"),
+    WINDOW_CONFIGS.find(c => c.id === "projects"),
     WINDOW_CONFIGS.find(c => c.id === "experience"),
     WINDOW_CONFIGS.find(c => c.id === "achievements"),
+    WINDOW_CONFIGS.find(c => c.id === "contact"),
     WINDOW_CONFIGS.find(c => c.id === "terminal"),
+    WINDOW_CONFIGS.find(c => c.id === "settings"),
   ].filter(Boolean) as typeof WINDOW_CONFIGS;
 
   return (

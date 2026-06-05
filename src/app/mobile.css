@@ -1,0 +1,44 @@
+/* ── Mobile Responsiveness ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Windows snap to full screen on mobile */
+  .os-window {
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    height: calc(100dvh - var(--taskbar-h)) !important;
+    border-radius: 0 !important;
+    resize: none !important;
+    /* remove the shadow to make it flush */
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  .os-window.focused {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Make taskbar more compact */
+  .os-taskbar {
+    padding: 0 4px !important;
+    gap: 2px !important;
+  }
+
+  .taskbar-app-btn {
+    max-width: 80px !important;
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+  }
+  
+  .taskbar-clock {
+    display: none !important; /* Hide clock to save space */
+  }
+
+  /* Adjust Desktop Icons for mobile portrait layout */
+  #desktop-icons {
+    grid-template-rows: repeat(4, auto) !important;
+    gap: 16px 12px !important;
+    top: 10px !important;
+    left: 10px !important;
+  }
+}
