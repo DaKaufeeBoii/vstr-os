@@ -21,9 +21,9 @@ export default function AboutApp() {
               height: 120,
               borderRadius: 12,
               overflow: "hidden",
-              border: "2px solid rgba(0, 212, 255, 0.3)",
+              border: "2px solid rgba(245, 158, 11, 0.3)",
               cursor: "pointer",
-              boxShadow: "0 0 20px rgba(0,212,255,0.15)",
+              boxShadow: "0 0 20px rgba(245,158,11,0.12)",
             }}
             whileHover={{ scale: 1.04, boxShadow: "0 0 28px rgba(0,212,255,0.35)" }}
             onClick={() => openWindow("photo_viewer")}
@@ -53,7 +53,7 @@ export default function AboutApp() {
               }}
             >
               <span style={{ fontSize: 22 }}>👁️</span>
-              <span style={{ fontSize: 10, color: "var(--os-cyan)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>
+              <span style={{ fontSize: 10, color: "var(--os-amber)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>
                 REVEAL
               </span>
             </motion.div>
@@ -68,7 +68,7 @@ export default function AboutApp() {
           <h2 style={{ fontSize: 20, fontWeight: 700, color: "var(--os-text)", lineHeight: 1.2 }}>
             Sai Tarun Reddy Velagala
           </h2>
-          <p style={{ marginTop: 4, fontSize: 13, color: "var(--os-cyan)", fontFamily: "var(--font-mono)" }}>
+          <p style={{ marginTop: 4, fontSize: 13, color: "var(--os-amber)", fontFamily: "var(--font-mono)" }}>
             CS Undergrad &amp; AI Developer
           </p>
 
@@ -128,7 +128,7 @@ export default function AboutApp() {
           target="_blank"
           rel="noopener noreferrer"
           id="about-resume-link"
-          style={{ ...linkStyle, background: "var(--os-cyan-dim)", borderColor: "rgba(0,212,255,0.3)", color: "var(--os-cyan)" }}
+          style={{ ...linkStyle, background: "var(--os-amber-dim)", borderColor: "rgba(245,158,11,0.3)", color: "var(--os-amber)" }}
         >
           <span>📄</span> Download My Resume
         </a>

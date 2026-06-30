@@ -10,17 +10,20 @@ import type { WindowId, WindowConfig } from "@/types";
 
 /* ── Window Configs ─────────────────────────────────────────────── */
 export const WINDOW_CONFIGS: WindowConfig[] = [
-  { id: "about",        title: "About.exe",        icon: "👤", defaultW: 520, defaultH: 460 },
-  { id: "projects",     title: "Projects/",        icon: "📁", defaultW: 600, defaultH: 500 },
-  { id: "skills",       title: "Skills.sys",       icon: "⚡", defaultW: 480, defaultH: 520 },
-  { id: "experience",   title: "Experience.log",   icon: "📋", defaultW: 500, defaultH: 480 },
-  { id: "achievements", title: "Achievements.txt", icon: "🏆", defaultW: 480, defaultH: 380 },
-  { id: "terminal",     title: "Terminal",         icon: "⌨️", defaultW: 560, defaultH: 400 },
-  { id: "contact",      title: "Contact.app",      icon: "📧", defaultW: 400, defaultH: 360 },
-  { id: "flappy",       title: "Flappy.exe",       icon: "🎮", defaultW: 400, defaultH: 500 },
-  { id: "hintmaster",   title: "HintMaster.exe",   icon: "🪙", defaultW: 400, defaultH: 360 },
-  { id: "settings",     title: "Settings.sys",     icon: "⚙️", defaultW: 400, defaultH: 300 },
-  { id: "photo_viewer", title: "real.png",         icon: "🖼️", defaultW: 360, defaultH: 480 },
+  { id: "about",            title: "About.app",           icon: "👤", defaultW: 520, defaultH: 460 },
+  { id: "projects",         title: "Projects/",           icon: "📁", defaultW: 600, defaultH: 500 },
+  { id: "skills",           title: "Skills.sys",          icon: "⚡", defaultW: 480, defaultH: 520 },
+  { id: "experience",       title: "Experience.log",      icon: "📋", defaultW: 500, defaultH: 480 },
+  { id: "achievements",     title: "Achievements.txt",    icon: "🏆", defaultW: 480, defaultH: 380 },
+  { id: "terminal",         title: "Terminal",            icon: "⌨️", defaultW: 560, defaultH: 400 },
+  { id: "contact",          title: "Contact.app",         icon: "📧", defaultW: 400, defaultH: 360 },
+  { id: "flappy",           title: "Flappy.exe",          icon: "🐦", defaultW: 400, defaultH: 500 },
+  { id: "hintmaster",       title: "HintMaster.app",      icon: "🪙", defaultW: 400, defaultH: 360 },
+  { id: "settings",         title: "Settings.sys",        icon: "⚙️", defaultW: 400, defaultH: 300 },
+  { id: "photo_viewer",     title: "real.png",            icon: "🖼️", defaultW: 360, defaultH: 480 },
+  { id: "disk_cleanup",     title: "Disk Cleanup.app",    icon: "💾", defaultW: 500, defaultH: 460 },
+  { id: "desktop_pet",      title: "Desktop Pet.app",     icon: "🐾", defaultW: 380, defaultH: 320 },
+  { id: "password_cracker", title: "PwnTool 3.0.app",     icon: "🔓", defaultW: 540, defaultH: 480 },
 ];
 
 /* ── Types ──────────────────────────────────────────────────────── */

@@ -3,38 +3,52 @@
 
 /* ── VSTR-OS Design Tokens ─────────────────────────────────────── */
 :root {
-  --os-bg:        #0d1117;
-  --os-surface:   rgba(22, 27, 34, 0.85);
-  --os-border:    rgba(48, 54, 61, 0.8);
-  --os-glass:     rgba(13, 17, 23, 0.6);
-  --os-cyan:      #00d4ff;
-  --os-cyan-dim:  rgba(0, 212, 255, 0.15);
-  --os-purple:    #7c3aed;
-  --os-purple-dim:rgba(124, 58, 237, 0.15);
-  --os-green:     #10b981;
-  --os-green-dim: rgba(16, 185, 129, 0.15);
-  --os-yellow:    #f59e0b;
-  --os-red:       #ef4444;
-  --os-text:      #e6edf3;
-  --os-text-muted:#8b949e;
-  --os-text-dim:  #484f58;
-  --taskbar-h:    48px;
-  --titlebar-h:   32px;
+  --os-bg:           #080c10;
+  --os-surface:      rgba(15, 20, 28, 0.88);
+  --os-border:       rgba(40, 48, 58, 0.85);
+  --os-glass:        rgba(8, 12, 16, 0.65);
+
+  --os-amber:        #f59e0b;
+  --os-amber-dim:    rgba(245, 158, 11, 0.15);
+  --os-amber-glow:   rgba(245, 158, 11, 0.08);
+
+  --os-jade:         #10b981;
+  --os-jade-dim:     rgba(16, 185, 129, 0.15);
+  --os-jade-glow:    rgba(16, 185, 129, 0.08);
+
+  /* Legacy aliases (keep for backward compat in apps not yet updated) */
+  --os-cyan:         #f59e0b;
+  --os-cyan-dim:     rgba(245, 158, 11, 0.15);
+  --os-purple:       #10b981;
+  --os-purple-dim:   rgba(16, 185, 129, 0.15);
+  --os-green:        #10b981;
+  --os-green-dim:    rgba(16, 185, 129, 0.15);
+
+  --os-yellow:       #fbbf24;
+  --os-red:          #ef4444;
+  --os-text:         #e8edf4;
+  --os-text-muted:   #8b929e;
+  --os-text-dim:     #3d4451;
+
+  --taskbar-h:       48px;
+  --titlebar-h:      32px;
 }
 
 /* ── Theme Overrides ────────────────────────────────────────────── */
 [data-theme="light"] {
-  --os-bg:        #f3f4f6;
-  --os-surface:   rgba(255, 255, 255, 0.85);
-  --os-border:    rgba(0, 0, 0, 0.15);
-  --os-glass:     rgba(255, 255, 255, 0.6);
-  --os-cyan:      #0284c7;
-  --os-cyan-dim:  rgba(2, 132, 199, 0.15);
-  --os-purple:    #9333ea;
-  --os-purple-dim:rgba(147, 51, 234, 0.15);
+  --os-bg:        #f0f2f5;
+  --os-surface:   rgba(255, 255, 255, 0.9);
+  --os-border:    rgba(0, 0, 0, 0.12);
+  --os-glass:     rgba(255, 255, 255, 0.65);
+  --os-amber:     #d97706;
+  --os-amber-dim: rgba(217, 119, 6, 0.12);
+  --os-jade:      #059669;
+  --os-jade-dim:  rgba(5, 150, 105, 0.12);
+  --os-cyan:      #d97706;
+  --os-cyan-dim:  rgba(217, 119, 6, 0.12);
+  --os-purple:    #059669;
+  --os-purple-dim:rgba(5, 150, 105, 0.12);
   --os-green:     #059669;
-  --os-green-dim: rgba(5, 150, 105, 0.15);
-  --os-yellow:    #d97706;
   --os-red:       #dc2626;
   --os-text:      #111827;
   --os-text-muted:#4b5563;
@@ -42,21 +56,23 @@
 }
 
 [data-theme="retro"] {
-  --os-bg:        #008080;
-  --os-surface:   #c0c0c0;
-  --os-border:    #000000;
-  --os-glass:     #c0c0c0;
-  --os-cyan:      #000080;
-  --os-cyan-dim:  rgba(0, 0, 128, 0.15);
-  --os-purple:    #800080;
-  --os-purple-dim:rgba(128, 0, 128, 0.15);
-  --os-green:     #008000;
-  --os-green-dim: rgba(0, 128, 0, 0.15);
-  --os-yellow:    #808000;
-  --os-red:       #ff0000;
-  --os-text:      #000000;
-  --os-text-muted:#333333;
-  --os-text-dim:  #666666;
+  --os-bg:        #003300;
+  --os-surface:   #001a00;
+  --os-border:    #00aa00;
+  --os-glass:     #001a00;
+  --os-amber:     #00ff00;
+  --os-amber-dim: rgba(0, 255, 0, 0.15);
+  --os-jade:      #00cc00;
+  --os-jade-dim:  rgba(0, 204, 0, 0.15);
+  --os-cyan:      #00ff00;
+  --os-cyan-dim:  rgba(0, 255, 0, 0.15);
+  --os-purple:    #00cc00;
+  --os-purple-dim:rgba(0, 204, 0, 0.15);
+  --os-green:     #00cc00;
+  --os-red:       #ff3300;
+  --os-text:      #00ff00;
+  --os-text-muted:#00aa00;
+  --os-text-dim:  #006600;
 }
 
 /* ── Reset & Base ───────────────────────────────────────────────── */
@@ -90,72 +106,61 @@ html, body {
   background: var(--os-border);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--os-cyan-dim); }
+::-webkit-scrollbar-thumb:hover { background: var(--os-amber-dim); }
 
-/* ── Aurora Wallpaper ───────────────────────────────────────────── */
+/* ── Wallpaper ──────────────────────────────────────────────────── */
 .wallpaper {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 20% 30%, var(--os-purple-dim) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 70%, var(--os-cyan-dim) 0%, transparent 60%),
-    radial-gradient(ellipse 100% 80% at 50% 100%, var(--os-green-dim) 0%, transparent 50%),
-    var(--os-bg);
-  animation: auroraShift 18s ease-in-out infinite alternate;
+  background-image: url('/os_wallpaper.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-@keyframes auroraShift {
-  0%   { background-position: 0% 0%; }
-  50%  {
-    background:
-      radial-gradient(ellipse 90% 60% at 30% 20%, var(--os-purple-dim) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 50% at 70% 80%, var(--os-cyan-dim) 0%, transparent 60%),
-      radial-gradient(ellipse 80% 60% at 60% 90%, var(--os-green-dim) 0%, transparent 50%),
-      var(--os-bg);
-  }
-  100% {
-    background:
-      radial-gradient(ellipse 70% 45% at 10% 40%, var(--os-purple-dim) 0%, transparent 60%),
-      radial-gradient(ellipse 80% 55% at 90% 60%, var(--os-cyan-dim) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 40% 95%, var(--os-green-dim) 0%, transparent 50%),
-      var(--os-bg);
-  }
+/* Dark overlay to ensure readability */
+.wallpaper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 16, 0.55);
 }
 
-/* Grid overlay */
+/* Subtle amber/jade grid overlay */
 .wallpaper::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0, 212, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 212, 255, 0.025) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(245, 158, 11, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 158, 11, 0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
 /* ── Glass Window Shell ─────────────────────────────────────────── */
 .os-window {
   position: absolute;
   background: var(--os-surface);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
   border: 1px solid var(--os-border);
   border-radius: 12px;
   box-shadow:
-    0 0 0 1px rgba(0, 212, 255, 0.06),
-    0 24px 80px rgba(0, 0, 0, 0.6),
-    0 4px 16px rgba(0, 0, 0, 0.4);
+    0 0 0 1px rgba(245, 158, 11, 0.04),
+    0 28px 90px rgba(0, 0, 0, 0.65),
+    0 4px 18px rgba(0, 0, 0, 0.45);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .os-window.focused {
-  border-color: rgba(0, 212, 255, 0.25);
+  border-color: rgba(245, 158, 11, 0.22);
   box-shadow:
-    0 0 0 1px rgba(0, 212, 255, 0.15),
+    0 0 0 1px rgba(245, 158, 11, 0.12),
     0 32px 100px rgba(0, 0, 0, 0.7),
+    0 0 40px rgba(245, 158, 11, 0.06),
     0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
@@ -165,7 +170,7 @@ html, body {
   display: flex;
   align-items: center;
   padding: 0 12px;
-  background: var(--os-surface);
+  background: rgba(10, 14, 20, 0.5);
   border-bottom: 1px solid var(--os-border);
   cursor: grab;
   flex-shrink: 0;
@@ -181,8 +186,8 @@ html, body {
 }
 
 .os-traffic-light {
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.15s;
@@ -192,10 +197,10 @@ html, body {
   font-size: 8px;
   color: transparent;
 }
-.os-traffic-light:hover { opacity: 0.85; transform: scale(1.15); color: rgba(0,0,0,0.5); }
-.os-traffic-light.close  { background: var(--os-red); }
-.os-traffic-light.min    { background: var(--os-yellow); }
-.os-traffic-light.max    { background: var(--os-green); }
+.os-traffic-light:hover { opacity: 0.85; transform: scale(1.15); color: rgba(0,0,0,0.55); }
+.os-traffic-light.close  { background: #ff5f57; box-shadow: 0 0 6px rgba(255,95,87,0.4); }
+.os-traffic-light.min    { background: #ffbd2e; box-shadow: 0 0 6px rgba(255,189,46,0.4); }
+.os-traffic-light.max    { background: #28ca41; box-shadow: 0 0 6px rgba(40,202,65,0.4); }
 
 .os-titlebar-title {
   flex: 1;
@@ -221,7 +226,7 @@ html, body {
 /* ── Window Content ─────────────────────────────────────────────── */
 .os-window-body {
   flex: 1;
-  min-height: 0;        /* critical: lets flex child shrink so overflow-y works */
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 20px;
@@ -234,35 +239,36 @@ html, body {
   align-items: center;
   gap: 6px;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s;
-  width: 80px;
+  transition: background 0.15s, transform 0.15s;
+  width: 82px;
   text-align: center;
 }
 .desktop-icon:hover {
-  background: rgba(0, 212, 255, 0.08);
+  background: rgba(245, 158, 11, 0.10);
+  transform: translateY(-1px);
 }
 .desktop-icon.selected {
-  background: rgba(0, 212, 255, 0.15);
+  background: rgba(245, 158, 11, 0.18);
 }
 
 .desktop-icon-emoji {
   font-size: 36px;
   line-height: 1;
-  filter: drop-shadow(0 2px 8px rgba(0, 212, 255, 0.3));
+  filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.25));
   transition: transform 0.2s, filter 0.2s;
 }
 .desktop-icon:hover .desktop-icon-emoji {
   transform: translateY(-3px) scale(1.08);
-  filter: drop-shadow(0 6px 16px rgba(0, 212, 255, 0.5));
+  filter: drop-shadow(0 6px 16px rgba(245, 158, 11, 0.45));
 }
 
 .desktop-icon-label {
   font-size: 11px;
   color: var(--os-text);
   font-family: 'Inter', sans-serif;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.6);
   line-height: 1.3;
   word-break: break-word;
 }
@@ -275,9 +281,9 @@ html, body {
   right: 0;
   height: var(--taskbar-h);
   z-index: 9000;
-  background: var(--os-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(8, 12, 16, 0.92);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   border-top: 1px solid var(--os-border);
   display: flex;
   align-items: center;
@@ -289,19 +295,24 @@ html, body {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--os-purple), var(--os-cyan));
+  background: var(--os-amber);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  transition: transform 0.15s, box-shadow 0.15s;
+  font-size: 18px;
+  font-weight: 700;
+  color: #080c10;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
   flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.05em;
 }
 .taskbar-start-btn:hover {
   transform: scale(1.08);
-  box-shadow: 0 0 16px rgba(0, 212, 255, 0.4);
+  background: #fbbf24;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
 }
 
 .taskbar-divider {
@@ -338,17 +349,17 @@ html, body {
   overflow: hidden;
 }
 .taskbar-app-btn:hover {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.05);
   color: var(--os-text);
   border-color: var(--os-border);
 }
 .taskbar-app-btn.active {
-  background: var(--os-cyan-dim);
-  border-color: rgba(0, 212, 255, 0.3);
-  color: var(--os-cyan);
+  background: var(--os-amber-dim);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: var(--os-amber);
 }
 .taskbar-app-btn.minimized {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .taskbar-clock {
@@ -371,14 +382,14 @@ html, body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--os-green);
-  box-shadow: 0 0 6px var(--os-green);
+  background: var(--os-jade);
+  box-shadow: 0 0 8px var(--os-jade);
   animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.5; }
+  50%       { opacity: 0.4; }
 }
 
 /* ── Terminal ───────────────────────────────────────────────────── */
@@ -386,8 +397,8 @@ html, body {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--os-green);
-  background: rgba(0, 0, 0, 0.5);
+  color: var(--os-jade);
+  background: rgba(0, 0, 0, 0.6);
   padding: 16px;
   height: 100%;
   min-height: 0;
@@ -395,10 +406,10 @@ html, body {
   user-select: text;
 }
 
-.terminal-prompt { color: var(--os-cyan); }
+.terminal-prompt { color: var(--os-amber); }
 .terminal-output { color: var(--os-text); }
 .terminal-error  { color: var(--os-red); }
-.terminal-success { color: var(--os-green); }
+.terminal-success { color: var(--os-jade); }
 .terminal-dim    { color: var(--os-text-muted); }
 
 .terminal-input-row {
@@ -411,11 +422,11 @@ html, body {
   background: transparent;
   border: none;
   outline: none;
-  color: var(--os-green);
+  color: var(--os-jade);
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   flex: 1;
-  caret-color: var(--os-cyan);
+  caret-color: var(--os-amber);
   user-select: text;
 }
 
@@ -429,7 +440,7 @@ html, body {
 .skill-bar-fill {
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--os-cyan), var(--os-purple));
+  background: linear-gradient(90deg, var(--os-amber), var(--os-jade));
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -438,8 +449,8 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -450,7 +461,7 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 99998;
-  background: var(--os-bg);
+  background: #000;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -460,49 +471,51 @@ html, body {
 
 .boot-logo {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 48px;
+  font-size: 52px;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--os-cyan), var(--os-purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--os-amber);
   letter-spacing: -2px;
+  text-shadow:
+    0 0 40px rgba(245, 158, 11, 0.6),
+    0 0 80px rgba(245, 158, 11, 0.2);
 }
 
 .boot-progress-track {
-  width: 240px;
+  width: 200px;
   height: 2px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(245, 158, 11, 0.12);
   border-radius: 1px;
   overflow: hidden;
 }
 
 .boot-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--os-cyan), var(--os-purple));
+  background: var(--os-amber);
   border-radius: 1px;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
   animation: bootLoad 1.8s ease-out forwards;
 }
 
 @keyframes bootLoad {
   0%   { width: 0%; }
-  60%  { width: 75%; }
-  90%  { width: 95%; }
+  60%  { width: 78%; }
+  90%  { width: 96%; }
   100% { width: 100%; }
 }
 
 .boot-text {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--os-text-muted);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 /* ── Misc utilities ─────────────────────────────────────────────── */
 .mono { font-family: 'JetBrains Mono', monospace; }
 
 .glass-card {
-  background: rgba(22, 27, 34, 0.6);
+  background: rgba(10, 14, 20, 0.5);
   border: 1px solid var(--os-border);
   border-radius: 10px;
   padding: 16px;
@@ -515,21 +528,21 @@ html, body {
   border-radius: 4px;
   font-size: 11px;
   font-family: 'JetBrains Mono', monospace;
-  background: var(--os-cyan-dim);
-  color: var(--os-cyan);
-  border: 1px solid rgba(0, 212, 255, 0.2);
+  background: var(--os-amber-dim);
+  color: var(--os-amber);
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .tag.purple {
-  background: var(--os-purple-dim);
-  color: #a78bfa;
-  border-color: rgba(124, 58, 237, 0.3);
+  background: var(--os-jade-dim);
+  color: var(--os-jade);
+  border-color: rgba(16, 185, 129, 0.25);
 }
 
 .tag.green {
-  background: var(--os-green-dim);
-  color: var(--os-green);
-  border-color: rgba(16, 185, 129, 0.3);
+  background: var(--os-jade-dim);
+  color: var(--os-jade);
+  border-color: rgba(16, 185, 129, 0.25);
 }
 
 .section-heading {
@@ -542,10 +555,12 @@ html, body {
   font-family: 'JetBrains Mono', monospace;
 }
 
-.cyan-text  { color: var(--os-cyan); }
-.purple-text { color: #a78bfa; }
-.green-text  { color: var(--os-green); }
-.muted-text  { color: var(--os-text-muted); }
+.cyan-text    { color: var(--os-amber); }
+.purple-text  { color: var(--os-jade); }
+.green-text   { color: var(--os-jade); }
+.amber-text   { color: var(--os-amber); }
+.jade-text    { color: var(--os-jade); }
+.muted-text   { color: var(--os-text-muted); }
 
 /* ── Start Menu ─────────────────────────────────────────────────── */
 .start-menu {
@@ -553,18 +568,18 @@ html, body {
   bottom: calc(var(--taskbar-h) + 8px);
   left: 12px;
   width: 280px;
-  background: rgba(22, 27, 34, 0.97);
-  backdrop-filter: blur(24px);
+  background: rgba(10, 14, 20, 0.97);
+  backdrop-filter: blur(28px);
   border: 1px solid var(--os-border);
   border-radius: 12px;
   z-index: 9500;
   overflow: hidden;
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
 }
 
 .start-menu-header {
   padding: 16px;
-  background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(0,212,255,0.1));
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(16,185,129,0.06));
   border-bottom: 1px solid var(--os-border);
 }
 
@@ -579,7 +594,7 @@ html, body {
   color: var(--os-text);
 }
 .start-menu-item:hover {
-  background: rgba(0, 212, 255, 0.08);
+  background: rgba(245, 158, 11, 0.08);
 }
 .start-menu-item-icon {
   font-size: 18px;
@@ -594,9 +609,53 @@ html, body {
   image-rendering: crisp-edges;
 }
 
+/* ── Amber glow button ──────────────────────────────────────────── */
+.btn-amber {
+  padding: 8px 20px;
+  background: var(--os-amber);
+  color: #080c10;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+}
+.btn-amber:hover {
+  background: #fbbf24;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+}
+.btn-amber:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-jade {
+  padding: 8px 20px;
+  background: var(--os-jade);
+  color: #080c10;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+}
+.btn-jade:hover {
+  background: #34d399;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+}
+.btn-jade:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ── Mobile Responsiveness ──────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Windows snap to full screen on mobile */
   .os-window {
     left: 0 !important;
     top: 0 !important;
@@ -604,7 +663,6 @@ html, body {
     height: calc(100dvh - var(--taskbar-h)) !important;
     border-radius: 0 !important;
     resize: none !important;
-    /* remove the shadow to make it flush */
     box-shadow: none !important;
     border: none !important;
   }
@@ -614,7 +672,6 @@ html, body {
     border: none !important;
   }
 
-  /* Make taskbar more compact */
   .os-taskbar {
     padding: 0 4px !important;
     gap: 2px !important;
@@ -627,10 +684,9 @@ html, body {
   }
   
   .taskbar-clock {
-    display: none !important; /* Hide clock to save space */
+    display: none !important;
   }
 
-  /* Adjust Desktop Icons for mobile portrait layout */
   #desktop-icons {
     grid-template-rows: repeat(4, auto) !important;
     gap: 16px 12px !important;

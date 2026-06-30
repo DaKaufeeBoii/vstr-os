@@ -1,5 +1,6 @@
 "use client";
 
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import DesktopIcon from "./DesktopIcon";
@@ -8,40 +9,48 @@ import Window from "./Window";
 import BootScreen from "./BootScreen";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
 
-// App components
-import AboutApp      from "@/components/apps/AboutApp";
-import ProjectsApp   from "@/components/apps/ProjectsApp";
-import SkillsApp     from "@/components/apps/SkillsApp";
-import ExperienceApp from "@/components/apps/ExperienceApp";
+// Core app components
+import AboutApp        from "@/components/apps/AboutApp";
+import ProjectsApp     from "@/components/apps/ProjectsApp";
+import SkillsApp       from "@/components/apps/SkillsApp";
+import ExperienceApp   from "@/components/apps/ExperienceApp";
 import AchievementsApp from "@/components/apps/AchievementsApp";
-import TerminalApp   from "@/components/apps/TerminalApp";
-import ContactApp    from "@/components/apps/ContactApp";
+import TerminalApp     from "@/components/apps/TerminalApp";
+import ContactApp      from "@/components/apps/ContactApp";
+import SettingsApp     from "@/components/apps/SettingsApp";
 
-import FlappyGameApp from "@/components/apps/FlappyGameApp";
-import HintMasterApp from "@/components/apps/HintMasterApp";
-import PhotoViewerApp from "@/components/apps/PhotoViewerApp";
+// Hidden easter egg apps
+import FlappyGameApp      from "@/components/apps/FlappyGameApp";
+import HintMasterApp      from "@/components/apps/HintMasterApp";
+import PhotoViewerApp     from "@/components/apps/PhotoViewerApp";
 
-import SettingsApp   from "@/components/apps/SettingsApp";
+// New easter egg apps
+import DiskCleanupApp     from "../apps/DiskCleanupApp";
+import DesktopPetApp      from "../apps/DesktopPetApp";
+import PasswordCrackerApp from "../apps/PasswordCrackerApp";
 
 const APP_CONTENT: Record<string, React.ReactNode> = {
-  about:        <AboutApp />,
-  projects:     <ProjectsApp />,
-  skills:       <SkillsApp />,
-  experience:   <ExperienceApp />,
-  achievements: <AchievementsApp />,
-  terminal:     <TerminalApp />,
-  contact:      <ContactApp />,
-  flappy:       <FlappyGameApp />,
-  hintmaster:   <HintMasterApp />,
-  settings:     <SettingsApp />,
-  photo_viewer: <PhotoViewerApp />,
+  about:            <AboutApp />,
+  projects:         <ProjectsApp />,
+  skills:           <SkillsApp />,
+  experience:       <ExperienceApp />,
+  achievements:     <AchievementsApp />,
+  terminal:         <TerminalApp />,
+  contact:          <ContactApp />,
+  flappy:           <FlappyGameApp />,
+  hintmaster:       <HintMasterApp />,
+  settings:         <SettingsApp />,
+  photo_viewer:     <PhotoViewerApp />,
+  disk_cleanup:     <DiskCleanupApp />,
+  desktop_pet:      <DesktopPetApp />,
+  password_cracker: <PasswordCrackerApp />,
 };
 
 export default function Desktop() {
   const [booting, setBooting] = useState(true);
   const { theme } = useOS();
 
-  // Ordered as per user request
+  // Only show core apps on desktop icon grid (easter eggs are discovered via terminal)
   const orderedConfigs = [
     WINDOW_CONFIGS.find(c => c.id === "about"),
     WINDOW_CONFIGS.find(c => c.id === "skills"),
@@ -68,10 +77,10 @@ export default function Desktop() {
     >
       {booting && <BootScreen onComplete={() => setBooting(false)} />}
       
-      {/* Default Aurora wallpaper is always in the background */}
+      {/* Wallpaper */}
       <div className="wallpaper" />
 
-      {/* Desktop hint */}
+      {/* Desktop watermark */}
       <div
         style={{
           position: "absolute",
@@ -81,23 +90,23 @@ export default function Desktop() {
           textAlign: "center",
           pointerEvents: "none",
           zIndex: 1,
-          opacity: 0.18,
+          opacity: 0.12,
         }}
       >
         <p
           className="mono"
-          style={{ fontSize: 13, color: "var(--os-cyan)", letterSpacing: "0.15em" }}
+          style={{ fontSize: 13, color: "var(--os-amber)", letterSpacing: "0.18em" }}
         >
-          VSTR-OS v1.0.0
+          VSTR-OS v2.0.0
         </p>
         <p
           style={{ fontSize: 11, color: "var(--os-text-muted)", marginTop: 6, letterSpacing: "0.08em" }}
         >
-          Double-click an icon to open
+          double-click to open · explore to discover
         </p>
       </div>
 
-      {/* Desktop icons grid: Max 6 per column */}
+      {/* Desktop icons grid */}
       <div
         id="desktop-icons"
         style={{
@@ -121,7 +130,7 @@ export default function Desktop() {
         ))}
       </div>
 
-      {/* Windows */}
+      {/* All windows (including hidden easter eggs) */}
       {WINDOW_CONFIGS.map((cfg) => (
         <Window
           key={cfg.id}

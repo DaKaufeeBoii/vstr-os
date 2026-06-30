@@ -6,7 +6,7 @@ import { OSProvider } from "@/store/windowStore";
 import Desktop from "@/components/os/Desktop";
 
 const BOOT_STEPS = [
-  "Initializing VSTR-OS kernel...",
+  "Initializing VSTR-OS kernel v2.0.0...",
   "Loading user profile...",
   "Mounting filesystems...",
   "Starting window manager...",

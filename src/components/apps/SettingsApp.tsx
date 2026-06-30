@@ -14,7 +14,7 @@ export default function SettingsApp() {
 
   return (
     <div style={{ padding: 20, height: "100%", fontFamily: "var(--font-mono)", color: "var(--os-text)", display: "flex", flexDirection: "column" }}>
-      <h2 style={{ color: "var(--os-cyan)", marginBottom: 20 }}>System Settings</h2>
+      <h2 style={{ color: "var(--os-amber)", marginBottom: 20, fontFamily: "'JetBrains Mono', monospace" }}>System Settings</h2>
       
       <div style={{ marginBottom: 10, fontSize: 14, fontWeight: "bold" }}>Theme Selection</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -25,14 +25,14 @@ export default function SettingsApp() {
             style={{
               padding: "12px 16px",
               textAlign: "left",
-              background: theme === t.id ? "rgba(0,212,255,0.1)" : "rgba(255,255,255,0.05)",
-              border: `1px solid ${theme === t.id ? "var(--os-cyan)" : "var(--os-border)"}`,
+              background: theme === t.id ? "rgba(245,158,11,0.1)" : "rgba(255,255,255,0.04)",
+              border: `1px solid ${theme === t.id ? "var(--os-amber)" : "var(--os-border)"}`,
               borderRadius: 6,
               color: "var(--os-text)",
               cursor: "pointer",
             }}
           >
-            <div style={{ fontWeight: "bold", marginBottom: 4, color: theme === t.id ? "var(--os-cyan)" : "inherit" }}>
+            <div style={{ fontWeight: "bold", marginBottom: 4, color: theme === t.id ? "var(--os-amber)" : "inherit" }}>
               {t.name}
             </div>
             <div style={{ fontSize: 12, color: "var(--os-text-muted)" }}>{t.desc}</div>

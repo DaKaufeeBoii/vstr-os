@@ -25,17 +25,19 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, [onClose]);
 
-  // Filter apps by search
-  const filteredApps = WINDOW_CONFIGS.filter(cfg => 
-    cfg.title.toLowerCase().includes(search.toLowerCase())
+  // Only show non-hidden apps in the start menu grid
+  const visibleApps = WINDOW_CONFIGS.filter(
+    (c) => !["flappy", "hintmaster", "photo_viewer", "disk_cleanup", "desktop_pet", "password_cracker"].includes(c.id)
   );
+  const filteredApps = search
+    ? WINDOW_CONFIGS.filter(cfg => cfg.title.toLowerCase().includes(search.toLowerCase()))
+    : visibleApps;
 
-  const pinnedApps = search ? filteredApps : WINDOW_CONFIGS.slice(0, 12);
   const recommendedApps = [
-    { title: "logo-GitHub", subtitle: "43m ago", img: "/resume_res/icons/logo-GitHub.png", id: "contact" as WindowId },
-    { title: "logo-GitHub", subtitle: "44m ago", img: "/resume_res/icons/logo-GitHub.png", id: "contact" as WindowId },
-    { title: "logo-GitHub", subtitle: "45m ago", img: "/resume_res/icons/logo-GitHub.png", id: "contact" as WindowId },
-    { title: "logo-Gmail", subtitle: "46m ago", img: "/resume_res/icons/logo-Gmail.svg", id: "contact" as WindowId },
+    { title: "GitHub", subtitle: "View my repositories", img: "/resume_res/icons/logo-GitHub.png", id: "contact" as WindowId },
+    { title: "LinkedIn", subtitle: "Connect professionally", img: "/resume_res/icons/logo-Lin.jpg", id: "contact" as WindowId },
+    { title: "Gmail", subtitle: "Send me an email", img: "/resume_res/icons/logo-Gmail.svg", id: "contact" as WindowId },
+    { title: "Terminal", subtitle: "Type 'help' to explore", img: null, id: "terminal" as WindowId },
   ];
 
   return (
@@ -54,13 +56,13 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
         width: "min(640px, 95vw)",
         height: "720px",
         maxHeight: "85vh",
-        background: "var(--os-surface)",
+        background: "rgba(10, 14, 20, 0.97)",
         backdropFilter: "blur(40px)",
         WebkitBackdropFilter: "blur(40px)",
-        border: "1px solid var(--os-border)",
+        border: "1px solid rgba(40, 48, 58, 0.85)",
         borderRadius: 16,
         zIndex: 9500,
-        boxShadow: "0 12px 60px rgba(0,0,0,0.6)",
+        boxShadow: "0 12px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(245,158,11,0.06)",
         display: "flex",
         flexDirection: "column",
         color: "var(--os-text)",
@@ -72,17 +74,18 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
         <div style={{
           display: "flex",
           alignItems: "center",
-          background: "rgba(0, 0, 0, 0.4)",
-          border: "1px solid rgba(255, 255, 255, 0.06)",
+          background: "rgba(0, 0, 0, 0.5)",
+          border: "1px solid rgba(245, 158, 11, 0.15)",
           borderRadius: 24,
           padding: "8px 16px",
           gap: 12,
-          boxShadow: "inset 0 1px 2px rgba(0,0,0,0.5)",
+          boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5)",
+          transition: "border-color 0.2s",
         }}>
-          <span style={{ fontSize: 18, color: "#00d4ff" }}>🔍</span>
-          <input 
-            type="text" 
-            placeholder="Search for apps, settings, and documents" 
+          <span style={{ fontSize: 16, color: "var(--os-amber)" }}>⌕</span>
+          <input
+            type="text"
+            placeholder="Search apps…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -92,6 +95,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               outline: "none",
               color: "var(--os-text)",
               fontSize: 14,
+              fontFamily: "'Inter', sans-serif",
             }}
           />
         </div>
@@ -99,67 +103,65 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
 
       <div style={{ flex: 1, overflowY: "auto", padding: "0 32px" }}>
         {/* Pinned Section */}
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <span style={{ fontSize: 15, fontWeight: 600 }}>Pinned</span>
-            <button style={{ 
-              background: "rgba(255,255,255,0.06)", 
-              border: "1px solid rgba(255,255,255,0.04)", 
-              padding: "4px 10px", 
-              borderRadius: 6, 
-              color: "#aaa", 
-              fontSize: 12,
-              cursor: "pointer"
-            }}>
-              All apps &rsaquo;
-            </button>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+              {search ? "Results" : "Pinned"}
+            </span>
           </div>
-          
+
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(84px, 1fr))",
-            gap: "20px 4px",
-            justifyItems: "center"
+            gap: "16px 4px",
+            justifyItems: "center",
           }}>
-            {pinnedApps.map((cfg) => (
+            {filteredApps.map((cfg) => (
               <div
                 key={cfg.id}
-                onClick={() => onOpen(cfg.id)}
+                onClick={() => { onOpen(cfg.id); onClose(); }}
                 style={{
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   gap: 8,
                   padding: "12px 8px",
-                  borderRadius: 8,
+                  borderRadius: 10,
                   cursor: "pointer",
                   width: 84,
-                  transition: "background 0.15s"
+                  transition: "background 0.15s, transform 0.15s",
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(245,158,11,0.08)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
               >
                 <div style={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 24,
-                  filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.3))"
+                  fontSize: 26,
+                  filter: "drop-shadow(0 2px 6px rgba(245,158,11,0.2))",
                 }}>
                   {cfg.icon}
                 </div>
-                <span style={{ 
-                  fontSize: 11, 
-                  color: "var(--os-text)", 
-                  textAlign: "center", 
+                <span style={{
+                  fontSize: 11,
+                  color: "var(--os-text)",
+                  textAlign: "center",
                   width: "100%",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
-                  textOverflow: "ellipsis"
+                  textOverflow: "ellipsis",
+                  fontFamily: "'Inter', sans-serif",
                 }}>
-                  {cfg.title.replace('.exe', '').replace('.sys', '').replace('/', '')}
+                  {cfg.title.replace(".app", "").replace(".sys", "").replace(".exe", "").replace(".txt", "").replace(".log", "").replace("/", "")}
                 </span>
               </div>
             ))}
@@ -168,49 +170,50 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
 
         {/* Recommended Section */}
         {!search && (
-          <div style={{ marginTop: 40, marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <span style={{ fontSize: 15, fontWeight: 600 }}>Recommended</span>
-              <button style={{ 
-                background: "rgba(255,255,255,0.06)", 
-                border: "1px solid rgba(255,255,255,0.04)", 
-                padding: "4px 10px", 
-                borderRadius: 6, 
-                color: "#aaa", 
-                fontSize: 12,
-                cursor: "pointer"
-              }}>
-                More &rsaquo;
-              </button>
+          <div style={{ marginTop: 36, marginBottom: 20 }}>
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+                Quick Links
+              </span>
             </div>
 
             <div style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
-              gap: 16
+              gap: 12,
             }}>
               {recommendedApps.map((app, idx) => (
                 <div
                   key={idx}
-                  onClick={() => onOpen(app.id)}
+                  onClick={() => { onOpen(app.id); onClose(); }}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 16,
-                    padding: "12px",
-                    borderRadius: 8,
+                    gap: 14,
+                    padding: "10px 12px",
+                    borderRadius: 10,
                     cursor: "pointer",
-                    transition: "background 0.15s"
+                    border: "1px solid transparent",
+                    transition: "background 0.15s, border-color 0.15s",
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
-                  onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(245,158,11,0.06)";
+                    e.currentTarget.style.borderColor = "rgba(245,158,11,0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.borderColor = "transparent";
+                  }}
                 >
-                  <div style={{ width: 28, height: 28, flexShrink: 0 }}>
-                    <img src={app.img} alt={app.title} style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 4 }} />
+                  <div style={{ width: 28, height: 28, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {app.img
+                      ? <img src={app.img} alt={app.title} style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 4 }} />
+                      : <span style={{ fontSize: 22 }}>⌨️</span>
+                    }
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
                     <span style={{ fontSize: 13, color: "var(--os-text)", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.title}</span>
-                    <span style={{ fontSize: 11, color: "var(--os-text-muted)", marginTop: 2 }}>{app.subtitle}</span>
+                    <span style={{ fontSize: 11, color: "var(--os-text-muted)", marginTop: 1 }}>{app.subtitle}</span>
                   </div>
                 </div>
               ))}
@@ -220,48 +223,44 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
       </div>
 
       {/* Footer */}
-      <div style={{ 
-        padding: "16px 32px", 
-        background: "rgba(0,0,0,0.15)", 
-        borderTop: "1px solid var(--os-border)",
+      <div style={{
+        padding: "14px 32px",
+        background: "rgba(0,0,0,0.2)",
+        borderTop: "1px solid rgba(40,48,58,0.85)",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         borderBottomLeftRadius: 16,
         borderBottomRightRadius: 16,
       }}>
-        <div 
-          onClick={() => onOpen("about")}
-          style={{ 
-          display: "flex", 
-          alignItems: "center", 
-          gap: 12,
-          cursor: "pointer",
-          padding: "6px 10px 6px 6px",
-          borderRadius: 8,
-          transition: "background 0.15s"
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
-        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-        >
-          <div style={{ 
-            width: 32, 
-            height: 32, 
-            borderRadius: "50%", 
-            overflow: "hidden",
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "#1c1c1e",
+        <div
+          onClick={() => { onOpen("about"); onClose(); }}
+          style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontSize: 16
+            gap: 12,
+            cursor: "pointer",
+            padding: "6px 10px 6px 6px",
+            borderRadius: 8,
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(245,158,11,0.08)"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+        >
+          <div style={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            overflow: "hidden",
+            border: "1px solid rgba(245,158,11,0.2)",
+            background: "#1a1f2e",
           }}>
             <img src="/pix_image.png" alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" }} />
           </div>
           <span style={{ fontSize: 12, fontWeight: 500, color: "var(--os-text)" }}>Sai Tarun Reddy Velagala</span>
         </div>
-        
-        <button 
+
+        <button
           title="Shut Down"
           style={{
             width: 36,
@@ -272,13 +271,19 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
             justifyContent: "center",
             background: "transparent",
             border: "none",
-            color: "var(--os-text)",
+            color: "var(--os-text-muted)",
             fontSize: 18,
             cursor: "pointer",
-            transition: "background 0.15s"
+            transition: "background 0.15s, color 0.15s",
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
+            e.currentTarget.style.color = "#ef4444";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "var(--os-text-muted)";
+          }}
           onClick={() => window.location.reload()}
         >
           ⏻

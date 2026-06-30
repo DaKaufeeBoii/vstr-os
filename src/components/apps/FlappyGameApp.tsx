@@ -130,15 +130,18 @@ export default function FlappyGameApp() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Draw pipes
-      ctx.fillStyle = "#10b981"; // var(--os-green)
+      ctx.fillStyle = "#f59e0b"; // amber — pipes
       s.pipes.forEach((p) => {
         ctx.fillRect(p.x, 0, PIPE_WIDTH, p.topHeight);
         ctx.fillRect(p.x, p.topHeight + PIPE_GAP, PIPE_WIDTH, canvas.height - p.topHeight - PIPE_GAP);
       });
 
-      // Draw bird
-      ctx.fillStyle = "#00d4ff"; // var(--os-cyan)
+      // Draw bird (jade square)
+      ctx.fillStyle = "#10b981";
+      ctx.shadowColor = "#10b981";
+      ctx.shadowBlur = 8;
       ctx.fillRect(50, s.birdY, BIRD_SIZE, BIRD_SIZE);
+      ctx.shadowBlur = 0;
     };
 
     let lastTime = performance.now();

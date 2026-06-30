@@ -9,13 +9,19 @@ interface TerminalLine {
 
 const HELP_TEXT = `
 Available commands:
-  whoami        — about Sai Tarun
-  ls            — list all sections
-  ls projects/  — list projects
-  cat skills    — print skill stack
-  contact       — show contact info
-  clear         — clear terminal
-  help          — show this message
+  whoami          — about Sai Tarun
+  ls              — list all sections
+  ls projects/    — list projects
+  cat skills      — print skill stack
+  contact         — show contact info
+  clear           — clear terminal
+
+Secret commands (try them):
+  play flappy     — launch Flappy Bird
+  ask hintmaster  — consult the HintMaster
+  open disk_cleanup    — run a disk diagnostic
+  start desktop_pet    — install a companion
+  crack password       — run PwnTool 3.0
 `.trim();
 
 const WHOAMI = `
@@ -37,6 +43,7 @@ const LS_ROOT = [
   "drwxr-xr-x  achievements/",
   "-rw-r--r--   contact.txt",
   "-rw-r--r--   resume.pdf",
+  "-rwx------   [hidden easter eggs — explore to find them]",
 ].join("\n");
 
 const LS_PROJECTS = [
@@ -58,11 +65,11 @@ const CONTACT = `
 📞  +91 7043692980
 📍  Hyderabad, Telangana, India
 🔗  LinkedIn  →  linkedin.com/in/sai-tarun-reddy
-🐙  GitHub    →  github.com/saitarun
+🐙  GitHub    →  github.com/DaKaufeeBoii
 `.trim();
 
 const BOOT_LINES: TerminalLine[] = [
-  { type: "success", text: "VSTR-OS Terminal v1.0.0" },
+  { type: "success", text: "VSTR-OS Terminal v2.0.0" },
   { type: "dim", text: "Copyright © 2025 Sai Tarun Reddy Velagala" },
   { type: "dim", text: '─'.repeat(46) },
   { type: "dim", text: 'Type "help" to see available commands.' },
@@ -136,16 +143,27 @@ export default function TerminalApp() {
         push({ type: "error", text: "Nice try 😄  Permission denied." });
         break;
       case "play flappy":
-        push({ type: "success", text: "Launching Flappy.exe..." });
+        push({ type: "success", text: "Launching Flappy.exe... good luck 🐦" });
         openWindow("flappy");
         break;
       case "ask hintmaster":
         push({ type: "success", text: "Summoning the HintMaster..." });
         openWindow("hintmaster");
         break;
-      case "play victory.fight":
-        push({ type: "success", text: "Redirecting to Fighter Arena..." });
-        window.open("/games/fighter", "_blank");
+      case "open disk_cleanup":
+      case "disk_cleanup":
+        push({ type: "success", text: "Launching Disk Cleanup.app — scanning for corrupted sectors..." });
+        openWindow("disk_cleanup");
+        break;
+      case "start desktop_pet":
+      case "desktop_pet":
+        push({ type: "success", text: "Installing Desktop Pet companion..." });
+        openWindow("desktop_pet");
+        break;
+      case "crack password":
+      case "pwntool":
+        push({ type: "success", text: "Initializing PwnTool 3.0... connecting to target..." });
+        openWindow("password_cracker");
         break;
       default:
         push({
@@ -154,7 +172,7 @@ export default function TerminalApp() {
         });
     }
     push({ type: "dim", text: "" });
-  }, [push]);
+  }, [push, openWindow]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {

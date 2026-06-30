@@ -41,7 +41,10 @@ export type WindowId =
   | "flappy"
   | "hintmaster"
   | "settings"
-  | "photo_viewer";
+  | "photo_viewer"
+  | "disk_cleanup"
+  | "desktop_pet"
+  | "password_cracker";
 
 export interface WindowConfig {
   id: WindowId;

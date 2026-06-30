@@ -85,7 +85,7 @@ export default function Window({
         <motion.div
           ref={windowRef}
           key={id}
-          className="os-window"
+          className={`os-window`}
           initial={{ opacity: 0, scale: 0.92, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 8 }}
