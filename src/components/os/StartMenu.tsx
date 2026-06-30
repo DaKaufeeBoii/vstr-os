@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { WINDOW_CONFIGS } from "@/store/windowStore";
+import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
 import type { WindowId } from "@/types";
 
 interface StartMenuProps {
@@ -13,11 +13,18 @@ interface StartMenuProps {
 export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
+  const { windows } = useOS();
 
   // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const target = e.target as HTMLElement;
+      if (
+        ref.current &&
+        !ref.current.contains(target) &&
+        !target.closest("#taskbar-start-btn") &&
+        !target.closest("#taskbar-search-pill")
+      ) {
         onClose();
       }
     };
@@ -25,12 +32,23 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, [onClose]);
 
-  // Only show non-hidden apps in the start menu grid
-  const visibleApps = WINDOW_CONFIGS.filter(
-    (c) => !["flappy", "hintmaster", "photo_viewer", "disk_cleanup", "desktop_pet", "password_cracker"].includes(c.id)
-  );
+  // Core apps are always visible. Secret apps only visible if opened once during session.
+  const visibleApps = WINDOW_CONFIGS.filter((c) => {
+    const isSecret = ["flappy", "hintmaster", "photo_viewer", "disk_cleanup", "desktop_pet", "password_cracker"].includes(c.id);
+    if (!isSecret) return true;
+    const state = windows.find((w) => w.id === c.id);
+    return state?.hasBeenOpened === true;
+  });
+
   const filteredApps = search
-    ? WINDOW_CONFIGS.filter(cfg => cfg.title.toLowerCase().includes(search.toLowerCase()))
+    ? WINDOW_CONFIGS.filter(cfg => {
+        const isSecret = ["flappy", "hintmaster", "photo_viewer", "disk_cleanup", "desktop_pet", "password_cracker"].includes(cfg.id);
+        if (isSecret) {
+          const state = windows.find((w) => w.id === cfg.id);
+          if (state?.hasBeenOpened !== true) return false;
+        }
+        return cfg.title.toLowerCase().includes(search.toLowerCase());
+      })
     : visibleApps;
 
   const recommendedApps = [
@@ -41,34 +59,39 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
   ];
 
   return (
-    <motion.div
-      ref={ref}
-      id="start-menu"
-      initial={{ opacity: 0, y: 12, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 8, scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-      style={{
-        position: "fixed",
-        bottom: "calc(var(--taskbar-h) + 12px)",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "min(640px, 95vw)",
-        height: "720px",
-        maxHeight: "85vh",
-        background: "rgba(10, 14, 20, 0.97)",
-        backdropFilter: "blur(40px)",
-        WebkitBackdropFilter: "blur(40px)",
-        border: "1px solid rgba(40, 48, 58, 0.85)",
-        borderRadius: 16,
-        zIndex: 9500,
-        boxShadow: "0 12px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(245,158,11,0.06)",
-        display: "flex",
-        flexDirection: "column",
-        color: "var(--os-text)",
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 9500,
+      pointerEvents: "none",
+    }}>
+      <motion.div
+        ref={ref}
+        id="start-menu"
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 15 }}
+        transition={{ type: "spring", stiffness: 350, damping: 28 }}
+        style={{
+          width: "min(640px, 95vw)",
+          height: "720px",
+          maxHeight: "85vh",
+          background: "rgba(10, 14, 20, 0.97)",
+          backdropFilter: "blur(40px)",
+          WebkitBackdropFilter: "blur(40px)",
+          border: "1px solid rgba(40, 48, 58, 0.85)",
+          borderRadius: 16,
+          boxShadow: "0 12px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(245,158,11,0.06)",
+          display: "flex",
+          flexDirection: "column",
+          color: "var(--os-text)",
+          fontFamily: "'Inter', sans-serif",
+          pointerEvents: "auto",
+        }}
+      >
       {/* Search Bar */}
       <div style={{ padding: "32px 32px 16px" }}>
         <div style={{
@@ -290,5 +313,6 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
         </button>
       </div>
     </motion.div>
+  </div>
   );
 }

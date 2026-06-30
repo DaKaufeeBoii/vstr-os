@@ -17,13 +17,13 @@ export const WINDOW_CONFIGS: WindowConfig[] = [
   { id: "achievements",     title: "Achievements.txt",    icon: "🏆", defaultW: 480, defaultH: 380 },
   { id: "terminal",         title: "Terminal",            icon: "⌨️", defaultW: 560, defaultH: 400 },
   { id: "contact",          title: "Contact.app",         icon: "📧", defaultW: 400, defaultH: 360 },
-  { id: "flappy",           title: "Flappy.exe",          icon: "🐦", defaultW: 400, defaultH: 500 },
-  { id: "hintmaster",       title: "HintMaster.app",      icon: "🪙", defaultW: 400, defaultH: 360 },
+  { id: "flappy",           title: "Flappy.exe",          icon: "🐦", defaultW: 450, defaultH: 550 },
+  { id: "hintmaster",       title: "HintMaster.app",      icon: "🪙", defaultW: 480, defaultH: 420 },
   { id: "settings",         title: "Settings.sys",        icon: "⚙️", defaultW: 400, defaultH: 300 },
   { id: "photo_viewer",     title: "real.png",            icon: "🖼️", defaultW: 360, defaultH: 480 },
-  { id: "disk_cleanup",     title: "Disk Cleanup.app",    icon: "💾", defaultW: 500, defaultH: 460 },
-  { id: "desktop_pet",      title: "Desktop Pet.app",     icon: "🐾", defaultW: 380, defaultH: 320 },
-  { id: "password_cracker", title: "PwnTool 3.0.app",     icon: "🔓", defaultW: 540, defaultH: 480 },
+  { id: "disk_cleanup",     title: "Disk Cleanup.app",    icon: "💾", defaultW: 560, defaultH: 520 },
+  { id: "desktop_pet",      title: "Desktop Pet.app",     icon: "🐾", defaultW: 460, defaultH: 380 },
+  { id: "password_cracker", title: "PwnTool 3.0.app",     icon: "🔓", defaultW: 600, defaultH: 540 },
 ];
 
 /* ── Types ──────────────────────────────────────────────────────── */
@@ -36,6 +36,7 @@ interface WindowState {
   zIndex: number;
   x: number;
   y: number;
+  hasBeenOpened?: boolean;
 }
 
 interface OSState {
@@ -69,6 +70,7 @@ function buildInitial(): OSState {
       zIndex: 10,
       x: 0,
       y: 0,
+      hasBeenOpened: false,
     })),
     topZ: 10,
     theme: "cyberpunk",
@@ -87,7 +89,7 @@ function reducer(state: OSState, action: OSAction): OSState {
         topZ: newZ,
         windows: state.windows.map((w) =>
           w.id === action.id
-            ? { ...w, isOpen: true, isMinimized: false, zIndex: newZ, x: offset, y: offset }
+            ? { ...w, isOpen: true, isMinimized: false, zIndex: newZ, x: offset, y: offset, hasBeenOpened: true }
             : w
         ),
       };

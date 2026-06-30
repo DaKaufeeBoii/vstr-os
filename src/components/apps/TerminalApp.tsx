@@ -15,13 +15,6 @@ Available commands:
   cat skills      — print skill stack
   contact         — show contact info
   clear           — clear terminal
-
-Secret commands (try them):
-  play flappy     — launch Flappy Bird
-  ask hintmaster  — consult the HintMaster
-  open disk_cleanup    — run a disk diagnostic
-  start desktop_pet    — install a companion
-  crack password       — run PwnTool 3.0
 `.trim();
 
 const WHOAMI = `
