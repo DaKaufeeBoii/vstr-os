@@ -13,6 +13,7 @@ export const projects: Project[] = [
     ],
     stack: ["Next.js", "React 19", "TypeScript", "Framer Motion", "Tailwind CSS"],
     github: "https://github.com/DaKaufeeBoii/vstr-os",
+    demo: "https://vstr-os.vercel.app",
     icon: "🖥️",
   },
   {
@@ -27,6 +28,7 @@ export const projects: Project[] = [
     ],
     stack: ["Next.js", "React", "Tailwind CSS", "Vercel"],
     github: "https://github.com/DaKaufeeBoii/eventos",
+    demo: "https://eventos-em.vercel.app",
     icon: "🎪",
   },
   {
@@ -42,7 +44,7 @@ export const projects: Project[] = [
     ],
     stack: ["Kotlin", "Android", "ML Kit", "Vosk"],
     github: "https://github.com/DaKaufeeBoii/BharatVaani-Offline",
-    icon: "🎪",
+    icon: "🌐",
   },
   {
     title: "DropPin",
@@ -76,6 +78,7 @@ export const projects: Project[] = [
     ],
     stack: ["TypeScript", "Vercel", "Supabase", "Google Gemini API", "Google GenAI"],
     github: "https://github.com/DaKaufeeBoii/ProjectPulse",
+    demo: "https://project-pulse-ver2.vercel.app",
     icon: "📋",
   },
   {
@@ -89,6 +92,7 @@ export const projects: Project[] = [
     ],
     stack: ["HTML", "JavaScript", "CSS", "Vercel", "TypeScript", "Supabase"],
     github: "https://github.com/DaKaufeeBoii/LogicBlitz",
+    demo: "https://logic-blitz.vercel.app",
     icon: "⚡",
   },
   {
@@ -103,6 +107,7 @@ export const projects: Project[] = [
     ],
     stack: ["Python", "Custom Tkinter", "Socket.io"],
     github: "https://github.com/DaKaufeeBoii/Multi-Buzzer",
+    demo: "https://dakaufeeboii.itch.io/multi-buzzer",
     icon: "🛎️",
   },
   {
@@ -117,6 +122,7 @@ export const projects: Project[] = [
     ],
     stack: ["Next.js", "React", "Tailwind CSS", "Supabase", "Shadcn UI"],
     github: "https://github.com/DaKaufeeBoii/heartfund-fundraising",
+    demo: "heartfund-fundraising.vercel.app",
     icon: "💕",
   },
   {
@@ -144,6 +150,7 @@ export const projects: Project[] = [
     ],
     stack: ["HTML", "CSS", "JavaScript", "Vercel"],
     github: "https://github.com/DaKaufeeBoii/disease-inc",
+    demo: "disease-inc.vercel.app",
     icon: "🦠",
   },
   {
@@ -185,6 +192,7 @@ export const projects: Project[] = [
     ],
     stack: ["Next.js", "React", "Tailwind CSS", "Google Gemini API"],
     github: "https://github.com/DaKaufeeBoii/Historytales.ai",
+    demo: "https://historytales-ai.onrender.com",
     icon: "📚",
   },
   {
@@ -199,6 +207,7 @@ export const projects: Project[] = [
     ],
     stack: ["Python 3.13", "Jinja2", "HTML", "CSS", "JavaScript"],
     github: "https://github.com/DaKaufeeBoii/pdnf-pcnf-web",
+    demo: "https://pdnf-pcnf-web.onrender.com",
     icon: "➕➖✖️➗",
   },
   {
@@ -213,6 +222,7 @@ export const projects: Project[] = [
     ],
     stack: ["Python", "NLP", "Prompt Engineering", "REST APIs"],
     github: "https://github.com/DaKaufeeBoii/mailgenius-buddy",
+    demo: "https://mailgenius-buddy.lovable.app",
     icon: "✉️",
   },
   {
@@ -227,6 +237,7 @@ export const projects: Project[] = [
     ],
     stack: ["Python", "NLP", "Data Visualization", "React"],
     github: "https://github.com/DaKaufeeBoii/EchoLens2",
+    demo: "https://echolens.lovable.app",
     icon: "📡",
   },
 ];
