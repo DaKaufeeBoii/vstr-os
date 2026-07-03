@@ -4,11 +4,10 @@ import React, { useState } from "react";
 
 const HINTS = [
   "Try typing 'play flappy' in the terminal. Your highscore awaits.",
+  "A locked door reveals itself. Type 'crack password' if you dare.",
   "Something is scanning your disk. Run 'open disk_cleanup' and investigate.",
   "The terminal hides more than just commands. Try 'start desktop_pet'.",
-  "A locked door reveals itself. Type 'crack password' if you dare.",
-  "Check out the /games/secret URL if you're feeling curious.",
-  "The HintMaster knows all. But knowledge has its price.",
+  "The HintMaster knows all. But knowledge has its price. You earned all the hints!",
 ];
 
 export default function HintMasterApp() {

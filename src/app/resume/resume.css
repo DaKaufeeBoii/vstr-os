@@ -1,0 +1,129 @@
+.resume-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  color: #111;
+  font-family: Georgia, "Times New Roman", serif;
+  padding: 24px 16px 48px;
+}
+
+.resume-toolbar {
+  max-width: 800px;
+  margin: 0 auto 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+.resume-back,
+.resume-print {
+  color: #333;
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.resume-document {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 48px 56px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.resume-header h1 {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.resume-title {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.resume-contact {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.resume-contact a {
+  color: #0066cc;
+}
+
+.resume-page section {
+  margin-top: 24px;
+}
+
+.resume-page section h2 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+
+.resume-entry {
+  margin-bottom: 16px;
+}
+
+.resume-entry-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.resume-org {
+  font-size: 13px;
+  color: #555;
+  font-style: italic;
+  margin: 2px 0 6px;
+}
+
+.resume-stack {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.resume-page ul {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+
+.resume-page li {
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.resume-page p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .resume-page {
+    background: #fff;
+    padding: 0;
+  }
+
+  .resume-document {
+    box-shadow: none;
+    padding: 0;
+    max-width: 100%;
+  }
+}

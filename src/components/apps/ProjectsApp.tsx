@@ -60,6 +60,15 @@ export default function ProjectsApp() {
                     <p style={{ fontSize: 12, color: "var(--os-text-muted)", lineHeight: 1.7, marginBottom: 12 }}>
                       {proj.description}
                     </p>
+                    {proj.highlights && proj.highlights.length > 0 && (
+                      <ul style={{ marginBottom: 12, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 4 }}>
+                        {proj.highlights.map((h) => (
+                          <li key={h} style={{ fontSize: 12, color: "var(--os-text-muted)", lineHeight: 1.6 }}>
+                            {h}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
                       {proj.stack.map((tech) => (
                         <span key={tech} className="tag">{tech}</span>

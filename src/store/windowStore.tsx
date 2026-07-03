@@ -4,6 +4,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useReducer,
 } from "react";
 import type { WindowId, WindowConfig } from "@/types";
@@ -28,6 +29,15 @@ export const WINDOW_CONFIGS: WindowConfig[] = [
 
 /* ── Types ──────────────────────────────────────────────────────── */
 export type Theme = "cyberpunk" | "retro" | "light";
+
+const THEME_STORAGE_KEY = "vstr_theme";
+const VALID_THEMES: Theme[] = ["cyberpunk", "retro", "light"];
+
+function readStoredTheme(): Theme | null {
+  if (typeof window === "undefined") return null;
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  return VALID_THEMES.includes(saved as Theme) ? (saved as Theme) : null;
+}
 
 interface WindowState {
   id: WindowId;
@@ -161,6 +171,11 @@ const OSContext = createContext<OSContextValue | null>(null);
 export function OSProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, buildInitial);
 
+  useEffect(() => {
+    const saved = readStoredTheme();
+    if (saved) dispatch({ type: "SET_THEME", theme: saved });
+  }, []);
+
   const openWindow    = useCallback((id: WindowId) => dispatch({ type: "OPEN",     id }), []);
   const closeWindow   = useCallback((id: WindowId) => dispatch({ type: "CLOSE",    id }), []);
   const minimizeWindow= useCallback((id: WindowId) => dispatch({ type: "MINIMIZE", id }), []);
@@ -174,7 +189,10 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
     (id: WindowId) => state.windows.find((w) => w.id === id),
     [state.windows]
   );
-  const setTheme = useCallback((theme: Theme) => dispatch({ type: "SET_THEME", theme }), []);
+  const setTheme = useCallback((theme: Theme) => {
+    dispatch({ type: "SET_THEME", theme });
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, []);
 
   return (
     <OSContext.Provider value={{

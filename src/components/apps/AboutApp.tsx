@@ -124,13 +124,13 @@ export default function AboutApp() {
           <span><img src="/resume_res/icons/logo-GitHub.png" alt="GitHub" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> GitHub
         </a>
         <a
-          href="/resume.pdf"
+          href="/resume"
           target="_blank"
           rel="noopener noreferrer"
           id="about-resume-link"
           style={{ ...linkStyle, background: "var(--os-amber-dim)", borderColor: "rgba(245,158,11,0.3)", color: "var(--os-amber)" }}
         >
-          <span>📄</span> Download My Resume
+          <span>📄</span> View Resume
         </a>
       </div>
     </div>

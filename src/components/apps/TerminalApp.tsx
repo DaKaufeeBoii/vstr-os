@@ -14,6 +14,8 @@ Available commands:
   ls projects/    — list projects
   cat skills      — print skill stack
   contact         — show contact info
+  resume          — resume page info
+  ask hintmaster  — get hints from hintmaster
   clear           — clear terminal
 `.trim();
 
@@ -35,11 +37,12 @@ const LS_ROOT = [
   "drwxr-xr-x  experience/",
   "drwxr-xr-x  achievements/",
   "-rw-r--r--   contact.txt",
-  "-rw-r--r--   resume.pdf",
+  "-rw-r--r--   resume         (open /resume in browser)",
   "-rwx------   [hidden easter eggs — explore to find them]",
 ].join("\n");
 
 const LS_PROJECTS = [
+  "-rw-r--r--   VSTR-OS        (Interactive OS Portfolio)",
   "-rw-r--r--   EventOS        (Event Management Platform)",
   "-rw-r--r--   MailGenius     (AI Email Automation Tool)",
   "-rw-r--r--   EchoLens       (Real-Time Sentiment Dashboard)",
@@ -123,6 +126,10 @@ export default function TerminalApp() {
       case "clear":
         setLines([]);
         break;
+      case "resume":
+      case "cat resume.pdf":
+        push({ type: "output", text: "Open /resume in your browser to view or print to PDF." });
+        break;
       case "pwd":
         push({ type: "output", text: "/home/saitarun/portfolio" });
         break;
@@ -194,11 +201,11 @@ export default function TerminalApp() {
         <div
           key={i}
           className={
-            line.type === "input"   ? "terminal-prompt"
-            : line.type === "error"   ? "terminal-error"
-            : line.type === "success" ? "terminal-success"
-            : line.type === "dim"     ? "terminal-dim"
-            : "terminal-output"
+            line.type === "input" ? "terminal-prompt"
+              : line.type === "error" ? "terminal-error"
+                : line.type === "success" ? "terminal-success"
+                  : line.type === "dim" ? "terminal-dim"
+                    : "terminal-output"
           }
           style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
         >

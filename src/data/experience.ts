@@ -7,8 +7,8 @@ export const experiences: Experience[] = [
     period: "Aug 2025 – Present",
     type: "leadership",
     points: [
-      "Coordinated student communications and event documentation.",
-      "Led digital outreach initiatives for the student community.",
+      "Coordinate student communications and maintain event documentation for council initiatives.",
+      "Lead digital outreach and content for the student community across campus channels.",
     ],
   },
   {
@@ -17,8 +17,8 @@ export const experiences: Experience[] = [
     period: "Oct 2024 – Aug 2025",
     type: "leadership",
     points: [
-      "Led promotional campaigns for AI-focused events.",
-      "Managed technical event outreach and community engagement activities.",
+      "Planned and executed promotional campaigns for AI workshops and technical events.",
+      "Managed event outreach, social content, and community engagement for club activities.",
     ],
   },
   {
@@ -27,8 +27,8 @@ export const experiences: Experience[] = [
     period: "Jul 2024",
     type: "internship",
     points: [
-      "Completed industry-oriented training in AI and cybersecurity.",
-      "Worked on chatbot development and machine learning fundamentals.",
+      "Completed industry training in AI fundamentals, cybersecurity, and WatsonX tooling.",
+      "Built chatbot prototypes and applied machine learning concepts to practical use cases.",
     ],
   },
 ];

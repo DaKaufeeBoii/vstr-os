@@ -1,27 +1,55 @@
 # VSTR-OS Portfolio
 
-A completely custom interactive portfolio simulating an operating system experience, built with Next.js, React, and Framer Motion.
+An interactive OS-themed portfolio for **Sai Tarun Reddy Velagala**, built with Next.js 15, React 19, TypeScript, Framer Motion, and Tailwind CSS.
 
 ## Features
-- **Window Management System**: Draggable, minimizable, overlapping windows.
-- **Dynamic Slot Machine Wallpapers**: Backgrounds change based on hovered icons.
-- **Apps**: About, Projects, Skills, Experience, Achievements, Terminal, Contact.
 
-## Running Locally
+- **Window manager** — draggable, minimizable, focus-stacked windows with taskbar and start menu
+- **Portfolio apps** — About, Projects, Skills, Experience, Achievements, Contact, Terminal, Settings
+- **Themes** — Cyberpunk (default), Retro 95, and Light mode (persisted in localStorage)
+- **Mobile support** — fullscreen windows and compact taskbar on small screens
+- **Web resume** — printable resume at `/resume` (use browser Print → Save as PDF)
+- **Easter eggs** — hidden games and apps discoverable via the Terminal
+
+## Running locally
+
 ```bash
 npm install
 npm run dev
 ```
 
-## 🤫 Secret Commands
-If you found this README, you found the secrets. Open the **Terminal** app and try these commands:
+Open [http://localhost:3000](http://localhost:3000).
 
-1. **`play flappy`**  
-   Launch a hidden Jellybean/Flappy Bird style game. Earn 1 currency 💰 for every 2 pipes you pass.
+## Optional: static resume PDF
 
-2. **`enter code`**  
-   Launch the CodeBreaker app. Use your earned currency to buy passcodes.
-   - `FIGHT`: Unlocks the Fighter Arena (Costs 5 💰)
-   - `SECRET`: Unlocks the hidden "You Found Me" page (Costs 5 💰)
+To enable a direct PDF download, add your file as `public/resume.pdf`. The site uses `/resume` by default.
 
-Have fun exploring!
+## Secret terminal commands
+
+Open the **Terminal** app and try:
+
+| Command | Action |
+|---------|--------|
+| `help` | List available commands |
+| `whoami` | Profile summary |
+| `ls` / `ls projects/` | Browse sections |
+| `play flappy` | Launch Flappy.exe mini-game |
+| `ask hintmaster` | Coin-toss hint giver |
+| `open disk_cleanup` | Disk Cleanup easter egg |
+| `start desktop_pet` | Desktop Pet companion |
+| `crack password` | PwnTool typing challenge |
+| `resume` | Resume page info |
+
+Hidden route: [`/games/secret`](/games/secret)
+
+## Tech stack
+
+- Next.js 15 (App Router)
+- React 19 + TypeScript
+- Framer Motion
+- Tailwind CSS 4
+- Custom `useReducer` window state
+
+## Deploy
+
+Deploy to [Vercel](https://vercel.com) and set `NEXT_PUBLIC_SITE_URL` to your production URL for correct Open Graph metadata.

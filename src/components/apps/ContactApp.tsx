@@ -14,6 +14,15 @@ const CONTACTS = [
     border: "rgba(0,212,255,0.25)",
   },
   {
+    icon: "📞",
+    label: "Phone",
+    value: "+91 7043692980",
+    href: "tel:+917043692980",
+    color: "var(--os-jade)",
+    bg: "var(--os-jade-dim)",
+    border: "rgba(16,185,129,0.25)",
+  },
+  {
     icon: "/resume_res/icons/logo-Lin.jpg",
     label: "LinkedIn",
     value: "linkedin.com/in/sai-tarun-reddy-velagala-24135229b/",
@@ -93,7 +102,7 @@ export default function ContactApp() {
 
       {/* Download resume */}
       <motion.a
-        href="/resume.pdf"
+        href="/resume"
         target="_blank"
         rel="noopener noreferrer"
         id="contact-resume-download"
@@ -114,7 +123,7 @@ export default function ContactApp() {
           cursor: "pointer",
         }}
       >
-        <span>📄</span> Download Resume (PDF)
+        <span>📄</span> View Resume (Print to PDF)
       </motion.a>
     </div>
   );
