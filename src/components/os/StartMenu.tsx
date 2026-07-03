@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
 import type { WindowId } from "@/types";
 
@@ -13,6 +13,7 @@ interface StartMenuProps {
 export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
+  const [confirmShutdown, setConfirmShutdown] = useState(false);
   const { windows } = useOS();
 
   // Close on outside click
@@ -90,229 +91,318 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
           color: "var(--os-text)",
           fontFamily: "'Inter', sans-serif",
           pointerEvents: "auto",
+          position: "relative",
         }}
       >
-      {/* Search Bar */}
-      <div style={{ padding: "32px 32px 16px" }}>
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          background: "rgba(0, 0, 0, 0.5)",
-          border: "1px solid rgba(245, 158, 11, 0.15)",
-          borderRadius: 24,
-          padding: "8px 16px",
-          gap: 12,
-          boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5)",
-          transition: "border-color 0.2s",
-        }}>
-          <span style={{ fontSize: 16, color: "var(--os-amber)" }}>⌕</span>
-          <input
-            type="text"
-            placeholder="Search apps…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              flex: 1,
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              color: "var(--os-text)",
-              fontSize: 14,
-              fontFamily: "'Inter', sans-serif",
-            }}
-          />
-        </div>
-      </div>
-
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 32px" }}>
-        {/* Pinned Section */}
-        <div style={{ marginTop: 8 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
-              {search ? "Results" : "Pinned"}
-            </span>
-          </div>
-
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(84px, 1fr))",
-            gap: "16px 4px",
-            justifyItems: "center",
-          }}>
-            {filteredApps.map((cfg) => (
-              <div
-                key={cfg.id}
-                onClick={() => { onOpen(cfg.id); onClose(); }}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "12px 8px",
-                  borderRadius: 10,
-                  cursor: "pointer",
-                  width: 84,
-                  transition: "background 0.15s, transform 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(245,158,11,0.08)";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                <div style={{
-                  width: 36,
-                  height: 36,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 26,
-                  filter: "drop-shadow(0 2px 6px rgba(245,158,11,0.2))",
-                }}>
-                  {cfg.icon}
-                </div>
-                <span style={{
-                  fontSize: 11,
-                  color: "var(--os-text)",
-                  textAlign: "center",
-                  width: "100%",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  fontFamily: "'Inter', sans-serif",
-                }}>
-                  {cfg.title.replace(".app", "").replace(".sys", "").replace(".exe", "").replace(".txt", "").replace(".log", "").replace("/", "")}
-                </span>
+        {/* Reset Confirmation Overlay */}
+        <AnimatePresence>
+          {confirmShutdown && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(10, 14, 20, 0.95)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(40, 48, 58, 0.85)",
+                borderRadius: 16,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 32,
+                gap: 20,
+                zIndex: 9600,
+                color: "var(--os-text)",
+              }}
+            >
+              <span style={{ fontSize: 48, filter: "drop-shadow(0 0 12px var(--os-red))" }}>⚠️</span>
+              <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, fontFamily: "'JetBrains Mono', monospace", color: "var(--os-red)" }}>
+                Clear all progress?
+              </h3>
+              <p style={{ fontSize: 13, color: "var(--os-text-muted)", textAlign: "center", lineHeight: 1.6, maxWidth: 380, margin: 0 }}>
+                This will wipe your completed missions, custom wallpaper settings, pet companion configuration, and game stats.
+              </p>
+              <div style={{ display: "flex", gap: 16, width: "100%", maxWidth: 280, marginTop: 8 }}>
+                <button
+                  onClick={() => {
+                    // Delete all VSTR-OS progress
+                    if (typeof window !== "undefined") {
+                      Object.keys(localStorage)
+                        .filter(key => key.startsWith("vstr_"))
+                        .forEach(key => localStorage.removeItem(key));
+                      window.location.reload();
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(239, 68, 68, 0.4)",
+                    background: "rgba(239, 68, 68, 0.15)",
+                    color: "#ff6b6b",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 13,
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.3)"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)"}
+                >
+                  Yes, Clear
+                </button>
+                <button
+                  onClick={() => {
+                    setConfirmShutdown(false);
+                    onClose(); // return to home page
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    borderRadius: 8,
+                    border: "1px solid var(--os-border)",
+                    background: "rgba(255,255,255,0.05)",
+                    color: "var(--os-text)",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 13,
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                >
+                  No, Keep
+                </button>
               </div>
-            ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Search Bar */}
+        <div style={{ padding: "32px 32px 16px" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            background: "rgba(0, 0, 0, 0.5)",
+            border: "1px solid rgba(245, 158, 11, 0.15)",
+            borderRadius: 24,
+            padding: "8px 16px",
+            gap: 12,
+            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5)",
+            transition: "border-color 0.2s",
+          }}>
+            <span style={{ fontSize: 16, color: "var(--os-amber)" }}>⌕</span>
+            <input
+              type="text"
+              placeholder="Search apps…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                flex: 1,
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: "var(--os-text)",
+                fontSize: 14,
+                fontFamily: "'Inter', sans-serif",
+              }}
+            />
           </div>
         </div>
 
-        {/* Recommended Section */}
-        {!search && (
-          <div style={{ marginTop: 36, marginBottom: 20 }}>
-            <div style={{ marginBottom: 16 }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 32px" }}>
+          {/* Pinned Section */}
+          <div style={{ marginTop: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
-                Quick Links
+                {search ? "Results" : "Pinned"}
               </span>
             </div>
 
             <div style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
+              gridTemplateColumns: "repeat(auto-fill, minmax(84px, 1fr))",
+              gap: "16px 4px",
+              justifyItems: "center",
             }}>
-              {recommendedApps.map((app, idx) => (
+              {filteredApps.map((cfg) => (
                 <div
-                  key={idx}
-                  onClick={() => { onOpen(app.id); onClose(); }}
+                  key={cfg.id}
+                  onClick={() => { onOpen(cfg.id); onClose(); }}
                   style={{
                     display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
-                    gap: 14,
-                    padding: "10px 12px",
+                    gap: 8,
+                    padding: "12px 8px",
                     borderRadius: 10,
                     cursor: "pointer",
-                    border: "1px solid transparent",
-                    transition: "background 0.15s, border-color 0.15s",
+                    width: 84,
+                    transition: "background 0.15s, transform 0.15s",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(245,158,11,0.06)";
-                    e.currentTarget.style.borderColor = "rgba(245,158,11,0.12)";
+                    e.currentTarget.style.background = "rgba(245,158,11,0.08)";
+                    e.currentTarget.style.transform = "translateY(-1px)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.borderColor = "transparent";
+                    e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
-                  <div style={{ width: 28, height: 28, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {app.img
-                      ? <img src={app.img} alt={app.title} style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 4 }} />
-                      : <span style={{ fontSize: 22 }}>⌨️</span>
-                    }
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 26,
+                    filter: "drop-shadow(0 2px 6px rgba(245,158,11,0.2))",
+                  }}>
+                    {cfg.icon}
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                    <span style={{ fontSize: 13, color: "var(--os-text)", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.title}</span>
-                    <span style={{ fontSize: 11, color: "var(--os-text-muted)", marginTop: 1 }}>{app.subtitle}</span>
-                  </div>
+                  <span style={{
+                    fontSize: 11,
+                    color: "var(--os-text)",
+                    textAlign: "center",
+                    width: "100%",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    fontFamily: "'Inter', sans-serif",
+                  }}>
+                    {cfg.title.replace(".app", "").replace(".sys", "").replace(".exe", "").replace(".txt", "").replace(".log", "").replace("/", "")}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Footer */}
-      <div style={{
-        padding: "14px 32px",
-        background: "rgba(0,0,0,0.2)",
-        borderTop: "1px solid rgba(40,48,58,0.85)",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        borderBottomLeftRadius: 16,
-        borderBottomRightRadius: 16,
-      }}>
-        <div
-          onClick={() => { onOpen("about"); onClose(); }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            cursor: "pointer",
-            padding: "6px 10px 6px 6px",
-            borderRadius: 8,
-            transition: "background 0.15s",
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(245,158,11,0.08)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-        >
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            overflow: "hidden",
-            border: "1px solid rgba(245,158,11,0.2)",
-            background: "#1a1f2e",
-          }}>
-            <img src="/pix_image.png" alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" }} />
-          </div>
-          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--os-text)" }}>Sai Tarun Reddy Velagala</span>
+          {/* Recommended Section */}
+          {!search && (
+            <div style={{ marginTop: 36, marginBottom: 20 }}>
+              <div style={{ marginBottom: 16 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+                  Quick Links
+                </span>
+              </div>
+
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 12,
+              }}>
+                {recommendedApps.map((app, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => { onOpen(app.id); onClose(); }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      padding: "10px 12px",
+                      borderRadius: 10,
+                      cursor: "pointer",
+                      border: "1px solid transparent",
+                      transition: "background 0.15s, border-color 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(245,158,11,0.06)";
+                      e.currentTarget.style.borderColor = "rgba(245,158,11,0.12)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.borderColor = "transparent";
+                    }}
+                  >
+                    <div style={{ width: 28, height: 28, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {app.img
+                        ? <img src={app.img} alt={app.title} style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 4 }} />
+                        : <span style={{ fontSize: 22 }}>⌨️</span>
+                      }
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+                      <span style={{ fontSize: 13, color: "var(--os-text)", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.title}</span>
+                      <span style={{ fontSize: 11, color: "var(--os-text-muted)", marginTop: 1 }}>{app.subtitle}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        <button
-          title="Shut Down"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "transparent",
-            border: "none",
-            color: "var(--os-text-muted)",
-            fontSize: 18,
-            cursor: "pointer",
-            transition: "background 0.15s, color 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
-            e.currentTarget.style.color = "#ef4444";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "var(--os-text-muted)";
-          }}
-          onClick={() => window.location.reload()}
-        >
-          ⏻
-        </button>
-      </div>
-    </motion.div>
-  </div>
+        {/* Footer */}
+        <div style={{
+          padding: "14px 32px",
+          background: "rgba(0,0,0,0.2)",
+          borderTop: "1px solid rgba(40,48,58,0.85)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottomLeftRadius: 16,
+          borderBottomRightRadius: 16,
+        }}>
+          <div
+            onClick={() => { onOpen("about"); onClose(); }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              cursor: "pointer",
+              padding: "6px 10px 6px 6px",
+              borderRadius: 8,
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(245,158,11,0.08)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+          >
+            <div style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              overflow: "hidden",
+              border: "1px solid rgba(245,158,11,0.2)",
+              background: "#1a1f2e",
+            }}>
+              <img src="/pix_image.png" alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" }} />
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 500, color: "var(--os-text)" }}>Sai Tarun Reddy Velagala</span>
+          </div>
+
+          <button
+            title="Shut Down"
+            onClick={() => setConfirmShutdown(true)}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "transparent",
+              border: "none",
+              color: "var(--os-text-muted)",
+              fontSize: 18,
+              cursor: "pointer",
+              transition: "background 0.15s, color 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
+              e.currentTarget.style.color = "#ef4444";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--os-text-muted)";
+            }}
+          >
+            ⏻
+          </button>
+        </div>
+      </motion.div>
+    </div>
   );
 }
