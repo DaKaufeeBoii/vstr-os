@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
+import { useOS } from "@/store/windowStore";
 
 type PetMood = "walk" | "sleep" | "chase" | "idle";
 
@@ -152,7 +153,7 @@ function PetOverlay() {
                 left: "50%",
                 transform: `translateX(-50%) scaleX(${dir})`,
                 background: "rgba(10,14,20,0.95)",
-                border: "1px solid rgba(245,158,11,0.3)",
+                border: "1px solid rgba(245, 158, 11, 0.3)",
                 borderRadius: 8,
                 padding: "6px 10px",
                 fontSize: 10,
@@ -171,7 +172,7 @@ function PetOverlay() {
                 transform: "translateX(-50%)",
                 borderLeft: "5px solid transparent",
                 borderRight: "5px solid transparent",
-                borderTop: "5px solid rgba(245,158,11,0.3)",
+                borderTop: "5px solid rgba(245, 158, 11, 0.3)",
               }} />
             </motion.div>
           )}
@@ -191,6 +192,7 @@ function PetOverlay() {
 }
 
 export default function DesktopPetApp() {
+  const { unlockMission } = useOS();
   const [installed, setInstalled] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("vstr_desktop_pet") === "true";
@@ -225,6 +227,7 @@ export default function DesktopPetApp() {
           localStorage.setItem("vstr_desktop_pet", "true");
           setInstalled(true);
           setInstalling(false);
+          unlockMission("pet-trainer");
         }, 600);
       }
     }, 400);

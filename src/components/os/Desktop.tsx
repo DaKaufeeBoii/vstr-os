@@ -6,7 +6,9 @@ import Taskbar from "./Taskbar";
 import Window from "./Window";
 import BootScreen from "./BootScreen";
 import OnboardingTip from "./OnboardingTip";
+import Win11ToastContainer from "./Win11ToastContainer";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
+import type { WindowConfig } from "@/types";
 
 import AboutApp        from "@/components/apps/AboutApp";
 import ProjectsApp     from "@/components/apps/ProjectsApp";
@@ -42,18 +44,25 @@ const APP_CONTENT: Record<string, React.ReactNode> = {
 };
 
 export default function Desktop() {
-  const { theme } = useOS();
+  const { theme, wallpaper, unlockMission } = useOS();
   const [booting, setBooting] = React.useState(true);
 
+  // Trigger "First Boot" mission once boot finishes
+  React.useEffect(() => {
+    if (!booting) {
+      unlockMission("first-boot");
+    }
+  }, [booting, unlockMission]);
+
   const orderedConfigs = [
-    WINDOW_CONFIGS.find(c => c.id === "about"),
-    WINDOW_CONFIGS.find(c => c.id === "skills"),
-    WINDOW_CONFIGS.find(c => c.id === "projects"),
-    WINDOW_CONFIGS.find(c => c.id === "experience"),
-    WINDOW_CONFIGS.find(c => c.id === "achievements"),
-    WINDOW_CONFIGS.find(c => c.id === "contact"),
-    WINDOW_CONFIGS.find(c => c.id === "terminal"),
-    WINDOW_CONFIGS.find(c => c.id === "settings"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "about"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "skills"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "projects"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "experience"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "achievements"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "contact"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "terminal"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "settings"),
   ].filter(Boolean) as typeof WINDOW_CONFIGS;
 
   return (
@@ -73,7 +82,12 @@ export default function Desktop() {
 
       {!booting && (
         <>
-          <div className="wallpaper" />
+          <div
+            className="wallpaper"
+            style={{
+              backgroundImage: wallpaper ? `url(${wallpaper})` : undefined,
+            }}
+          />
 
           <div
             style={{
@@ -113,7 +127,7 @@ export default function Desktop() {
               zIndex: 2,
             }}
           >
-            {orderedConfigs.map((cfg) => (
+            {orderedConfigs.map((cfg: WindowConfig) => (
               <DesktopIcon
                 key={cfg.id}
                 id={cfg.id}
@@ -123,7 +137,7 @@ export default function Desktop() {
             ))}
           </div>
 
-          {WINDOW_CONFIGS.map((cfg) => (
+          {WINDOW_CONFIGS.map((cfg: WindowConfig) => (
             <Window
               key={cfg.id}
               id={cfg.id}
@@ -139,6 +153,7 @@ export default function Desktop() {
 
           <Taskbar />
           <OnboardingTip />
+          <Win11ToastContainer />
         </>
       )}
     </div>

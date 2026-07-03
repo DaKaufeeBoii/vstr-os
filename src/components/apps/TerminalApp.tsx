@@ -15,6 +15,7 @@ Available commands:
   cat skills      — print skill stack
   contact         — show contact info
   resume          — resume page info
+  neofetch        — display system information
   ask hintmaster  — get hints from hintmaster
   clear           — clear terminal
 `.trim();
@@ -75,7 +76,7 @@ const BOOT_LINES: TerminalLine[] = [
 import { useOS } from "@/store/windowStore";
 
 export default function TerminalApp() {
-  const { openWindow } = useOS();
+  const { openWindow, unlockMission, unlockedMissions } = useOS();
   const [lines, setLines] = useState<TerminalLine[]>(BOOT_LINES);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([]);
@@ -104,6 +105,23 @@ export default function TerminalApp() {
       case "help":
         push({ type: "output", text: HELP_TEXT });
         break;
+      case "neofetch": {
+        const logo = `
+   /\\_/\\      saitarun@vstr-os
+  ( o.o )     ----------------
+   > ^ <      OS: VSTR-OS v2.0.0
+  /     \\     Host: Portfolio-Website-PC
+  |  |  |     Kernel: Next.js 15.5.18
+  \\__/__/     Uptime: ${Math.floor(performance.now() / 1000)}s
+              Shell: bash 5.2.15
+              CPU: Virtual AI Engine (Dual-Core)
+              RAM: 16 GB (Allocated)
+              Missions: ${unlockedMissions.length} / 12 unlocked 🏆
+        `.trim();
+        push({ type: "success", text: logo });
+        unlockMission("terminal-hacker");
+        break;
+      }
       case "whoami":
         push({ type: "output", text: WHOAMI });
         break;

@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS, WINDOW_CONFIGS } from "@/store/windowStore";
+import { systemMissions } from "@/data/systemMissions";
 import StartMenu from "./StartMenu";
 
 export default function Taskbar() {
-  const { windows, openWindow, restoreWindow, focusWindow, minimizeWindow } = useOS();
+  const { windows, openWindow, restoreWindow, focusWindow, minimizeWindow, unlockedMissions } = useOS();
   const [timeStr, setTimeStr] = useState("");
   const [dateStr, setDateStr] = useState("");
   const [showStart, setShowStart] = useState(false);
+  const [showMissionsWidget, setShowMissionsWidget] = useState(false);
 
   // Live clock and date (stacked Windows 11 style)
   useEffect(() => {
@@ -41,6 +43,110 @@ export default function Taskbar() {
             onClose={() => setShowStart(false)}
             onOpen={(id) => { openWindow(id); setShowStart(false); }}
           />
+        )}
+      </AnimatePresence>
+
+      {/* OS Missions Widget Popup */}
+      <AnimatePresence>
+        {showMissionsWidget && (
+          <motion.div
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              position: "fixed",
+              bottom: "60px",
+              right: "16px",
+              width: "320px",
+              maxHeight: "420px",
+              background: "rgba(15, 20, 28, 0.9)",
+              backdropFilter: "blur(20px) saturate(140%)",
+              WebkitBackdropFilter: "blur(20px) saturate(140%)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "12px",
+              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
+              color: "#fff",
+              padding: "16px",
+              zIndex: 9999,
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+              fontFamily: "var(--font-mono)",
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "12px", fontWeight: "bold", color: "var(--os-amber)" }}>// OS MISSIONS</span>
+              <button
+                onClick={() => setShowMissionsWidget(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--os-text-muted)",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  transition: "color 0.15s",
+                }}
+                onMouseOver={(e) => e.currentTarget.style.color = "#fff"}
+                onMouseOut={(e) => e.currentTarget.style.color = "var(--os-text-muted)"}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Progress */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--os-text-muted)" }}>
+                <span>PROGRESS</span>
+                <span style={{ color: "var(--os-jade)", fontWeight: "bold" }}>{unlockedMissions.length} / {systemMissions.length}</span>
+              </div>
+              <div style={{ height: "4px", background: "rgba(255,255,255,0.06)", borderRadius: "2px", overflow: "hidden" }}>
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${Math.round((unlockedMissions.length / systemMissions.length) * 100)}%`,
+                    background: "var(--os-jade)",
+                    borderRadius: "2px",
+                    boxShadow: "0 0 6px var(--os-jade)",
+                    transition: "width 0.3s ease",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* List */}
+            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px", paddingRight: "4px" }}>
+              {systemMissions.map((m) => {
+                const completed = unlockedMissions.includes(m.id);
+                return (
+                  <div
+                    key={m.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      background: completed ? "rgba(16, 185, 129, 0.05)" : "rgba(255,255,255,0.02)",
+                      border: `1px solid ${completed ? "rgba(16, 185, 129, 0.15)" : "rgba(255,255,255,0.04)"}`,
+                      borderRadius: "6px",
+                      padding: "6px 10px",
+                      fontSize: "11px",
+                      opacity: completed ? 1 : 0.6,
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <span style={{ fontSize: "14px", flexShrink: 0 }}>{completed ? m.icon : "🔒"}</span>
+                    <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
+                    <span style={{ color: completed ? "var(--os-jade)" : "var(--os-text-dim)" }}>
+                      {completed ? "✓" : "—"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -206,6 +312,35 @@ export default function Taskbar() {
           paddingRight: 16,
           zIndex: 9010,
         }}>
+          {/* Missions Quick View Icon */}
+          <button
+            onClick={() => setShowMissionsWidget((v) => !v)}
+            title="Missions Progress"
+            style={{
+              background: showMissionsWidget ? "rgba(255,255,255,0.08)" : "transparent",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 16,
+              color: showMissionsWidget ? "var(--os-amber)" : "var(--os-text-muted)",
+              padding: "4px 8px",
+              borderRadius: 6,
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (!showMissionsWidget) e.currentTarget.style.color = "var(--os-text)";
+            }}
+            onMouseLeave={(e) => {
+              if (!showMissionsWidget) e.currentTarget.style.color = "var(--os-text-muted)";
+            }}
+          >
+            💬
+          </button>
+
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
+
           {/* Language & Network Icons */}
           <div style={{
             display: "flex",

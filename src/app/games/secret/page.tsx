@@ -1,4 +1,29 @@
+"use client";
+
+import React, { useEffect } from "react";
+
 export default function SecretPage() {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedMissions = localStorage.getItem("vstr_missions");
+      let missions: string[] = [];
+      if (savedMissions) {
+        try {
+          const parsed = JSON.parse(savedMissions);
+          if (Array.isArray(parsed)) {
+            missions = parsed;
+          }
+        } catch (e) {
+          console.error("Error loading missions:", e);
+        }
+      }
+      if (!missions.includes("secret-agent")) {
+        missions.push("secret-agent");
+        localStorage.setItem("vstr_missions", JSON.stringify(missions));
+      }
+    }
+  }, []);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh", background: "#000", color: "#0f0", fontFamily: "monospace" }}>
       <h1 style={{ fontSize: "4rem", marginBottom: 20 }}>YOU FOUND ME</h1>

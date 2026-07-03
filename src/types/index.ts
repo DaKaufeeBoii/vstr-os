@@ -31,6 +31,21 @@ export interface Achievement {
   year: string;
 }
 
+export interface SystemMission {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+}
+
+export interface OSNotification {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
 export type WindowId =
   | "about"
   | "projects"

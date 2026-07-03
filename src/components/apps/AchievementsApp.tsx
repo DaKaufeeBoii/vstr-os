@@ -6,7 +6,7 @@ import { achievements } from "@/data/achievements";
 
 export default function AchievementsApp() {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%", overflowY: "auto", fontFamily: "var(--font-mono)", color: "var(--os-text)" }}>
       <p className="section-heading">// Achievements &amp; Awards</p>
 
       {achievements.map((ach, i) => (
@@ -19,6 +19,7 @@ export default function AchievementsApp() {
           style={{
             borderColor: "rgba(245, 158, 11, 0.25)",
             background: "rgba(245, 158, 11, 0.05)",
+            padding: "12px 14px",
           }}
         >
           <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
@@ -38,14 +39,13 @@ export default function AchievementsApp() {
                   <p style={{ fontSize: 15, fontWeight: 700, color: "var(--os-text)" }}>
                     {ach.title}
                   </p>
-                  <p style={{ fontSize: 12, color: "var(--os-yellow)", fontFamily: "var(--font-mono)", marginTop: 2 }}>
+                  <p style={{ fontSize: 12, color: "var(--os-yellow)", marginTop: 2 }}>
                     {ach.subtitle}
                   </p>
                 </div>
                 <span
                   style={{
                     fontSize: 12,
-                    fontFamily: "var(--font-mono)",
                     color: "var(--os-yellow)",
                     padding: "2px 10px",
                     background: "rgba(245,158,11,0.1)",

@@ -1,0 +1,88 @@
+import { SystemMission } from "@/types";
+
+export const systemMissions: SystemMission[] = [
+  {
+    id: "first-boot",
+    title: "Welcome Agent",
+    description: "Boot VSTR-OS for the first time.",
+    icon: "🚀",
+    difficulty: "Easy",
+  },
+  {
+    id: "theme-shifter",
+    title: "Multiverse Traveller",
+    description: "Switch the system theme in settings.",
+    icon: "🎨",
+    difficulty: "Easy",
+  },
+  {
+    id: "wallpaper-artisan",
+    title: "Interior Designer",
+    description: "Change the wallpaper or upload a custom image.",
+    icon: "🖼️",
+    difficulty: "Easy",
+  },
+  {
+    id: "terminal-hacker",
+    title: "Terminal Hacker",
+    description: "Execute 'neofetch' in the terminal.",
+    icon: "⌨️",
+    difficulty: "Easy",
+  },
+  {
+    id: "pet-trainer",
+    title: "Pet Companion",
+    description: "Install the desktop pet companion.",
+    icon: "🐾",
+    difficulty: "Easy",
+  },
+  {
+    id: "flappy-novice",
+    title: "Flappy Champion",
+    description: "Score 10 or more points in Flappy.exe.",
+    icon: "🐦",
+    difficulty: "Hard",
+  },
+  {
+    id: "cleanup-quick",
+    title: "Quick Cleanup",
+    description: "Complete Disk Cleanup in Quick Scan mode.",
+    icon: "🧹",
+    difficulty: "Easy",
+  },
+  {
+    id: "cleanup-deep",
+    title: "Deep Cleanup",
+    description: "Complete Disk Cleanup in Deep Scan mode.",
+    icon: "⚙️",
+    difficulty: "Medium",
+  },
+  {
+    id: "cleanup-full",
+    title: "Full Cleanup",
+    description: "Complete Disk Cleanup in Full Scan mode.",
+    icon: "💾",
+    difficulty: "Hard",
+  },
+  {
+    id: "cracker-standard",
+    title: "Firewall Breached",
+    description: "Successfully crack the password in PwnTool.",
+    icon: "🔓",
+    difficulty: "Medium",
+  },
+  {
+    id: "cracker-perfect",
+    title: "Perfect Crack",
+    description: "Crack the password without missing a single word.",
+    icon: "🎯",
+    difficulty: "Hard",
+  },
+  {
+    id: "secret-agent",
+    title: "Secret Agent",
+    description: "Access the secret hidden page.",
+    icon: "🕵️",
+    difficulty: "Hard",
+  },
+];

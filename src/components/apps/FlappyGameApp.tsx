@@ -4,11 +4,19 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useOS } from "@/store/windowStore";
 
 export default function FlappyGameApp() {
+  const { unlockMission } = useOS();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [playing, setPlaying] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const requestRef = useRef<number>(0);
+
+  // Trigger flappy mission when player scores 10+ points
+  useEffect(() => {
+    if (score >= 10) {
+      unlockMission("flappy-novice");
+    }
+  }, [score, unlockMission]);
 
   // Game state refs (to avoid dependency cycles in requestAnimationFrame)
   const state = useRef({

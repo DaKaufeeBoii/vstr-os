@@ -62,7 +62,7 @@ export default function ProjectsApp() {
                     </p>
                     {proj.highlights && proj.highlights.length > 0 && (
                       <ul style={{ marginBottom: 12, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 4 }}>
-                        {proj.highlights.map((h) => (
+                        {proj.highlights.map((h: string) => (
                           <li key={h} style={{ fontSize: 12, color: "var(--os-text-muted)", lineHeight: 1.6 }}>
                             {h}
                           </li>
@@ -70,7 +70,7 @@ export default function ProjectsApp() {
                       </ul>
                     )}
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-                      {proj.stack.map((tech) => (
+                      {proj.stack.map((tech: string) => (
                         <span key={tech} className="tag">{tech}</span>
                       ))}
                     </div>

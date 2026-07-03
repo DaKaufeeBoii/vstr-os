@@ -26,7 +26,7 @@ const FIELD_H = 300;
 const BASE_SPEED = 0.4;
 
 export default function PasswordCrackerApp() {
-  const { openWindow } = useOS();
+  const { openWindow, unlockMission } = useOS();
   const [phase, setPhase] = useState<Phase>("connect");
   const [connectLog, setConnectLog] = useState<string[]>([]);
   const [access, setAccess] = useState(0);
@@ -50,6 +50,16 @@ export default function PasswordCrackerApp() {
     setAccess(savedAccess);
     accessRef.current = savedAccess;
   }, []);
+
+  // Trigger cracking missions upon successful crack
+  useEffect(() => {
+    if (phase === "granted") {
+      unlockMission("cracker-standard");
+      if (missed === 0) {
+        unlockMission("cracker-perfect");
+      }
+    }
+  }, [phase, missed, unlockMission]);
 
   useEffect(() => { accessRef.current = access; }, [access]);
   useEffect(() => { wordsRef.current = words; }, [words]);
