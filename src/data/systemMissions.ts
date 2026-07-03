@@ -85,4 +85,32 @@ export const systemMissions: SystemMission[] = [
     icon: "🕵️",
     difficulty: "Hard",
   },
+  {
+    id: "hint-first",
+    title: "First Consultation",
+    description: "Use the HintMaster for the first time.",
+    icon: "🪙",
+    difficulty: "Easy",
+  },
+  {
+    id: "hint-lose-streak",
+    title: "Unlucky Streak",
+    description: "Lose to HintMaster 5 times in a row.",
+    icon: "😭",
+    difficulty: "Medium",
+  },
+  {
+    id: "hint-win-streak",
+    title: "Fate Defier",
+    description: "Win against HintMaster 5 times in a row.",
+    icon: "🍀",
+    difficulty: "Hard",
+  },
+  {
+    id: "hint-all",
+    title: "Information Broker",
+    description: "Unlock all hints from the HintMaster.",
+    icon: "🔑",
+    difficulty: "Hard",
+  },
 ];
