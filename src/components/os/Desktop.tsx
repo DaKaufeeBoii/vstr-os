@@ -9,7 +9,8 @@ import OnboardingTip from "./OnboardingTip";
 import Win11ToastContainer from "./Win11ToastContainer";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
 import { useOSSettings, type VideoWallpaperId } from "@/store/osSettingsStore";
-import type { WindowConfig, WindowId } from "@/types";
+import type { WindowConfig } from "@/types";
+
 import { useGlobalHotkeys } from "@/hooks/useGlobalHotkeys";
 import { Announcer, focusManager } from "@/hooks/useFocusTrap";
 
@@ -29,12 +30,9 @@ import DiskCleanupApp     from "../apps/DiskCleanupApp";
 import DesktopPetApp      from "../apps/DesktopPetApp";
 import PasswordCrackerApp from "../apps/PasswordCrackerApp";
 
-// Context Menu
-import { ContextMenu }          from "./ContextMenu/ContextMenu";
-import { useContextMenu }       from "./ContextMenu/hooks/useContextMenu";
-import { getDesktopMenuGroups } from "./ContextMenu/configs/desktopMenu";
-import { getIconMenuGroups }    from "./ContextMenu/configs/iconMenu";
+// Context menu removed
 import VideoWallpaper          from "./VideoWallpaper";
+
 
 const APP_CONTENT: Record<string, React.ReactNode> = {
   about:            <AboutApp />,
@@ -58,8 +56,6 @@ export default function Desktop() {
   const { wallpaper, videoWallpaper, performanceMode, unlockMission } = useOSSettings();
   const [booting, setBooting] = React.useState(true);
 
-  // Context menu state
-  const { isOpen, position, contextData, openMenu, closeMenu } = useContextMenu();
 
   // Global hotkeys
   useGlobalHotkeys([
@@ -162,29 +158,7 @@ export default function Desktop() {
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "settings"),
   ].filter(Boolean) as typeof WINDOW_CONFIGS;
 
-  // Build context menu groups based on what was right-clicked
-  const menuGroups = React.useMemo(() => {
-    if (contextData?.type === "icon") {
-      return getIconMenuGroups({
-        id: contextData.id as WindowId,
-        label: contextData.label,
-        fluentIcon: contextData.fluentIcon,
-        onOpen: (id) => openWindow(id),
-        onMinimize: (id) => minimizeWindow(id),
-        onMaximize: (id) => maximizeWindow(id),
-        onRestore: (id) => restoreWindow(id),
-        onCloseWindow: (id) => closeWindow(id),
-        onPin: (id) => {}, // TODO: implement pin to taskbar
-      });
-    }
-    // Default: desktop background
-    return getDesktopMenuGroups({
-      refresh: () => window.location.reload(),
-      openTerminal: () => openWindow("terminal"),
-      openSettings: () => openWindow("settings"),
-    });
 
-  }, [contextData, openWindow, minimizeWindow, maximizeWindow, restoreWindow, closeWindow]);
 
   return (
     <div
@@ -196,11 +170,6 @@ export default function Desktop() {
         overflow: "hidden",
         background: "var(--os-bg)",
         color: "var(--os-text)",
-      }}
-      onContextMenu={(e) => {
-        // Only trigger if clicking the desktop background itself
-        if ((e.target as HTMLElement).closest("[data-context]")) return;
-        openMenu(e, { type: "desktop" });
       }}
     >
       {booting && <BootScreen onComplete={() => setBooting(false)} />}
@@ -242,15 +211,8 @@ export default function Desktop() {
                 icon={cfg.icon}
                 fluentIcon={cfg.fluentIcon}
                 label={cfg.title}
-                onContextMenu={(e) =>
-                  openMenu(e, {
-                    type: "icon",
-                    id: cfg.id,
-                    label: cfg.title,
-                    fluentIcon: cfg.fluentIcon,
-                  })
-                }
               />
+
             ))}
           </div>
 
@@ -274,13 +236,7 @@ export default function Desktop() {
           <Win11ToastContainer />
           <Announcer />
 
-          {/* Global Context Menu */}
-          <ContextMenu
-            isOpen={isOpen}
-            position={position}
-            groups={menuGroups}
-            onClose={closeMenu}
-          />
+
         </>
       )}
     </div>

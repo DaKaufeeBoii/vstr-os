@@ -14,10 +14,9 @@ interface DesktopIconProps {
   /** Fluent SVG icon registry key */
   fluentIcon?: string;
   label: string;
-  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
-export default function DesktopIcon({ id, icon, fluentIcon, label, onContextMenu }: DesktopIconProps) {
+export default function DesktopIcon({ id, icon, fluentIcon, label }: DesktopIconProps) {
   const { openWindow, getWindow } = useOS();
   const { playClick } = useSound();
   const win = getWindow(id);
@@ -33,8 +32,6 @@ export default function DesktopIcon({ id, icon, fluentIcon, label, onContextMenu
       className={`desktop-icon${isOpen ? " selected" : ""}`}
       id={`desktop-icon-${id}`}
       onDoubleClick={handleOpen}
-      onContextMenu={onContextMenu}
-      data-context="icon"
       drag
       dragMomentum={false}
       dragElastic={0.1}

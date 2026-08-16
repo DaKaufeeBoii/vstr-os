@@ -42,6 +42,8 @@ export const metadata: Metadata = {
   },
 };
 
+import ContextMenuManager from "@/components/ContextMenuManager";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -50,7 +52,9 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full`}
     >
-      <body className="h-full overflow-hidden">{children}</body>
+      <body className="h-full overflow-hidden">
+        <ContextMenuManager>{children}</ContextMenuManager>
+      </body>
     </html>
   );
 }

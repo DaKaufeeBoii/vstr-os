@@ -7,30 +7,66 @@ import { useOSSettings } from "@/store/osSettingsStore";
 import { systemMissions } from "@/data/systemMissions";
 import StartMenu from "./StartMenu";
 import { OsIcon } from "@/components/icons/OsIcon";
-import { VolumeIcon, WifiIcon, BatteryIcon, WindowsLogoIcon } from "@/components/icons";
-import QuickSettings from "./QuickSettings";
+import { VolumeIcon, WifiIcon, BatteryIcon } from "@/components/icons";
+/** VSTR logo — 4 quadrant blocks mirroring the Windows logo layout */
+function VstrLogo() {
+  const size = 26;
+  const gap = 2;
+  const q = (size - gap) / 2; // quadrant size ≈ 12px
+
+  const letters = [
+    { label: "V", x: 0,       y: 0,       color: "#e2e8f0" },
+    { label: "S", x: q + gap, y: 0,       color: "#e2e8f0" },
+    { label: "T", x: 0,       y: q + gap, color: "#e2e8f0" },
+    { label: "R", x: q + gap, y: q + gap, color: "#e2e8f0" },
+  ];
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="VSTR"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      {letters.map(({ label, x, y, color }) => (
+        <g key={label}>
+          <rect
+            x={x} y={y}
+            width={q} height={q}
+            rx={1.5}
+            fill={color}
+            opacity={0.12}
+          />
+          <text
+            x={x + q / 2}
+            y={y + q / 2 + 0.5}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontFamily="'JetBrains Mono', 'Geist Mono', monospace"
+            fontWeight="700"
+            fontStyle="italic"
+            fontSize={q * 0.72}
+            fill={color}
+            opacity={0.9}
+          >
+            {label}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
 
 export default function Taskbar() {
+
   const { windows, openWindow, restoreWindow, focusWindow, minimizeWindow } = useOS();
   const { unlockedMissions } = useOSSettings();
   const [timeStr, setTimeStr] = useState("");
   const [dateStr, setDateStr] = useState("");
   const [showStart, setShowStart] = useState(false);
-  const [showQuickSettings, setShowQuickSettings] = useState(false);
   const [showMissionsWidget, setShowMissionsWidget] = useState(false);
-
-  // Win+A keyboard shortcut for QuickSettings (using Win instead of metaKey check)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Use metaKey for Win key (which is what Next.js/Browser maps Win key to in many contexts)
-      if (e.metaKey && e.key.toLowerCase() === "a") {
-        e.preventDefault();
-        setShowQuickSettings((prev) => !prev);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   // Live clock and date (stacked Windows 11 style)
   useEffect(() => {
@@ -64,12 +100,6 @@ export default function Taskbar() {
           />
         )}
       </AnimatePresence>
-
-      {/* Quick Settings Popup */}
-      <QuickSettings
-        isOpen={showQuickSettings}
-        onClose={() => setShowQuickSettings(false)}
-      />
 
       {/* OS Missions Widget Popup */}
       <AnimatePresence>
@@ -162,11 +192,9 @@ export default function Taskbar() {
                       transition: "all 0.2s",
                     }}
                   >
-                    {completed ? (
-                      <OsIcon name={m.icon} size="sm" color="var(--os-jade)" />
-                    ) : (
-                      <OsIcon name="lock" size="sm" color="var(--os-text-dim)" />
-                    )}
+                    <span style={{ fontSize: "16px", lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "20px" }}>
+                      {completed ? m.icon : "🔒"}
+                    </span>
                     <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
                     <span style={{ color: completed ? "var(--os-jade)" : "var(--os-text-dim)" }}>
                       {completed ? "✓" : "—"}
@@ -179,9 +207,6 @@ export default function Taskbar() {
         )}
       </AnimatePresence>
 
-      {/* Quick Settings Panel */}
-      <QuickSettings isOpen={showQuickSettings} onClose={() => setShowQuickSettings(false)} />
-
       <div className="os-taskbar" id="os-taskbar">
         {/* Start Button */}
         <button
@@ -193,7 +218,8 @@ export default function Taskbar() {
           aria-expanded={showStart}
           aria-haspopup="true"
         >
-          <OsIcon name="windows" size="lg" color="var(--os-text)" />
+          <VstrLogo />
+
         </button>
 
         <div className="taskbar-divider" />
@@ -311,9 +337,8 @@ export default function Taskbar() {
 
           <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
 
-          {/* Language & Network Icons (Clickable for Quick Settings) */}
+          {/* Language & Network Icons */}
           <div
-            onClick={() => setShowQuickSettings((prev) => !prev)}
             style={{
               display: "flex",
               alignItems: "center",
@@ -322,17 +347,8 @@ export default function Taskbar() {
               fontSize: 11,
               fontFamily: "'JetBrains Mono', monospace",
               userSelect: "none",
-              cursor: "pointer",
               padding: "4px 8px",
               borderRadius: 6,
-              background: showQuickSettings ? "rgba(255,255,255,0.08)" : "transparent",
-              transition: "background 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              if (!showQuickSettings) e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
-            }}
-            onMouseLeave={(e) => {
-              if (!showQuickSettings) e.currentTarget.style.background = "transparent";
             }}
           >
             <span>ENG</span>

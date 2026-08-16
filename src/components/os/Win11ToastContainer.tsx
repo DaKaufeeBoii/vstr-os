@@ -88,10 +88,10 @@ export default function Win11ToastContainer() {
             </div>
 
             {/* Content Body */}
-            <div style={{ display: "flex", gap: "14px", padding: "12px 14px" }}>
+            <div style={{ display: "flex", gap: "14px", padding: "12px 14px", alignItems: "center" }}>
               <div
                 style={{
-                  fontSize: "34px",
+                  fontSize: "26px",
                   lineHeight: 1,
                   display: "flex",
                   alignItems: "center",
@@ -99,10 +99,11 @@ export default function Win11ToastContainer() {
                   background: "rgba(245, 158, 11, 0.12)",
                   border: "1px solid rgba(245, 158, 11, 0.25)",
                   borderRadius: "8px",
-                  width: "52px",
-                  height: "52px",
+                  width: "48px",
+                  height: "48px",
                   flexShrink: 0,
                   filter: "drop-shadow(0 2px 8px rgba(245, 158, 11, 0.3))",
+                  userSelect: "none",
                 }}
               >
                 {notif.icon}
