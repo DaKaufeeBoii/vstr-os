@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 const CONTACTS = [
   {
-    icon: "/resume_res/icons/logo-Gmail.svg",
+    icon: "/assets/resume/icons/logo-Gmail.svg",
     label: "Email",
     value: "saitarunrdy@gmail.com",
     href: "mailto:saitarunrdy@gmail.com",
@@ -23,7 +23,7 @@ const CONTACTS = [
     border: "rgba(16,185,129,0.25)",
   },
   {
-    icon: "/resume_res/icons/logo-Lin.jpg",
+    icon: "/assets/resume/icons/logo-Lin.jpg",
     label: "LinkedIn",
     value: "linkedin.com/in/sai-tarun-reddy-velagala-24135229b/",
     href: "https://linkedin.com/in/sai-tarun-reddy-velagala-24135229b/",
@@ -32,7 +32,7 @@ const CONTACTS = [
     border: "rgba(124,58,237,0.3)",
   },
   {
-    icon: "/resume_res/icons/logo-GitHub.png",
+    icon: "/assets/resume/icons/logo-GitHub.png",
     label: "GitHub",
     value: "github.com/DaKaufeeBoii",
     href: "https://github.com/DaKaufeeBoii",

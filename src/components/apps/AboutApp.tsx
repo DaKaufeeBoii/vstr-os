@@ -30,7 +30,7 @@ export default function AboutApp() {
             title="Click to reveal real photo"
           >
             <Image
-              src="/pix_image.png"
+              src="/assets/images/pix_image.png"
               alt="Pixel avatar of Sai Tarun"
               fill
               className="pixel-photo"
@@ -114,14 +114,14 @@ export default function AboutApp() {
           id="about-linkedin-link"
           style={linkStyle}
         >
-          <span><img src="/resume_res/icons/logo-Lin.jpg" alt="LinkedIn" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> LinkedIn
+          <span><img src="/assets/resume/icons/logo-Lin.jpg" alt="LinkedIn" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> LinkedIn
         </a>
         <a
           href="https://github.com/DaKaufeeBoii"
           id="about-github-link"
           style={linkStyle}
         >
-          <span><img src="/resume_res/icons/logo-GitHub.png" alt="GitHub" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> GitHub
+          <span><img src="/assets/resume/icons/logo-GitHub.png" alt="GitHub" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> GitHub
         </a>
         <a
           href="/resume"

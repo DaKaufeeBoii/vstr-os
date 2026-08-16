@@ -1,78 +1,101 @@
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
-/* ── VSTR-OS Design Tokens ─────────────────────────────────────── */
+/* ── VSTR-OS Design Tokens (Windows 11 + Anime Aesthetic) ───────── */
 :root {
-  --os-bg:           #080c10;
-  --os-surface:      rgba(15, 20, 28, 0.88);
-  --os-border:       rgba(40, 48, 58, 0.85);
-  --os-glass:        rgba(8, 12, 16, 0.65);
+  /* Primitives - Anime Dark Base */
+  --color-bg:        #0f0c29;
+  --color-surface:   rgba(15, 12, 41, 0.92);
+  --color-border:    rgba(168, 85, 247, 0.3);
+  --color-glass:     rgba(15, 12, 41, 0.8);
 
-  --os-amber:        #f59e0b;
-  --os-amber-dim:    rgba(245, 158, 11, 0.15);
-  --os-amber-glow:   rgba(245, 158, 11, 0.08);
+  --color-rose:      #e94560;
+  --color-rose-dim:  rgba(233, 69, 96, 0.15);
+  --color-rose-glow: rgba(233, 69, 96, 0.08);
 
-  --os-jade:         #10b981;
-  --os-jade-dim:     rgba(16, 185, 129, 0.15);
-  --os-jade-glow:    rgba(16, 185, 129, 0.08);
+  --color-violet:    #a855f7;
+  --color-violet-dim:rgba(168, 85, 247, 0.15);
+  --color-violet-glow:rgba(168, 85, 247, 0.08);
 
-  /* Legacy aliases (keep for backward compat in apps not yet updated) */
-  --os-cyan:         #f59e0b;
-  --os-cyan-dim:     rgba(245, 158, 11, 0.15);
-  --os-purple:       #10b981;
-  --os-purple-dim:   rgba(16, 185, 129, 0.15);
-  --os-green:        #10b981;
-  --os-green-dim:    rgba(16, 185, 129, 0.15);
+  --color-cyan:      #06b6d4;
+  --color-cyan-dim:  rgba(6, 182, 212, 0.15);
+  --color-emerald:   #22c55e;
+  --color-red:       #ef4444;
 
-  --os-yellow:       #fbbf24;
-  --os-red:          #ef4444;
-  --os-text:         #e8edf4;
-  --os-text-muted:   #8b929e;
-  --os-text-dim:     #3d4451;
+  --color-text:      #f8fafc;
+  --color-text-muted:#c4b5fd;
+  --color-text-dim:  #581c87;
+
+  /* Win11 Mica/Acrylic tokens */
+  --mica-base:       rgba(15, 12, 41, 0.85);
+  --mica-alt:        rgba(23, 20, 58, 0.9);
+  --acrylic:         rgba(15, 12, 41, 0.75);
+  --acrylic-strong:  rgba(15, 12, 41, 0.9);
+
+  /* Semantic */
+  --os-bg:           var(--color-bg);
+  --os-surface:      var(--color-surface);
+  --os-border:       var(--color-border);
+  --os-glass:        var(--color-glass);
+
+  --os-primary:      var(--color-rose);
+  --os-primary-hover:#ff6b8a;
+  --os-secondary:    var(--color-violet);
+
+  --os-amber:        var(--color-rose);
+  --os-amber-dim:    var(--color-rose-dim);
+  --os-amber-glow:   var(--color-rose-glow);
+
+  --os-jade:         var(--color-violet);
+  --os-jade-dim:     var(--color-violet-dim);
+  --os-jade-glow:    var(--color-violet-glow);
+
+  --os-cyan:         var(--color-cyan);
+  --os-cyan-dim:     var(--color-cyan-dim);
+  --os-purple:       var(--color-violet);
+  --os-purple-dim:   var(--color-violet-dim);
+--os-green:        var(--color-emerald);
+  --os-green-dim:    rgba(34, 197, 94, 0.15);
+  --os-green-glow:   rgba(34, 197, 94, 0.08);
+
+  --os-primary-dim:  rgba(233, 69, 96, 0.12);
+  --os-secondary-dim:rgba(168, 85, 247, 0.12);
+  --os-red:          var(--color-red);
+
+  --os-text:         var(--color-text);
+  --os-text-muted:   var(--color-text-muted);
+  --os-text-dim:     var(--color-text-dim);
 
   --taskbar-h:       48px;
-  --titlebar-h:      32px;
-}
+  --titlebar-h:      36px;
+  
+  /* Win11 Radius */
+  --radius-sm:       4px;
+  --radius-md:       8px;
+  --radius-lg:       12px;
+  --radius-xl:       16px;
+  --radius-full:     9999px;
 
-/* ── Theme Overrides ────────────────────────────────────────────── */
-[data-theme="light"] {
-  --os-bg:        #f0f2f5;
-  --os-surface:   rgba(255, 255, 255, 0.9);
-  --os-border:    rgba(0, 0, 0, 0.12);
-  --os-glass:     rgba(255, 255, 255, 0.65);
-  --os-amber:     #d97706;
-  --os-amber-dim: rgba(217, 119, 6, 0.12);
-  --os-jade:      #059669;
-  --os-jade-dim:  rgba(5, 150, 105, 0.12);
-  --os-cyan:      #d97706;
-  --os-cyan-dim:  rgba(217, 119, 6, 0.12);
-  --os-purple:    #059669;
-  --os-purple-dim:rgba(5, 150, 105, 0.12);
-  --os-green:     #059669;
-  --os-red:       #dc2626;
-  --os-text:      #111827;
-  --os-text-muted:#4b5563;
-  --os-text-dim:  #9ca3af;
-}
-
-[data-theme="retro"] {
-  --os-bg:        #003300;
-  --os-surface:   #001a00;
-  --os-border:    #00aa00;
-  --os-glass:     #001a00;
-  --os-amber:     #00ff00;
-  --os-amber-dim: rgba(0, 255, 0, 0.15);
-  --os-jade:      #00cc00;
-  --os-jade-dim:  rgba(0, 204, 0, 0.15);
-  --os-cyan:      #00ff00;
-  --os-cyan-dim:  rgba(0, 255, 0, 0.15);
-  --os-purple:    #00cc00;
-  --os-purple-dim:rgba(0, 204, 0, 0.15);
-  --os-green:     #00cc00;
-  --os-red:       #ff3300;
-  --os-text:      #00ff00;
-  --os-text-muted:#00aa00;
-  --os-text-dim:  #006600;
+  /* Anime Dark aesthetic (default, no theme switching) */
+  --os-bg:        #0f0c29;
+  --os-surface:   rgba(15, 12, 41, 0.92);
+  --os-border:    rgba(168, 85, 247, 0.3);
+  --os-glass:     rgba(15, 12, 41, 0.8);
+  --os-amber:     #e94560;
+  --os-amber-dim: rgba(233, 69, 96, 0.15);
+  --os-amber-glow:rgba(233, 69, 96, 0.08);
+  --os-jade:      #a855f7;
+  --os-jade-dim:  rgba(168, 85, 247, 0.15);
+  --os-jade-glow: rgba(168, 85, 247, 0.08);
+  --os-cyan:      #06b6d4;
+  --os-cyan-dim:  rgba(6, 182, 212, 0.15);
+  --os-purple:    #a855f7;
+  --os-purple-dim:rgba(168, 85, 247, 0.15);
+  --os-green:     #22c55e;
+  --os-red:       #ef4444;
+  --os-text:      #f8fafc;
+  --os-text-muted:#c4b5fd;
+  --os-text-dim:  #581c87;
 }
 
 /* ── Reset & Base ───────────────────────────────────────────────── */
@@ -88,7 +111,8 @@ html, body {
   overflow: hidden;
   background: var(--os-bg);
   color: var(--os-text);
-  font-family: 'Inter', sans-serif;
+  /* Segoe UI Variable is the real Win11 font; falls back gracefully on other OSes */
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
@@ -113,64 +137,64 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background-image: url('/os_wallpaper.png');
+  background-image: var(--wallpaper-url, url('/wallpapers/static/batman.jpg'));
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-/* Dark overlay to ensure readability */
+/* Subtle dark overlay for readability with anime wallpapers */
 .wallpaper::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(8, 12, 16, 0.55);
+  background: linear-gradient(180deg, rgba(15,12,41,0.4) 0%, rgba(15,12,41,0.65) 60%, rgba(15,12,41,0.8) 100%);
 }
 
-/* Subtle amber/jade grid overlay */
+/* Subtle vignette */
 .wallpaper::after {
   content: '';
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(245, 158, 11, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(245, 158, 11, 0.018) 1px, transparent 1px);
-  background-size: 48px 48px;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(15,12,41,0.5) 100%);
+  pointer-events: none;
 }
 
-/* ── Glass Window Shell ─────────────────────────────────────────── */
+/* ── Glass Window Shell (Win11 Mica/Acrylic) ───────────────────── */
 .os-window {
   position: absolute;
-  background: var(--os-surface);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  background: var(--mica-base);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
   border: 1px solid var(--os-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow:
-    0 0 0 1px rgba(245, 158, 11, 0.04),
-    0 28px 90px rgba(0, 0, 0, 0.65),
-    0 4px 18px rgba(0, 0, 0, 0.45);
+    0 0 0 1px rgba(168, 85, 247, 0.08),
+    0 24px 48px rgba(0, 0, 0, 0.4),
+    0 8px 16px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
 .os-window.focused {
-  border-color: rgba(245, 158, 11, 0.22);
+  border-color: rgba(168, 85, 247, 0.4);
   box-shadow:
-    0 0 0 1px rgba(245, 158, 11, 0.12),
-    0 32px 100px rgba(0, 0, 0, 0.7),
-    0 0 40px rgba(245, 158, 11, 0.06),
-    0 4px 20px rgba(0, 0, 0, 0.5);
+    0 0 0 1px rgba(168, 85, 247, 0.15),
+    0 32px 64px rgba(0, 0, 0, 0.5),
+    0 0 48px rgba(168, 85, 247, 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* ── Title Bar ──────────────────────────────────────────────────── */
+/* ── Title Bar (Traffic Lights Style) ────────────────────────────── */
 .os-titlebar {
   height: var(--titlebar-h);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 12px;
-  background: rgba(10, 14, 20, 0.5);
+  background: var(--mica-alt);
   border-bottom: 1px solid var(--os-border);
   cursor: grab;
   flex-shrink: 0;
@@ -194,24 +218,17 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
+  font-size: 9px;
+  font-weight: 600;
   color: transparent;
+  border: none;
+  background: var(--color-text-dim);
 }
+
 .os-traffic-light:hover { opacity: 0.85; transform: scale(1.15); color: rgba(0,0,0,0.55); }
 .os-traffic-light.close  { background: #ff5f57; box-shadow: 0 0 6px rgba(255,95,87,0.4); }
 .os-traffic-light.min    { background: #ffbd2e; box-shadow: 0 0 6px rgba(255,189,46,0.4); }
-.os-traffic-light.max    { background: #28ca41; box-shadow: 0 0 6px rgba(40,202,65,0.4); }
-
-.os-titlebar-title {
-  flex: 1;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--os-text-muted);
-  font-family: 'Inter', sans-serif;
-  letter-spacing: 0.02em;
-  pointer-events: none;
-}
+.os-traffic-light.max    { background: #28ca42; box-shadow: 0 0 6px rgba(40,202,66,0.4); }
 
 .os-titlebar-icon {
   width: 16px;
@@ -221,6 +238,21 @@ html, body {
   justify-content: center;
   font-size: 13px;
   pointer-events: none;
+  color: var(--os-text-muted);
+}
+
+.os-titlebar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--os-text);
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Window Content ─────────────────────────────────────────────── */
@@ -232,48 +264,50 @@ html, body {
   padding: 20px;
 }
 
-/* ── Desktop Icons ──────────────────────────────────────────────── */
+/* ── Desktop Icons (Win11 Style) ────────────────────────────────── */
 .desktop-icon {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 8px;
-  border-radius: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: background 0.15s, transform 0.15s;
-  width: 82px;
+  width: 88px;
   text-align: center;
 }
 .desktop-icon:hover {
-  background: rgba(245, 158, 11, 0.10);
-  transform: translateY(-1px);
+  background: var(--os-primary-dim);
+  transform: translateY(-2px);
 }
 .desktop-icon.selected {
-  background: rgba(245, 158, 11, 0.18);
+  background: var(--os-primary-dim);
+  border: 1px solid var(--os-primary);
 }
 
 .desktop-icon-emoji {
-  font-size: 36px;
+  font-size: 32px;
   line-height: 1;
-  filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.25));
+  filter: drop-shadow(0 4px 12px rgba(168, 85, 247, 0.3));
   transition: transform 0.2s, filter 0.2s;
 }
 .desktop-icon:hover .desktop-icon-emoji {
-  transform: translateY(-3px) scale(1.08);
-  filter: drop-shadow(0 6px 16px rgba(245, 158, 11, 0.45));
+  transform: translateY(-4px) scale(1.1);
+  filter: drop-shadow(0 8px 24px rgba(233, 69, 96, 0.5));
 }
 
 .desktop-icon-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--os-text);
-  font-family: 'Inter', sans-serif;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.6);
-  line-height: 1.3;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  line-height: 1.2;
   word-break: break-word;
 }
 
-/* ── Taskbar ────────────────────────────────────────────────────── */
+/* ── Taskbar (Windows Standard - Left Aligned, Full Width) ───────── */
 .os-taskbar {
   position: fixed;
   bottom: 0;
@@ -281,109 +315,134 @@ html, body {
   right: 0;
   height: var(--taskbar-h);
   z-index: 9000;
-  background: rgba(8, 12, 16, 0.92);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: var(--mica-base);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-top: 1px solid var(--os-border);
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  gap: 4px;
+  padding: 0 8px;
+  gap: 8px;
+  box-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(168, 85, 247, 0.05);
 }
 
 .taskbar-start-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--os-amber);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  color: #080c10;
-  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  color: var(--os-primary);
+  transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: -0.05em;
 }
 .taskbar-start-btn:hover {
-  transform: scale(1.08);
-  background: #fbbf24;
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+  background: var(--os-primary-dim);
+  color: var(--os-primary-hover);
+}
+.taskbar-start-btn:active {
+  background: var(--os-primary);
+  color: #080c10;
 }
 
 .taskbar-divider {
   width: 1px;
   height: 24px;
   background: var(--os-border);
-  margin: 0 6px;
+  margin: 0 8px;
   flex-shrink: 0;
 }
 
 .taskbar-apps {
   flex: 1;
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: stretch;
+  gap: 0;
   overflow: hidden;
 }
 
 .taskbar-app-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 6px;
+  justify-content: center;
+  padding: 0 16px;
+  height: 100%;
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
   cursor: pointer;
   color: var(--os-text-muted);
-  font-size: 12px;
-  font-family: 'Inter', sans-serif;
-  transition: all 0.15s;
+  font-size: 13px;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
-  max-width: 140px;
-  overflow: hidden;
+  max-width: 180px;
+  min-width: 44px;
+  position: relative;
 }
 .taskbar-app-btn:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.08);
   color: var(--os-text);
-  border-color: var(--os-border);
 }
 .taskbar-app-btn.active {
-  background: var(--os-amber-dim);
-  border-color: rgba(245, 158, 11, 0.3);
-  color: var(--os-amber);
+  background: var(--os-primary-dim);
+  color: var(--os-primary);
 }
 .taskbar-app-btn.minimized {
-  opacity: 0.5;
+  opacity: 0.7;
+}
+
+/* Bottom indicator line for active/minimized windows */
+.taskbar-app-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--os-primary);
+  transition: width 0.2s ease;
+}
+.taskbar-app-btn.active::after {
+  width: 80%;
+}
+.taskbar-app-btn.minimized::after {
+  width: 20%;
+  background: var(--os-text-muted);
 }
 
 .taskbar-clock {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   color: var(--os-text-muted);
-  text-align: right;
-  min-width: 80px;
+  text-align: center;
+  min-width: 90px;
   flex-shrink: 0;
+  padding: 0 8px;
 }
 
 .taskbar-status {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 0 8px;
 }
 
 .status-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--os-jade);
-  box-shadow: 0 0 8px var(--os-jade);
+  background: var(--os-green);
+  box-shadow: 0 0 12px var(--os-green);
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -515,34 +574,35 @@ html, body {
 .mono { font-family: 'JetBrains Mono', monospace; }
 
 .glass-card {
-  background: rgba(10, 14, 20, 0.5);
+  background: var(--mica-alt);
   border: 1px solid var(--os-border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   padding: 16px;
 }
 
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
   font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
-  background: var(--os-amber-dim);
-  color: var(--os-amber);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  font-weight: 600;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  background: var(--os-primary-dim);
+  color: var(--os-primary);
+  border: 1px solid rgba(233, 69, 96, 0.2);
 }
 
 .tag.purple {
-  background: var(--os-jade-dim);
-  color: var(--os-jade);
-  border-color: rgba(16, 185, 129, 0.25);
+  background: var(--os-secondary-dim);
+  color: var(--os-secondary);
+  border-color: rgba(168, 85, 247, 0.25);
 }
 
 .tag.green {
-  background: var(--os-jade-dim);
-  color: var(--os-jade);
-  border-color: rgba(16, 185, 129, 0.25);
+  background: var(--os-green-dim);
+  color: var(--os-green);
+  border-color: rgba(34, 197, 94, 0.25);
 }
 
 .section-heading {
@@ -552,54 +612,64 @@ html, body {
   text-transform: uppercase;
   color: var(--os-text-muted);
   margin-bottom: 12px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
 }
 
-.cyan-text    { color: var(--os-amber); }
-.purple-text  { color: var(--os-jade); }
-.green-text   { color: var(--os-jade); }
-.amber-text   { color: var(--os-amber); }
-.jade-text    { color: var(--os-jade); }
+.cyan-text    { color: var(--os-cyan); }
+.purple-text  { color: var(--os-secondary); }
+.green-text   { color: var(--os-green); }
+.rose-text    { color: var(--os-primary); }
+.violet-text  { color: var(--os-secondary); }
 .muted-text   { color: var(--os-text-muted); }
 
-/* ── Start Menu ─────────────────────────────────────────────────── */
+/* ── Start Menu (Win11 Centered) ────────────────────────────────── */
 .start-menu {
   position: fixed;
-  bottom: calc(var(--taskbar-h) + 8px);
-  left: 12px;
-  width: 280px;
-  background: rgba(10, 14, 20, 0.97);
-  backdrop-filter: blur(28px);
+  bottom: calc(var(--taskbar-h) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  background: var(--mica-base);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
   border: 1px solid var(--os-border);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   z-index: 9500;
   overflow: hidden;
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+  box-shadow:
+    0 0 0 1px rgba(168, 85, 247, 0.08),
+    0 32px 64px rgba(0, 0, 0, 0.5),
+    0 0 64px rgba(168, 85, 247, 0.1);
 }
 
 .start-menu-header {
-  padding: 16px;
-  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(16,185,129,0.06));
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(233,69,96,0.12), rgba(168,85,247,0.06));
   border-bottom: 1px solid var(--os-border);
 }
 
 .start-menu-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: 14px;
+  padding: 12px 20px;
   cursor: pointer;
   transition: background 0.12s;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--os-text);
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
 }
 .start-menu-item:hover {
-  background: rgba(245, 158, 11, 0.08);
+  background: var(--os-primary-dim);
 }
 .start-menu-item-icon {
-  font-size: 18px;
-  width: 28px;
+  font-size: 20px;
+  width: 32px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ── Pixel photo ─────────────────────────────────────────────────── */
@@ -609,35 +679,65 @@ html, body {
   image-rendering: crisp-edges;
 }
 
-/* ── Amber glow button ──────────────────────────────────────────── */
-.btn-amber {
-  padding: 8px 20px;
-  background: var(--os-amber);
+/* ── Win11 Button Styles ────────────────────────────────────────── */
+.btn-primary {
+  padding: 10px 24px;
+  background: var(--os-primary);
   color: #080c10;
   border: none;
-  border-radius: 6px;
-  font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.15s;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
 }
-.btn-amber:hover {
-  background: #fbbf24;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+.btn-primary:hover {
+  background: var(--os-primary-hover);
+  box-shadow: 0 4px 16px rgba(233, 69, 96, 0.5);
+  transform: translateY(-1px);
 }
-.btn-amber:disabled {
+.btn-primary:active {
+  transform: translateY(0);
+}
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  padding: 10px 24px;
+  background: var(--os-secondary);
+  color: #080c10;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+}
+.btn-secondary:hover {
+  background: #c084fc;
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.5);
+  transform: translateY(-1px);
+}
+.btn-secondary:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.btn-jade {
+.btn-accent {
   padding: 8px 20px;
-  background: var(--os-jade);
+  background: var(--os-cyan);
   color: #080c10;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
@@ -645,13 +745,20 @@ html, body {
   transition: all 0.15s;
   letter-spacing: 0.04em;
 }
-.btn-jade:hover {
-  background: #34d399;
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+.btn-accent:hover {
+  background: #22d3ee;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
 }
-.btn-jade:disabled {
+.btn-accent:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* ── Global Focus Indicators ───────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--os-amber);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* ── Mobile Responsiveness ──────────────────────────────────────── */
@@ -693,4 +800,161 @@ html, body {
     top: 10px !important;
     left: 10px !important;
   }
+}
+
+/* ── Matrix terminal animation ──────────────────────────────────────── */
+@keyframes matrixScroll {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 200px; }
+}
+
+/* ── Context menu entrance ──────────────────────────────────────────── */
+@keyframes ctxMenuIn {
+  from { opacity: 0; transform: scale(0.94) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Context menu keyboard focus ring ───────────────────────────────── */
+.ctx-item-focused {
+  background: rgba(255, 255, 255, 0.07) !important;
+  outline: none;
+}
+
+/* ── Desktop icon shortcut badge ────────────────────────────────────── */
+.desktop-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.desktop-icon-badge {
+  position: absolute;
+  bottom: 18px; /* sits just above label */
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+}
+
+/* ── Touch Target Sizing (≥48px) ───────────────────────────────────── */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea,
+  .taskbar-app-btn,
+  .taskbar-start-btn,
+  .os-traffic-light,
+  .desktop-icon {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .os-traffic-light {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .taskbar-start-btn {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .taskbar-app-btn {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* ── Gesture Alternatives for Drag Operations ──────────────────────── */
+@media (pointer: coarse) {
+  .os-titlebar {
+    cursor: default;
+  }
+  
+  .os-titlebar:active {
+    cursor: default;
+  }
+  
+  .os-window {
+    touch-action: pan-y;
+  }
+  
+  .os-titlebar {
+    touch-action: manipulation;
+  }
+}
+
+/* ── Reduced Motion ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .os-window {
+    transition: none !important;
+  }
+  
+  .motion-safe {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── High Contrast ──────────────────────────────────────────────────── */
+@media (prefers-contrast: high) {
+  :root {
+    --os-border: rgba(255, 255, 255, 0.5);
+    --os-amber: #ffcc00;
+    --os-jade: #00ff88;
+  }
+  
+  [data-theme="sunset"] {
+    --os-border: rgba(255, 255, 255, 0.5);
+    --os-amber: #ff88aa;
+    --os-jade: #ffcc00;
+  }
+  
+  [data-theme="mono"] {
+    --os-border: rgba(255, 255, 255, 0.5);
+    --os-amber: #ffffff;
+    --os-jade: #cccccc;
+  }
+  
+  [data-theme="anime"] {
+    --os-border: rgba(255, 255, 255, 0.5);
+    --os-amber: #ff6b8a;
+    --os-jade: #c084fc;
+  }
+
+  [data-theme="standard"] {
+    --os-border: rgba(255, 255, 255, 0.5);
+    --os-amber: #0078d4;
+    --os-jade: #005a9e;
+  }
+}
+
+/* ── Snap Overlay Visual Indicators ───────────────────────────────── */
+.snap-zone-indicator {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  background: rgba(233, 69, 96, 0.15);
+  border: 2px dashed var(--os-primary);
+  border-radius: var(--radius-md);
+  transition: opacity 0.15s;
+}
+
+.snap-zone-indicator.active {
+  background: rgba(233, 69, 96, 0.3);
+  border-style: solid;
 }

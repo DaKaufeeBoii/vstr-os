@@ -5,14 +5,19 @@ import { motion } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import type { WindowId } from "@/types";
 import { useSound } from "@/utils/useSound";
+import { OsIcon } from "@/components/icons/OsIcon";
 
 interface DesktopIconProps {
   id: WindowId;
+  /** Legacy emoji fallback */
   icon: string;
+  /** Fluent SVG icon registry key */
+  fluentIcon?: string;
   label: string;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
-export default function DesktopIcon({ id, icon, label }: DesktopIconProps) {
+export default function DesktopIcon({ id, icon, fluentIcon, label, onContextMenu }: DesktopIconProps) {
   const { openWindow, getWindow } = useOS();
   const { playClick } = useSound();
   const win = getWindow(id);
@@ -28,20 +33,40 @@ export default function DesktopIcon({ id, icon, label }: DesktopIconProps) {
       className={`desktop-icon${isOpen ? " selected" : ""}`}
       id={`desktop-icon-${id}`}
       onDoubleClick={handleOpen}
+      onContextMenu={onContextMenu}
+      data-context="icon"
       drag
       dragMomentum={false}
       dragElastic={0.1}
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ scale: 1.07 }}
       whileDrag={{ scale: 1.1, zIndex: 50 }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.93 }}
       title={`Double-click to open ${label}`}
     >
       <motion.div
         className="desktop-icon-emoji"
-        animate={isOpen ? { filter: ["drop-shadow(0 0 8px rgba(0,212,255,0.6))", "drop-shadow(0 0 14px rgba(0,212,255,0.3))", "drop-shadow(0 0 8px rgba(0,212,255,0.6))"] } : {}}
+        animate={
+          isOpen
+            ? {
+                filter: [
+                  "drop-shadow(0 0 8px rgba(245,158,11,0.7))",
+                  "drop-shadow(0 0 16px rgba(245,158,11,0.3))",
+                  "drop-shadow(0 0 8px rgba(245,158,11,0.7))",
+                ],
+              }
+            : {}
+        }
         transition={{ duration: 2, repeat: Infinity }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
       >
-        {icon}
+        {fluentIcon ? (
+          <OsIcon
+            name={fluentIcon}
+            size="lg"
+          />
+        ) : (
+          <span style={{ fontSize: 28 }}>{icon}</span>
+        )}
       </motion.div>
       <span className="desktop-icon-label">{label}</span>
     </motion.div>

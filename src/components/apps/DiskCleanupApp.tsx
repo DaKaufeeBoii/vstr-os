@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
+import { useOSSettings } from "@/store/osSettingsStore";
 
 type Phase = "select" | "scan" | "game" | "win" | "lose";
 type ScanMode = "quick" | "deep" | "full";
@@ -85,7 +86,7 @@ const NEIGHBOR_COLORS: Record<number, string> = {
 };
 
 export default function DiskCleanupApp() {
-  const { unlockMission } = useOS();
+  const { unlockMission } = useOSSettings();
   const [phase, setPhase] = useState<Phase>("select");
   const [mode, setMode] = useState<ScanMode>("quick");
   const [scanProgress, setScanProgress] = useState(0);

@@ -22,7 +22,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Optional: static resume PDF
 
-To enable a direct PDF download, add your file as `public/resume.pdf`. The site uses `/resume` by default.
+To enable a direct PDF download, add your file as `public/assets/resume/resume.pdf`. The site uses `/resume` by default.
 
 ## Secret terminal commands
 

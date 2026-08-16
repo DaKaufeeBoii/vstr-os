@@ -12,7 +12,7 @@ export interface Project {
 export interface SkillCategory {
   title: string;
   icon: string;
-  skills: { name: string; level: number }[];
+  skills: { name: string }[];
 }
 
 export interface Experience {
@@ -65,7 +65,31 @@ export type WindowId =
 export interface WindowConfig {
   id: WindowId;
   title: string;
+  /** Legacy emoji icon — kept for backward compat */
   icon: string;
+  /** Key used to look up Fluent SVG icon from the icon registry */
+  fluentIcon?: string;
   defaultW: number;
   defaultH: number;
+}
+
+export type SnapZone = "left" | "right" | "top" | "bottom" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "maximize" | null;
+
+export interface WindowState {
+  id: WindowId;
+  isOpen: boolean;
+  isMinimized: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  zIndex: number;
+  hasBeenOpened: boolean;
+  snapZone?: SnapZone;
+}
+
+export interface OSUIState {
+  isExposéOpen: boolean;
+  isCommandPaletteOpen: boolean;
+  isTerminalDrawerOpen: boolean;
 }

@@ -1,14 +1,19 @@
 "use client";
 
-import React, { useRef, useCallback, useEffect } from "react";
+import React, { useRef, useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import type { WindowId } from "@/types";
+import { OsIcon } from "@/components/icons/OsIcon";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface WindowProps {
   id: WindowId;
   title: string;
+  /** Legacy emoji icon */
   icon: string;
+  /** Fluent SVG icon registry key */
+  fluentIcon?: string;
   defaultW?: number;
   defaultH?: number;
   noPadding?: boolean;
@@ -19,16 +24,26 @@ export default function Window({
   id,
   title,
   icon,
+  fluentIcon,
   defaultW = 500,
   defaultH = 420,
   noPadding = false,
   children,
 }: WindowProps) {
-  const { getWindow, closeWindow, minimizeWindow, focusWindow, moveWindow } = useOS();
+  const { getWindow, closeWindow, minimizeWindow, focusWindow, moveWindow, maximizeWindow, resizeWindow, windows } = useOS();
   const win = getWindow(id);
 
   const dragOrigin = useRef<{ mx: number; my: number; wx: number; wy: number } | null>(null);
   const windowRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap for the window
+  const focusTrapRef = useFocusTrap({
+    enabled: win?.isOpen && !win?.isMinimized,
+    onEscape: () => minimizeWindow(id),
+    initialFocusRef: windowRef,
+  });
+
+  const isFocused = win?.zIndex === Math.max(...windows.filter(w => w.isOpen && !w.isMinimized).map(w => w.zIndex), 0);
 
   /* ── Drag via titlebar ─────────────────────────────────────────── */
   const onTitleMouseDown = useCallback(
@@ -83,9 +98,12 @@ export default function Window({
     <AnimatePresence>
       {!win.isMinimized && (
         <motion.div
-          ref={windowRef}
+          ref={(el) => {
+            windowRef.current = el;
+            if (focusTrapRef.current) focusTrapRef.current = el;
+          }}
           key={id}
-          className={`os-window`}
+          className={`os-window${win.zIndex === Math.max(...windows.map(w => w.isOpen && !w.isMinimized ? w.zIndex : 0)) ? ' focused' : ''}`}
           initial={{ opacity: 0, scale: 0.92, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 8 }}
@@ -93,8 +111,8 @@ export default function Window({
           style={{
             left: win.x,
             top: win.y,
-            width: defaultW,
-            height: defaultH,
+            width: win.width,
+            height: win.height,
             zIndex: win.zIndex,
             resize: "both",
             overflow: "hidden",
@@ -102,8 +120,12 @@ export default function Window({
             minHeight: 200,
           }}
           onMouseDown={() => focusWindow(id)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
+          tabIndex={-1}
         >
-          {/* Title Bar */}
+          {/* Title Bar - Traffic Lights Style */}
           <div
             className="os-titlebar"
             onMouseDown={onTitleMouseDown}
@@ -114,17 +136,31 @@ export default function Window({
                 className="os-traffic-light close"
                 onClick={() => closeWindow(id)}
                 title="Close"
+                aria-label="Close window"
               >✕</button>
               <button
                 id={`${id}-minimize`}
                 className="os-traffic-light min"
                 onClick={() => minimizeWindow(id)}
                 title="Minimize"
+                aria-label="Minimize window"
               >−</button>
-              <div className="os-traffic-light max" title="Maximized">+</div>
+              <button
+                id={`${id}-maximize`}
+                className="os-traffic-light max"
+                onClick={(e) => { e.stopPropagation(); maximizeWindow(id); }}
+                title="Maximize"
+                aria-label="Maximize window"
+              />
             </div>
 
-            <div className="os-titlebar-icon">{icon}</div>
+            <div className="os-titlebar-icon" aria-hidden="true">
+              {fluentIcon ? (
+                <OsIcon name={fluentIcon} size="sm" color="var(--os-text)" />
+              ) : (
+                icon
+              )}
+            </div>
             <div className="os-titlebar-title">{title}</div>
             {/* spacer for symmetry */}
             <div style={{ width: 52 }} />

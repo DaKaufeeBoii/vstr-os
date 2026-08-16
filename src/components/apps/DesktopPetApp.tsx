@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useOS } from "@/store/windowStore";
+import { useOSSettings } from "@/store/osSettingsStore";
 
 type PetMood = "walk" | "sleep" | "chase" | "idle";
 
@@ -192,7 +193,7 @@ function PetOverlay() {
 }
 
 export default function DesktopPetApp() {
-  const { unlockMission } = useOS();
+  const { unlockMission } = useOSSettings();
   const [installed, setInstalled] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("vstr_desktop_pet") === "true";

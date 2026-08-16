@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
+import { useOSSettings } from "@/store/osSettingsStore";
 
 const HINTS = [
   "Try typing 'play flappy' in the terminal. Your highscore awaits.",
@@ -13,7 +14,7 @@ const HINTS = [
 ];
 
 export default function HintMasterApp() {
-  const { unlockMission } = useOS();
+  const { unlockMission } = useOSSettings();
   const [guess, setGuess] = useState<"heads" | "tails" | null>(null);
   const [result, setResult] = useState<"heads" | "tails" | null>(null);
   const [message, setMessage] = useState("I am the HintMaster. Beat me in a coin toss, and I shall reveal a secret.");

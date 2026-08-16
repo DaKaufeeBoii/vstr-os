@@ -2,10 +2,10 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useOS } from "@/store/windowStore";
+import { useOSSettings } from "@/store/osSettingsStore";
 
 export default function Win11ToastContainer() {
-  const { notifications, dismissNotification } = useOS();
+  const { notifications, dismissNotification } = useOSSettings();
 
   return (
     <div

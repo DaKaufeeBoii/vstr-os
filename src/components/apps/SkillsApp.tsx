@@ -37,21 +37,6 @@ export default function SkillsApp() {
                   <span style={{ fontSize: 12, color: "var(--os-text)", fontFamily: "var(--font-mono)" }}>
                     {skill.name}
                   </span>
-                  <span style={{ fontSize: 11, color: "var(--os-cyan)", fontFamily: "var(--font-mono)" }}>
-                    {skill.level}%
-                  </span>
-                </div>
-                <div className="skill-bar-track">
-                  <motion.div
-                    className="skill-bar-fill"
-                    initial={{ width: 0 }}
-                    animate={{ width: mounted ? `${skill.level}%` : "0%" }}
-                    transition={{
-                      duration: 0.8,
-                      delay: ci * 0.08 + si * 0.05,
-                      ease: [0.4, 0, 0.2, 1],
-                    }}
-                  />
                 </div>
               </div>
             ))}

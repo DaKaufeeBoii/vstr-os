@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
 import type { WindowId } from "@/types";
+import { OsIcon } from "@/components/icons/OsIcon";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface StartMenuProps {
   onClose: () => void;
@@ -15,6 +17,13 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
   const [search, setSearch] = useState("");
   const [confirmShutdown, setConfirmShutdown] = useState(false);
   const { windows } = useOS();
+
+  // Focus trap for the start menu
+  const focusTrapRef = useFocusTrap({
+    enabled: true,
+    onEscape: () => onClose(),
+    clickOutsideToClose: true,
+  });
 
   // Close on outside click
   useEffect(() => {
@@ -53,9 +62,9 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
     : visibleApps;
 
   const recommendedApps = [
-    { title: "GitHub", subtitle: "View my repositories", img: "/resume_res/icons/logo-GitHub.png", id: "contact" as WindowId },
-    { title: "LinkedIn", subtitle: "Connect professionally", img: "/resume_res/icons/logo-Lin.jpg", id: "contact" as WindowId },
-    { title: "Gmail", subtitle: "Send me an email", img: "/resume_res/icons/logo-Gmail.svg", id: "contact" as WindowId },
+    { title: "GitHub", subtitle: "View my repositories", img: "/assets/resume/icons/logo-GitHub.png", id: "contact" as WindowId },
+    { title: "LinkedIn", subtitle: "Connect professionally", img: "/assets/resume/icons/logo-Lin.jpg", id: "contact" as WindowId },
+    { title: "Gmail", subtitle: "Send me an email", img: "/assets/resume/icons/logo-Gmail.svg", id: "contact" as WindowId },
     { title: "Terminal", subtitle: "Type 'help' to explore", img: null, id: "terminal" as WindowId },
   ];
 
@@ -70,8 +79,14 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
       pointerEvents: "none",
     }}>
       <motion.div
-        ref={ref}
+        ref={(el) => {
+          ref.current = el;
+          if (focusTrapRef.current) focusTrapRef.current = el;
+        }}
         id="start-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Start Menu"
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -201,6 +216,9 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               placeholder="Search apps…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search applications"
+              aria-expanded="true"
+              aria-controls="start-menu-results"
               style={{
                 flex: 1,
                 background: "transparent",
@@ -223,16 +241,23 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               </span>
             </div>
 
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(84px, 1fr))",
-              gap: "16px 4px",
-              justifyItems: "center",
-            }}>
+            <div 
+              id="start-menu-results"
+              role="listbox"
+              aria-label="Applications"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(84px, 1fr))",
+                gap: "16px 4px",
+                justifyItems: "center",
+              }}>
               {filteredApps.map((cfg) => (
                 <div
                   key={cfg.id}
+                  role="option"
+                  tabIndex={0}
                   onClick={() => { onOpen(cfg.id); onClose(); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(cfg.id); onClose(); } }}
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -259,10 +284,13 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 26,
                     filter: "drop-shadow(0 2px 6px rgba(245,158,11,0.2))",
                   }}>
-                    {cfg.icon}
+                    {cfg.fluentIcon ? (
+                      <OsIcon name={cfg.fluentIcon} size="md" />
+                    ) : (
+                      <span style={{ fontSize: 26 }}>{cfg.icon}</span>
+                    )}
                   </div>
                   <span style={{
                     fontSize: 11,
@@ -290,7 +318,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                 </span>
               </div>
 
-              <div style={{
+              <div role="listbox" aria-label="Quick Links" style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
                 gap: 12,
@@ -298,7 +326,10 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                 {recommendedApps.map((app, idx) => (
                   <div
                     key={idx}
+                    role="option"
+                    tabIndex={0}
                     onClick={() => { onOpen(app.id); onClose(); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(app.id); onClose(); } }}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -347,7 +378,10 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
           borderBottomRightRadius: 16,
         }}>
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => { onOpen("about"); onClose(); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen("about"); onClose(); } }}
             style={{
               display: "flex",
               alignItems: "center",
@@ -359,6 +393,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
             }}
             onMouseEnter={(e) => e.currentTarget.style.background = "rgba(245,158,11,0.08)"}
             onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+            aria-label="Open About"
           >
             <div style={{
               width: 32,
@@ -368,13 +403,14 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               border: "1px solid rgba(245,158,11,0.2)",
               background: "#1a1f2e",
             }}>
-              <img src="/pix_image.png" alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" }} />
+              <img src="/assets/images/pix_image.png" alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" }} />
             </div>
             <span style={{ fontSize: 12, fontWeight: 500, color: "var(--os-text)" }}>Sai Tarun Reddy Velagala</span>
           </div>
 
           <button
             title="Shut Down"
+            aria-label="Shut Down"
             onClick={() => setConfirmShutdown(true)}
             style={{
               width: 36,

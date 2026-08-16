@@ -8,7 +8,10 @@ import BootScreen from "./BootScreen";
 import OnboardingTip from "./OnboardingTip";
 import Win11ToastContainer from "./Win11ToastContainer";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
-import type { WindowConfig } from "@/types";
+import { useOSSettings, type VideoWallpaperId } from "@/store/osSettingsStore";
+import type { WindowConfig, WindowId } from "@/types";
+import { useGlobalHotkeys } from "@/hooks/useGlobalHotkeys";
+import { Announcer, focusManager } from "@/hooks/useFocusTrap";
 
 import AboutApp        from "@/components/apps/AboutApp";
 import ProjectsApp     from "@/components/apps/ProjectsApp";
@@ -25,6 +28,13 @@ import PhotoViewerApp     from "@/components/apps/PhotoViewerApp";
 import DiskCleanupApp     from "../apps/DiskCleanupApp";
 import DesktopPetApp      from "../apps/DesktopPetApp";
 import PasswordCrackerApp from "../apps/PasswordCrackerApp";
+
+// Context Menu
+import { ContextMenu }          from "./ContextMenu/ContextMenu";
+import { useContextMenu }       from "./ContextMenu/hooks/useContextMenu";
+import { getDesktopMenuGroups } from "./ContextMenu/configs/desktopMenu";
+import { getIconMenuGroups }    from "./ContextMenu/configs/iconMenu";
+import VideoWallpaper          from "./VideoWallpaper";
 
 const APP_CONTENT: Record<string, React.ReactNode> = {
   about:            <AboutApp />,
@@ -44,8 +54,95 @@ const APP_CONTENT: Record<string, React.ReactNode> = {
 };
 
 export default function Desktop() {
-  const { theme, wallpaper, unlockMission } = useOS();
+  const { openWindow, closeWindow, minimizeWindow, maximizeWindow, focusWindow, restoreWindow, windows, toggleExposé, openExposé, closeExposé, toggleCommandPalette, openCommandPalette, closeCommandPalette, toggleTerminalDrawer, openTerminalDrawer, closeTerminalDrawer, isExposéOpen, isCommandPaletteOpen, isTerminalDrawerOpen } = useOS();
+  const { wallpaper, videoWallpaper, performanceMode, unlockMission } = useOSSettings();
   const [booting, setBooting] = React.useState(true);
+
+  // Context menu state
+  const { isOpen, position, contextData, openMenu, closeMenu } = useContextMenu();
+
+  // Global hotkeys
+  useGlobalHotkeys([
+    {
+      keys: ["Meta"], // Win key
+      description: "Open Start Menu",
+      handler: () => {
+        // Start menu is handled by Taskbar
+        const startBtn = document.getElementById("taskbar-start-btn") as HTMLButtonElement;
+        startBtn?.click();
+      },
+      allowInInput: false,
+    },
+    {
+      keys: ["Meta", "Tab"], // Win+Tab
+      description: "Open Exposé / Window Overview",
+      handler: () => toggleExposé(),
+      allowInInput: false,
+    },
+    {
+      keys: ["Alt", "Tab"], // Alt+Tab
+      description: "Switch windows",
+      handler: (e) => {
+        e.preventDefault();
+        const openWindows = windows.filter(w => w.isOpen && !w.isMinimized);
+        if (openWindows.length < 2) return;
+        
+        // Find current focused window (highest zIndex)
+        const focused = openWindows.reduce((max, w) => w.zIndex > max.zIndex ? w : max);
+        const currentIndex = openWindows.findIndex(w => w.id === focused.id);
+        const nextIndex = e.shiftKey 
+          ? (currentIndex - 1 + openWindows.length) % openWindows.length
+          : (currentIndex + 1) % openWindows.length;
+        
+        focusWindow(openWindows[nextIndex].id);
+      },
+      allowInInput: false,
+    },
+    {
+      keys: ["Meta", "KeyS"], // Win+S
+      description: "Open Command Palette / Search",
+      handler: () => toggleCommandPalette(),
+      allowInInput: false,
+    },
+    {
+      keys: ["Meta", "`"], // Win+`
+      description: "Toggle Terminal Drawer",
+      handler: () => toggleTerminalDrawer(),
+      allowInInput: false,
+    },
+    {
+      keys: ["Escape"],
+      description: "Close modals / Cancel",
+      handler: () => {
+        if (isExposéOpen) closeExposé();
+        if (isCommandPaletteOpen) closeCommandPalette();
+        if (isTerminalDrawerOpen) closeTerminalDrawer();
+      },
+      allowInInput: true,
+    },
+    {
+      keys: ["ArrowLeft", "Meta"], // Win+Left
+      description: "Snap window left",
+      handler: () => {
+        const focused = windows.find(w => w.isOpen && !w.isMinimized && w.zIndex === Math.max(...windows.filter(w => w.isOpen && !w.isMinimized).map(w => w.zIndex)));
+        if (focused) {
+          // Snap logic would be added here
+        }
+      },
+      allowInInput: false,
+    },
+    {
+      keys: ["ArrowRight", "Meta"], // Win+Right
+      description: "Snap window right",
+      handler: () => {
+        const focused = windows.find(w => w.isOpen && !w.isMinimized && w.zIndex === Math.max(...windows.filter(w => w.isOpen && !w.isMinimized).map(w => w.zIndex)));
+        if (focused) {
+          // Snap logic would be added here
+        }
+      },
+      allowInInput: false,
+    },
+  ]);
 
   // Trigger "First Boot" mission once boot finishes
   React.useEffect(() => {
@@ -65,10 +162,33 @@ export default function Desktop() {
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "settings"),
   ].filter(Boolean) as typeof WINDOW_CONFIGS;
 
+  // Build context menu groups based on what was right-clicked
+  const menuGroups = React.useMemo(() => {
+    if (contextData?.type === "icon") {
+      return getIconMenuGroups({
+        id: contextData.id as WindowId,
+        label: contextData.label,
+        fluentIcon: contextData.fluentIcon,
+        onOpen: (id) => openWindow(id),
+        onMinimize: (id) => minimizeWindow(id),
+        onMaximize: (id) => maximizeWindow(id),
+        onRestore: (id) => restoreWindow(id),
+        onCloseWindow: (id) => closeWindow(id),
+        onPin: (id) => {}, // TODO: implement pin to taskbar
+      });
+    }
+    // Default: desktop background
+    return getDesktopMenuGroups({
+      refresh: () => window.location.reload(),
+      openTerminal: () => openWindow("terminal"),
+      openSettings: () => openWindow("settings"),
+    });
+
+  }, [contextData, openWindow, minimizeWindow, maximizeWindow, restoreWindow, closeWindow]);
+
   return (
     <div
       id="os-desktop"
-      data-theme={theme}
       style={{
         position: "relative",
         width: "100%",
@@ -76,6 +196,11 @@ export default function Desktop() {
         overflow: "hidden",
         background: "var(--os-bg)",
         color: "var(--os-text)",
+      }}
+      onContextMenu={(e) => {
+        // Only trigger if clicking the desktop background itself
+        if ((e.target as HTMLElement).closest("[data-context]")) return;
+        openMenu(e, { type: "desktop" });
       }}
     >
       {booting && <BootScreen onComplete={() => setBooting(false)} />}
@@ -85,34 +210,17 @@ export default function Desktop() {
           <div
             className="wallpaper"
             style={{
-              backgroundImage: wallpaper ? `url(${wallpaper})` : undefined,
+              backgroundImage: (wallpaper && videoWallpaper === "none") ? `url(${wallpaper})` : undefined,
+              opacity: videoWallpaper !== "none" ? 0 : 1,
+              transition: "opacity 0.6s",
             }}
           />
-
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              textAlign: "center",
-              pointerEvents: "none",
-              zIndex: 1,
-              opacity: 0.12,
-            }}
-          >
-            <p
-              className="mono"
-              style={{ fontSize: 13, color: "var(--os-amber)", letterSpacing: "0.18em" }}
-            >
-              VSTR-OS v2.0.0
-            </p>
-            <p
-              style={{ fontSize: 11, color: "var(--os-text-muted)", marginTop: 6, letterSpacing: "0.08em" }}
-            >
-              double-click to open · explore to discover
-            </p>
-          </div>
+          {/* Video Live Wallpaper */}
+          <VideoWallpaper
+            videoSrc={videoWallpaper}
+            opacity={0.92}
+            paused={performanceMode}
+          />
 
           <div
             id="desktop-icons"
@@ -132,7 +240,16 @@ export default function Desktop() {
                 key={cfg.id}
                 id={cfg.id}
                 icon={cfg.icon}
+                fluentIcon={cfg.fluentIcon}
                 label={cfg.title}
+                onContextMenu={(e) =>
+                  openMenu(e, {
+                    type: "icon",
+                    id: cfg.id,
+                    label: cfg.title,
+                    fluentIcon: cfg.fluentIcon,
+                  })
+                }
               />
             ))}
           </div>
@@ -143,6 +260,7 @@ export default function Desktop() {
               id={cfg.id}
               title={cfg.title}
               icon={cfg.icon}
+              fluentIcon={cfg.fluentIcon}
               defaultW={cfg.defaultW}
               defaultH={cfg.defaultH}
               noPadding={cfg.id === "terminal"}
@@ -154,6 +272,15 @@ export default function Desktop() {
           <Taskbar />
           <OnboardingTip />
           <Win11ToastContainer />
+          <Announcer />
+
+          {/* Global Context Menu */}
+          <ContextMenu
+            isOpen={isOpen}
+            position={position}
+            groups={menuGroups}
+            onClose={closeMenu}
+          />
         </>
       )}
     </div>

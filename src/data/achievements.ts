@@ -6,7 +6,7 @@ export const achievements: Achievement[] = [
     subtitle: "First Prize Winner",
     description:
       "Won First Prize at an inter-college technical fest for innovation and technical execution. Recognized among top student developers for rapid prototyping and problem-solving.",
-    icon: "🥇",
+    icon: "trophy",
     year: "2024",
   },
   {
@@ -14,7 +14,7 @@ export const achievements: Achievement[] = [
     subtitle: "CSE-AIML Department",
     description:
       "Recognized for outstanding academic performance, productivity, and leadership within the CSE-AIML department. Awarded in 2025 for consistent excellence throughout the academic year.",
-    icon: "🏆",
+    icon: "trophy",
     year: "2025",
   },
 ];

@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     description: "Interactive OS-themed portfolio — explore apps, terminal, and hidden games.",
   },
   icons: {
-    icon: "/window.svg",
+    icon: "/favicon.ico",
   },
 };
 

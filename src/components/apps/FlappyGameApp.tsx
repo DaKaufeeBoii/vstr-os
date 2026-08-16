@@ -2,9 +2,10 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useOS } from "@/store/windowStore";
+import { useOSSettings } from "@/store/osSettingsStore";
 
 export default function FlappyGameApp() {
-  const { unlockMission } = useOS();
+  const { unlockMission } = useOSSettings();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [playing, setPlaying] = useState(false);
   const [gameOver, setGameOver] = useState(false);

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
+import { useOSSettings } from "@/store/osSettingsStore";
 
 type Phase = "connect" | "crack" | "granted" | "locked";
 
@@ -26,7 +27,8 @@ const FIELD_H = 300;
 const BASE_SPEED = 0.4;
 
 export default function PasswordCrackerApp() {
-  const { openWindow, unlockMission } = useOS();
+  const { openWindow } = useOS();
+  const { unlockMission } = useOSSettings();
   const [phase, setPhase] = useState<Phase>("connect");
   const [connectLog, setConnectLog] = useState<string[]>([]);
   const [access, setAccess] = useState(0);
