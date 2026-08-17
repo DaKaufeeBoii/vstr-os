@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useRef, useCallback, useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useRef, useCallback, useEffect } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useDragControls,
+  useMotionValue,
+} from "framer-motion";
 import { useOS } from "@/store/windowStore";
+import { useSound } from "@/utils/useSound";
 import type { WindowId } from "@/types";
 import { OsIcon } from "@/components/icons/OsIcon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -30,11 +36,27 @@ export default function Window({
   noPadding = false,
   children,
 }: WindowProps) {
-  const { getWindow, closeWindow, minimizeWindow, focusWindow, moveWindow, maximizeWindow, resizeWindow, windows } = useOS();
+  const {
+    getWindow,
+    closeWindow,
+    minimizeWindow,
+    focusWindow,
+    moveWindow,
+    maximizeWindow,
+    resizeWindow,
+    windows,
+    stack,
+  } = useOS();
+  const { playClick } = useSound();
   const win = getWindow(id);
 
-  const dragOrigin = useRef<{ mx: number; my: number; wx: number; wy: number } | null>(null);
+  const dragControls = useDragControls();
   const windowRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+
+  // Position is driven entirely by transform (framer-motion motion values)
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
   // Focus trap for the window
   const focusTrapRef = useFocusTrap({
@@ -43,54 +65,75 @@ export default function Window({
     initialFocusRef: windowRef,
   });
 
-  const isFocused = win?.zIndex === Math.max(...windows.filter(w => w.isOpen && !w.isMinimized).map(w => w.zIndex), 0);
+  // A window is focused if it is the topmost entry in the z-index stack
+  const isFocused = stack[stack.length - 1] === id;
 
-  /* ── Drag via titlebar ─────────────────────────────────────────── */
-  const onTitleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  /* ── Sync store -> motion values when changed externally ────────
+     (snap, maximize, center-on-open). Skip while dragging. */
+  useEffect(() => {
+    if (!win || isDragging.current) return;
+    x.set(win.x);
+    y.set(win.y);
+  }, [win?.x, win?.y, win?.isOpen, win?.isMinimized, x, y]);
+
+  /* ── Drag via titlebar (framer-motion drag controls) ──────────── */
+  const onTitlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
       if ((e.target as HTMLElement).closest(".os-traffic-light")) return;
-      e.preventDefault();
       focusWindow(id);
-      dragOrigin.current = {
-        mx: e.clientX,
-        my: e.clientY,
-        wx: win?.x ?? 80,
-        wy: win?.y ?? 80,
-      };
-
-      const onMove = (ev: MouseEvent) => {
-        if (!dragOrigin.current) return;
-        const dx = ev.clientX - dragOrigin.current.mx;
-        const dy = ev.clientY - dragOrigin.current.my;
-        const newX = dragOrigin.current.wx + dx;
-        const newY = dragOrigin.current.wy + dy;
-        // Clamp to viewport (leave taskbar space at bottom)
-        const maxX = window.innerWidth  - (windowRef.current?.offsetWidth  ?? defaultW);
-        const maxY = window.innerHeight - (windowRef.current?.offsetHeight ?? defaultH) - 48;
-        moveWindow(id, Math.max(0, Math.min(newX, maxX)), Math.max(0, Math.min(newY, maxY)));
-      };
-
-      const onUp = () => {
-        dragOrigin.current = null;
-        window.removeEventListener("mousemove", onMove);
-        window.removeEventListener("mouseup", onUp);
-      };
-
-      window.addEventListener("mousemove", onMove);
-      window.addEventListener("mouseup", onUp);
+      // Hand off pointer to framer-motion drag controls
+      (dragControls as any).start(e.nativeEvent);
     },
-    [id, win?.x, win?.y, focusWindow, moveWindow, defaultW, defaultH]
+    [id, focusWindow, dragControls]
+  );
+
+  const onDragEnd = useCallback(
+    (_: any, info: any) => {
+      isDragging.current = false;
+      if (!win) return;
+      // Calculate new position based on the delta from start
+      const newX = win.x + info.offset.x;
+      const newY = win.y + info.offset.y;
+      
+      // Clamp to viewport (leave taskbar space at bottom)
+      const w = windowRef.current?.offsetWidth ?? defaultW;
+      const h = windowRef.current?.offsetHeight ?? defaultH;
+      const maxX = Math.max(0, window.innerWidth - w);
+      const maxY = Math.max(0, window.innerHeight - h - 48);
+      
+      const finalX = Math.max(0, Math.min(newX, maxX));
+      const finalY = Math.max(0, Math.min(newY, maxY));
+      
+      moveWindow(id, finalX, finalY);
+    },
+    [id, win, moveWindow, defaultW, defaultH]
   );
 
   // Center on first open
   useEffect(() => {
     if (win?.isOpen && win.x === 0 && win.y === 0) {
-      const x = Math.max(40, (window.innerWidth  - defaultW) / 2);
-      const y = Math.max(40, (window.innerHeight - defaultH - 48) / 2);
-      moveWindow(id, x, y);
+      const cx = Math.max(40, (window.innerWidth - defaultW) / 2);
+      const cy = Math.max(40, (window.innerHeight - defaultH - 48) / 2);
+      moveWindow(id, cx, cy);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [win?.isOpen]);
+
+  // Handle native resize
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === windowRef.current) {
+          const { width, height } = entry.contentRect;
+          if (width !== win?.width || height !== win?.height) {
+            resizeWindow(id, width, height);
+          }
+        }
+      }
+    });
+    if (windowRef.current) observer.observe(windowRef.current);
+    return () => observer.disconnect();
+  }, [id, win?.width, win?.height, resizeWindow]);
 
   if (!win || !win.isOpen) return null;
 
@@ -103,52 +146,70 @@ export default function Window({
             if (focusTrapRef.current) focusTrapRef.current = el;
           }}
           key={id}
-          className={`os-window${win.zIndex === Math.max(...windows.map(w => w.isOpen && !w.isMinimized ? w.zIndex : 0)) ? ' focused' : ''}`}
-          initial={{ opacity: 0, scale: 0.92, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 8 }}
+          className={`os-window${isFocused ? " focused" : ""}`}
+          drag
+          dragControls={dragControls}
+          dragListener={false}
+          dragMomentum={false}
+          dragElastic={0}
+          onDragStart={() => {
+            isDragging.current = true;
+          }}
+          onDragEnd={onDragEnd}
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
           transition={{ type: "spring", stiffness: 340, damping: 28 }}
           style={{
-            left: win.x,
-            top: win.y,
+            x,
+            y,
             width: win.width,
             height: win.height,
             zIndex: win.zIndex,
+            position: "absolute",
+            left: 0,
+            top: 0,
             resize: "both",
-            overflow: "hidden",
+            overflow: "auto",
             minWidth: 300,
             minHeight: 200,
           }}
           onMouseDown={() => focusWindow(id)}
+          onPointerDown={() => focusWindow(id)}
           role="dialog"
           aria-modal="true"
           aria-label={title}
           tabIndex={-1}
         >
           {/* Title Bar - Traffic Lights Style */}
-          <div
-            className="os-titlebar"
-            onMouseDown={onTitleMouseDown}
-          >
+          <div className="os-titlebar" onPointerDown={onTitlePointerDown}>
             <div className="os-traffic-lights">
               <button
                 id={`${id}-close`}
                 className="os-traffic-light close"
-                onClick={() => closeWindow(id)}
+                onClick={() => { playClick(); closeWindow(id); }}
                 title="Close"
                 aria-label="Close window"
-              >✕</button>
+              >
+                ✕
+              </button>
               <button
                 id={`${id}-minimize`}
                 className="os-traffic-light min"
-                onClick={() => minimizeWindow(id)}
+                onClick={() => { playClick(); minimizeWindow(id); }}
                 title="Minimize"
                 aria-label="Minimize window"
-              >−</button>
+              >
+                −
+              </button>
               <button
                 id={`${id}-maximize`}
                 className="os-traffic-light max"
-                onClick={(e) => { e.stopPropagation(); maximizeWindow(id); }}
+                onClick={(e) => {
+                  playClick();
+                  e.stopPropagation();
+                  maximizeWindow(id);
+                }}
                 title="Maximize"
                 aria-label="Maximize window"
               />
@@ -169,7 +230,11 @@ export default function Window({
           {/* Body */}
           <div
             className="os-window-body"
-            style={noPadding ? { padding: 0, display: "flex", flexDirection: "column" } : undefined}
+            style={
+              noPadding
+                ? { padding: 0, display: "flex", flexDirection: "column" }
+                : undefined
+            }
           >
             {children}
           </div>

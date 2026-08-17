@@ -38,6 +38,8 @@ Available commands:
   open disk_cleanup — disk cleanup utility
   start desktop_pet — desktop pet companion
   crack password    — PwnTool 3.0 hacking sim
+  blue-screen       — trigger BSOD easter egg
+  bsod              — alias for blue-screen
   clear / cls       — clear the screen
   help              — show this help
 `.trim();
@@ -440,6 +442,12 @@ export default function TerminalApp() {
       } else if (cmd === "crack password" || cmd === "pwntool") {
         push({ type: "success", text: "Initializing PwnTool 3.0... connecting to target..." });
         openWindow("password_cracker");
+
+      // ── BSOD Easter Egg ───────────────────────────────────────────
+      } else if (cmd === "blue-screen" || cmd === "bsod") {
+        push({ type: "error", text: "*** STOP: 0x0000007F (UNEXPECTED_KERNEL_MODE_TRAP)" });
+        push({ type: "error", text: "*** Initing BSOD sequence... 💀" });
+        window.dispatchEvent(new Event("trigger-bsod"));
 
       // ── Grep / Findstr ────────────────────────────────────────────
       } else if (cmd.startsWith("grep ") || cmd.startsWith("findstr ") || cmd.startsWith("find ")) {

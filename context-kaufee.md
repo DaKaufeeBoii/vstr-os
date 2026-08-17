@@ -29,67 +29,62 @@ VSTR-OS is an interactive, Operating System-themed portfolio website for **Sai T
   - `osSettingsStore.tsx` — OS-wide personalization (theme, wallpaper, video wallpaper, performance mode, notifications, missions).
 - `src/data/` — Static data assets, portfolio projects, Easter egg mission list.
 - `src/types/` — Shared TypeScript interfaces.
-- `src/utils/` — Utility hooks (`useSound.ts`).
+- `src/utils/` — Utility hooks (`useSound.ts`)
+- `src/hooks/` — Reusable hooks (`useGlobalHotkeys.ts`, `useFocusTrap.tsx`)
 
 ---
 
-## 3. Active Applications
-- **AboutApp**: Standard profile details.
-- **ProjectsApp**: Portfolio projects display.
-- **SkillsApp**: Technical skill inventory.
-- **ExperienceApp**: Work experience logs.
-- **AchievementsApp**: Accomplishments list.
-- **ContactApp**: Email and social link panel.
-- **SettingsApp**: Interface personalization (theme, static/video wallpapers, performance mode).
-- **TerminalApp**: Interactive shell with 30+ commands (`help`, `whoami`, `systeminfo`, `ipconfig`, `tasklist`, `taskkill`, `ping`, `ver`, `wmic`, `get-process`, `tree`, `mkdir`, `cd`, `grep`/`findstr`, `matrix`, `color`, `neofetch`, app launchers).
-- **Easter Eggs / Games**:
-  - `FlappyGameApp` (Flappy Bird clone)
-  - `HintMasterApp` (Decision solver)
-  - `DiskCleanupApp` (System cleaner simulation)
-  - `DesktopPetApp` (Interactive companion pet)
-  - `PasswordCrackerApp` (Hacking typing challenge)
-  - `PhotoViewerApp` (Image viewer)
+## 3. Completed Features
 
----
-
-## 4. Implemented Features (Windows 11 Realism Upgrade)
-
-### A. Windows 11 Fluent Icon System ��
-- Replaced emojis with vector SVGs mapping to Microsoft Fluent design guidelines.
-- **Files**: `src/components/icons/FluentIcon.tsx`, `OsIcon.tsx`, categories (`FileSystem`, `Application`, `Taskbar`, `Control`).
+### A. Fluent Design Icon System ✅
+- SVG icons from `@fluentui/svg-icons` wrapped in `OsIcon.tsx`.
 - Supports 3 sizes (16px, 20px, 28px), custom colors, and badge overlays (shortcut arrow, lock, shared).
 
-### B. Global Right-Click Context Menu System ��
+### B. Global Right-Click Context Menu System ✅
 - Prevents default browser context menu on desktop, icons, taskbar.
 - Win11-styled menus with keyboard navigation (ArrowUp/Down, Enter, Escape), viewport flip logic, Framer Motion entrance animation.
 - **Configs**: Desktop (View, Sort, Refresh, New, Display settings, Personalize, Open in Terminal), Icon (Open, Pin, Delete, Properties), Taskbar (Task Manager, Show Desktop).
 
-### C. Live Video Wallpaper System �� (replaces WebGL shaders)
+### C. Live Video Wallpaper System ✅ (replaces WebGL shaders)
 - Full-screen HTML5 video wallpapers (MP4/WebM) with loop, mute, playsInline.
 - 4 built-in videos: Matrix, Aurora, Synthwave, Starfield (in `public/wallpapers/`).
 - Custom video upload support (max 50MB).
 - Performance mode pauses video when tab is backgrounded or manually toggled.
 - **Files**: `VideoWallpaper.tsx`, updated `SettingsApp.tsx`, `osSettingsStore.tsx`, `Desktop.tsx`.
 
-### D. Expanded Windows Terminal & PowerShell Commands ��
+### D. Expanded Windows Terminal & PowerShell Commands ✅
 - 30+ commands including system diagnostics, directory navigation, process management, network tools, and app launchers.
 - Command history with ArrowUp/Down, Tab completion, ghost text autocomplete.
-- Easter egg commands: `matrix`, `color`, `play flappy`, `ask hintmaster`, `crack password`, etc.
+- Easter egg commands: `matrix`, `color`, `play flappy`, `ask hintmaster`, `crack password`, `blue-screen`/`bsod`, etc.
 
-### E. Mica/Acrylic Styling & Desktop Polish ��
+### E. Mica/Acrylic Styling & Desktop Polish ✅
 - Context menus use `backdrop-filter: blur(24px) saturate(160%)` with solid fallback.
 - Taskbar, Start Menu, and context menus feature Win11 acrylic/mica aesthetics.
 - Smooth Framer Motion animations throughout.
 
-### F. System Tray & Quick Settings (Phase 5) �� **COMPLETED**
+### F. System Tray & Quick Settings ✅ **COMPLETED**
 - **QuickSettings panel**: Volume slider, brightness slider, Wi-Fi toggle, Battery status (with charging simulation), Focus assist, Accessibility, Bluetooth, Rotation lock, Mobile hotspot, Nearby share, Cast, Night light.
 - **Taskbar integration**: Click system tray area (Wi-Fi/Volume/Battery cluster) → opens QuickSettings panel anchored to bottom-right.
 - **Keyboard shortcut**: `Win + A` opens QuickSettings.
 - **Icons ready**: All required icons exported in `icons/index.ts` including `BluetoothIcon`, `NightLightIcon`, `RotationLockIcon`, `HotspotIcon`, `NearbyShareIcon`, `CastIcon`, `AccessibilityIcon`.
+- **Win11-style toast notifications** in bottom-right (`Win11ToastContainer.tsx`).
+- **Notification Center** slide-in panel (`NotificationCenter.tsx`) with dismiss/clear-all actions.
+- **System sounds** (`useSound.ts`) integrated into Taskbar buttons, Window traffic lights, and QuickSettings sliders.
 
-### G. Window Snap Assist �� **COMPLETED**
+### G. Window Snap Assist ✅ **COMPLETED**
 - Hover maximize button → show 6-zone layout grid (Win11 Snap Assist: left, right, top-left, top-right, bottom-left, bottom-right) → click to snap window to zone.
 - `Window.tsx` has `resize: "both"` and `SnapOverlay` component.
+
+### H. PWA Support ✅ **COMPLETED**
+- **Web App Manifest** (`public/manifest.json`) with icons, shortcuts (About, Projects, Terminal), theme color.
+- **Service Worker** (`public/sw.js`) with cache-first strategy for static assets, network-first for videos.
+- **Installable** on desktop/mobile with offline asset caching.
+
+### I. BSOD Easter Egg ✅ **COMPLETED**
+- **Blue Screen of Death** component (`BsodScreen.tsx`) with animated progress bar, random stop codes, fake QR code.
+- Triggered via `blue-screen` or `bsod` terminal command.
+- Auto-dismisses on any key/click or after 8-10 seconds.
+- HintMaster updated with clue about the BSOD command.
 
 ---
 
@@ -108,7 +103,7 @@ VSTR-OS is an interactive, Operating System-themed portfolio website for **Sai T
 ---
 
 ## 6. Build Status
-- �� TypeScript compilation successful
-- �� Next.js production build successful
-- �� All TypeScript types valid
-- ������ ESLint not installed (optional dev dependency)
+- ✅ TypeScript compilation successful
+- ✅ Next.js production build successful
+- ✅ All TypeScript types valid
+- ⚠️ ESLint not installed (optional dev dependency)

@@ -43,6 +43,7 @@ interface WindowState {
 interface OSState {
   windows: WindowState[];
   topZ: number;
+  stack: WindowId[]; // Z-index stack - last element is topmost
   // UI state
   isExposéOpen: boolean;
   isCommandPaletteOpen: boolean;
@@ -91,6 +92,7 @@ function buildInitial(): OSState {
       snapZone: null,
     })),
     topZ: 10,
+    stack: [],
     isExposéOpen: false,
     isCommandPaletteOpen: false,
     isTerminalDrawerOpen: false,
@@ -98,6 +100,10 @@ function buildInitial(): OSState {
 }
 
 /* ── Reducer ────────────────────────────────────────────────────── */
+function bringToFront(stack: WindowId[], id: WindowId): WindowId[] {
+  return [...stack.filter((w) => w !== id), id];
+}
+
 function reducer(state: OSState, action: OSAction): OSState {
   switch (action.type) {
     case "OPEN": {
@@ -107,6 +113,7 @@ function reducer(state: OSState, action: OSAction): OSState {
       return {
         ...state,
         topZ: newZ,
+        stack: bringToFront(state.stack, action.id),
         windows: state.windows.map((w) =>
           w.id === action.id
             ? { ...w, isOpen: true, isMinimized: false, zIndex: newZ, x: offset, y: offset, hasBeenOpened: true }
@@ -117,6 +124,7 @@ function reducer(state: OSState, action: OSAction): OSState {
     case "CLOSE":
       return {
         ...state,
+        stack: state.stack.filter((id) => id !== action.id),
         windows: state.windows.map((w) =>
           w.id === action.id ? { ...w, isOpen: false, isMinimized: false } : w
         ),
@@ -137,6 +145,7 @@ function reducer(state: OSState, action: OSAction): OSState {
       return {
         ...state,
         topZ: newZ,
+        stack: bringToFront(state.stack, action.id),
         windows: state.windows.map((w) =>
           w.id === action.id
             ? { ...w, isMinimized: false, x: 0, y: 0, width: vw, height: vh, zIndex: newZ, snapZone: "maximize" }
@@ -144,21 +153,23 @@ function reducer(state: OSState, action: OSAction): OSState {
         ),
       };
     }
-    case "RESTORE": {
+case "RESTORE": {
       const newZ = state.topZ + 1;
       return {
         ...state,
         topZ: newZ,
+        stack: bringToFront(state.stack, action.id),
         windows: state.windows.map((w) =>
           w.id === action.id ? { ...w, isMinimized: false, zIndex: newZ } : w
         ),
       };
     }
-    case "FOCUS": {
+case "FOCUS": {
       const newZ = state.topZ + 1;
       return {
         ...state,
         topZ: newZ,
+        stack: bringToFront(state.stack, action.id),
         windows: state.windows.map((w) =>
           w.id === action.id ? { ...w, zIndex: newZ } : w
         ),
@@ -192,6 +203,7 @@ function reducer(state: OSState, action: OSAction): OSState {
       return {
         ...state,
         topZ: newZ,
+        stack: bringToFront(state.stack, id),
         windows: state.windows.map((w) =>
           w.id === id ? { ...w, x, y, width, height, zIndex: newZ, snapZone: zone } : w
         ),
@@ -230,6 +242,7 @@ function reducer(state: OSState, action: OSAction): OSState {
 /* ── Context ────────────────────────────────────────────────────── */
 interface OSContextValue {
   windows: WindowState[];
+  stack: WindowId[];
   openWindow:    (id: WindowId) => void;
   closeWindow:   (id: WindowId) => void;
   minimizeWindow:(id: WindowId) => void;
@@ -296,6 +309,7 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
   return (
     <OSContext.Provider value={{
       windows: state.windows,
+      stack: state.stack,
       openWindow, closeWindow, minimizeWindow, maximizeWindow, restoreWindow, focusWindow, moveWindow, snapWindow, resizeWindow, getWindow,
       isExposéOpen: state.isExposéOpen,
       isCommandPaletteOpen: state.isCommandPaletteOpen,

@@ -87,6 +87,28 @@ export default function VideoWallpaper({
     };
   }, []);
 
+  // Periodic loop integrity check - some browsers may stop looping under memory pressure
+  useEffect(() => {
+    if (hasError || paused) return;
+    
+    const interval = setInterval(() => {
+      const video = videoRef.current;
+      if (video && !video.paused && !video.ended) {
+        // Video is playing normally
+        return;
+      }
+      // Video stopped unexpectedly - attempt to restart
+      if (video && !paused && !hasError && video.readyState >= 2) {
+        video.currentTime = 0;
+        video.play().catch(() => {
+          setIsPlaying(false);
+        });
+      }
+    }, 5000); // Check every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, [paused, hasError]);
+
   if (!resolvedSrc || hasError) return null;
 
   return (
@@ -121,6 +143,16 @@ export default function VideoWallpaper({
       }}
       onPause={() => setIsPlaying(false)}
       onPlay={() => setIsPlaying(true)}
+      onEnded={() => {
+        // Force loop restart - some browsers may stop looping under memory pressure
+        const video = videoRef.current;
+        if (video && !paused && !hasError) {
+          video.currentTime = 0;
+          video.play().catch(() => {
+            setIsPlaying(false);
+          });
+        }
+      }}
       aria-hidden="true"
     />
   );

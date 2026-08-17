@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { VstrIcon } from "@/components/icons";
+
 interface BootScreenProps {
   onComplete: () => void;
 }
@@ -93,26 +95,49 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
             />
           </div>
           <div style={{
-            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
             paddingBottom: 60,
-            fontFamily: "'JetBrains Mono', monospace",
           }}>
+            {/* Animated Brand Logo */}
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0.8 }}
+              animate={{ scale: [0.96, 1.02, 0.96], opacity: [0.85, 1, 0.85] }}
+              transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 18,
+                marginBottom: 32,
+                filter: "drop-shadow(0 0 30px rgba(245,158,11,0.45))",
+                userSelect: "none",
+              }}
+            >
+              <VstrIcon size={64} color="#f59e0b" />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  lineHeight: 1.05,
+                  fontFamily: "'Segoe UI Variable', system-ui, -apple-system, sans-serif",
+                  fontWeight: 800,
+                  color: "#f59e0b",
+                  textAlign: "left",
+                }}
+              >
+                <span style={{ fontSize: 38, letterSpacing: "-0.03em" }}>vstr</span>
+                <span style={{ fontSize: 26, letterSpacing: "-0.01em", opacity: 0.9 }}>os</span>
+              </div>
+            </motion.div>
+
+            {/* Loading Bar */}
             <div style={{
-              fontSize: 48,
-              fontWeight: 700,
-              color: "#f59e0b",
-              letterSpacing: "-2px",
-              textShadow: "0 0 40px rgba(245,158,11,0.5), 0 0 80px rgba(245,158,11,0.15)",
-              marginBottom: 20,
-            }}>
-              VSTR-OS
-            </div>
-            <div style={{
-              width: 200,
-              height: 2,
-              background: "rgba(245,158,11,0.12)",
-              borderRadius: 1,
-              margin: "0 auto",
+              width: 220,
+              height: 3,
+              background: "rgba(245,158,11,0.15)",
+              borderRadius: 2,
               overflow: "hidden",
             }}>
               <motion.div
@@ -121,9 +146,9 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
                 transition={{ duration: 2.2, ease: [0.4, 0, 0.2, 1] }}
                 style={{
                   height: "100%",
-                  background: "#f59e0b",
-                  borderRadius: 1,
-                  boxShadow: "0 0 8px rgba(245,158,11,0.6)",
+                  background: "linear-gradient(90deg, #f59e0b, #fbbf24)",
+                  borderRadius: 2,
+                  boxShadow: "0 0 10px rgba(245,158,11,0.7)",
                 }}
               />
             </div>

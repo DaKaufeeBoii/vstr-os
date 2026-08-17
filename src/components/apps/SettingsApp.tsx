@@ -4,36 +4,42 @@ import React, { useRef, useState } from "react";
 import { useOSSettings } from "@/store/osSettingsStore";
 import type { VideoWallpaperId } from "@/store/osSettingsStore";
 
-const VIDEO_WALLPAPER_OPTIONS: { id: VideoWallpaperId; name: string; desc: string; poster: string }[] = [
-  {
-    id: "none",
-    name: "Static Image",
-    desc: "Use a static wallpaper image.",
-    poster: "/wallpapers/static/os_wallpaper.png",
-  },
+interface LiveWallpaperOption {
+  id: Exclude<VideoWallpaperId, "none">;
+  name: string;
+  category: string;
+  desc: string;
+  videoSrc: string;
+}
+
+const LIVE_WALLPAPER_OPTIONS: LiveWallpaperOption[] = [
   {
     id: "dawn",
     name: "Dawn Cycling",
-    desc: "Serene cycling at dawn - peaceful morning vibes.",
-    poster: "/wallpapers/video/posters/dawn-cycling.jpg",
+    category: "Anime • Pixel Art • Lofi",
+    desc: "Serene cycling at dawn with peaceful morning ambience.",
+    videoSrc: "/wallpapers/video/Dawn-cycling.mp4",
   },
   {
     id: "lake",
     name: "Lake of Rage",
-    desc: "Mystical lake scene - dark fantasy ambience.",
-    poster: "/wallpapers/video/posters/lake-of-rage.jpg",
+    category: "Pokémon • Dark Fantasy • Rain",
+    desc: "Mystical Gyarados lake scene with stormy atmospheric rain.",
+    videoSrc: "/wallpapers/video/Lake-of-Rage.mp4",
   },
   {
     id: "rayquaza",
     name: "Rayquaza",
-    desc: "Legendary Pokémon soaring through skies.",
-    poster: "/wallpapers/video/posters/rayquaza.jpg",
+    category: "Pokémon • Cinematic • Skies",
+    desc: "Legendary Sky High Pokémon soaring through the ozone layer.",
+    videoSrc: "/wallpapers/video/Rayquaza.mp4",
   },
   {
     id: "yuji-sleepy",
     name: "Yuji Sleepy",
-    desc: "Peaceful anime moment - cozy atmosphere.",
-    poster: "/wallpapers/video/posters/yuji-sleepy.jpg",
+    category: "Anime • Jujutsu Kaisen • Cozy",
+    desc: "Peaceful Itadori Yuji resting in a cozy, warm atmosphere.",
+    videoSrc: "/wallpapers/video/yuji-sleepy.mp4",
   },
 ];
 
@@ -42,10 +48,12 @@ export default function SettingsApp() {
     wallpaper, setWallpaper,
     videoWallpaper, setVideoWallpaper,
     performanceMode, setPerformanceMode,
+    volume, setVolume,
+    brightness, setBrightness,
   } = useOSSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
 
   const presets = [
     { path: "/wallpapers/static/os_wallpaper.png", name: "VSTR-OS Default" },
@@ -60,6 +68,7 @@ export default function SettingsApp() {
   ];
 
   const isCustomWallpaper = wallpaper.startsWith("data:image/");
+  const isStaticActive = videoWallpaper === "none";
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setErrorMsg(null);
@@ -72,7 +81,10 @@ export default function SettingsApp() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const base64 = event.target?.result as string;
-      if (base64) setWallpaper(base64);
+      if (base64) {
+        setWallpaper(base64);
+        setVideoWallpaper("none");
+      }
     };
     reader.onerror = () => setErrorMsg("Error reading file.");
     reader.readAsDataURL(file);
@@ -92,18 +104,20 @@ export default function SettingsApp() {
     }
     const url = URL.createObjectURL(file);
     setVideoWallpaper(url as VideoWallpaperId);
-    setWallpaper(""); // Clear static wallpaper
   };
 
   const sectionLabel = (text: string) => (
     <div style={{
-      fontSize: 11,
+      fontSize: 12,
       fontWeight: 700,
-      color: "var(--os-text-muted)",
-      letterSpacing: "0.1em",
+      color: "var(--os-amber)",
+      letterSpacing: "0.08em",
       textTransform: "uppercase",
-      marginBottom: 10,
+      marginBottom: 8,
       fontFamily: "'JetBrains Mono', monospace",
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
     }}>
       {text}
     </div>
@@ -111,7 +125,7 @@ export default function SettingsApp() {
 
   return (
     <div style={{
-      padding: "20px 20px 32px",
+      padding: "20px 20px 36px",
       height: "100%",
       fontFamily: "var(--font-mono)",
       color: "var(--os-text)",
@@ -136,75 +150,322 @@ export default function SettingsApp() {
 
       <hr style={{ border: "none", borderTop: "1px solid var(--os-border)", margin: 0 }} />
 
-      {/* ── Live Video Wallpapers ───────────────────────────────────── */}
+      {/* ── a. Display and Audio ───────────────────────────────────── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        <div>
+          {sectionLabel("🖥️ Display & 🔊 Audio")}
+          <p style={{ margin: "0 0 14px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
+            Adjust display brightness and system audio output levels.
+          </p>
+        </div>
+
+        {/* Display Brightness */}
+        <div style={{
+          background: "rgba(255,255,255,0.02)",
+          border: "1px solid var(--os-border)",
+          borderRadius: 8,
+          padding: "14px 16px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <span style={{ fontSize: 24 }}>🔆</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--os-text)" }}>Brightness</span>
+                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--os-amber)" }}>
+                  {Math.round(brightness * 100)}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0.1"
+                max="1"
+                step="0.01"
+                value={brightness}
+                onChange={(e) => setBrightness(parseFloat(e.target.value))}
+                style={{ width: "100%", accentColor: "var(--os-amber)", cursor: "pointer" }}
+                aria-label="Display Brightness"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Audio Volume */}
+        <div style={{
+          background: "rgba(255,255,255,0.02)",
+          border: "1px solid var(--os-border)",
+          borderRadius: 8,
+          padding: "14px 16px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <span style={{ fontSize: 24 }}>🔊</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--os-text)" }}>Volume</span>
+                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--os-amber)" }}>
+                  {Math.round(volume * 100)}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                style={{ width: "100%", accentColor: "var(--os-amber)", cursor: "pointer" }}
+                aria-label="Audio Volume"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr style={{ border: "none", borderTop: "1px solid var(--os-border)", margin: 0 }} />
+
+      {/* ── b. Static Wallpaper ────────────────────────────────────── */}
+      <div>
+        {sectionLabel("🖼️ Static Wallpaper")}
+        <p style={{ margin: "0 0 12px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
+          Choose a desktop background image or upload your own high-resolution image.
+        </p>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 12 }}>
+          {presets.map((p) => {
+            const isActive = wallpaper === p.path && isStaticActive;
+            return (
+              <button
+                key={p.path}
+                onClick={() => {
+                  setWallpaper(p.path);
+                  setVideoWallpaper("none");
+                }}
+                style={{
+                  padding: "8px",
+                  background: isActive ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.02)",
+                  border: `1px solid ${isActive ? "var(--os-amber)" : "var(--os-border)"}`,
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 6,
+                  transition: "all 0.15s",
+                  boxShadow: isActive ? "0 0 12px rgba(245,158,11,0.25)" : "none",
+                }}
+              >
+                <div
+                  style={{
+                    width: "100%",
+                    height: "55px",
+                    borderRadius: "4px",
+                    backgroundImage: `url(${p.path})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                />
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: isActive ? "bold" : "normal",
+                  color: isActive ? "var(--os-amber)" : "var(--os-text)",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}>
+                  {p.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Custom static upload */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          accept="image/*"
+          style={{ display: "none" }}
+          aria-label="Upload wallpaper"
+        />
+        <button
+          onClick={() => {
+            fileInputRef.current?.click();
+          }}
+          style={{
+            width: "100%",
+            padding: "12px",
+            background: isCustomWallpaper && isStaticActive ? "rgba(16, 185, 129, 0.08)" : "rgba(255,255,255,0.02)",
+            border: `1px dashed ${isCustomWallpaper && isStaticActive ? "var(--os-jade)" : "var(--os-border)"}`,
+            borderRadius: 8,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            color: isCustomWallpaper && isStaticActive ? "var(--os-jade)" : "var(--os-text-muted)",
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
+            transition: "all 0.15s",
+          }}
+        >
+          {isCustomWallpaper && isStaticActive ? (
+            <>
+              <div
+                style={{
+                  width: 32,
+                  height: 20,
+                  borderRadius: 3,
+                  backgroundImage: `url(${wallpaper})`,
+                  backgroundSize: "cover",
+                  border: "1px solid rgba(16, 185, 129, 0.4)",
+                }}
+              />
+              <span style={{ fontWeight: "bold" }}>Custom Picture Active (Click to Change)</span>
+            </>
+          ) : (
+            <>
+              <span>🖼️</span>
+              <span>Upload Custom Picture (Max 2.5MB)</span>
+            </>
+          )}
+        </button>
+
+        {errorMsg && (
+          <div style={{ color: "var(--os-red)", fontSize: 11, marginTop: 6, textAlign: "center" }}>
+            {errorMsg}
+          </div>
+        )}
+      </div>
+
+      <hr style={{ border: "none", borderTop: "1px solid var(--os-border)", margin: 0 }} />
+
+      {/* ── c. Live Wallpaper ──────────────────────────────────────── */}
       <div>
         {sectionLabel("🎬 Live Video Wallpapers")}
         <p style={{ margin: "0 0 12px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
-          Looping MP4/WebM videos rendered full-screen on the desktop. Select one to activate it as your live wallpaper.
+          Looping high-definition video wallpapers rendered seamlessly across the desktop.
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {VIDEO_WALLPAPER_OPTIONS.map(v => {
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {LIVE_WALLPAPER_OPTIONS.map((v) => {
             const isActive = videoWallpaper === v.id;
             return (
               <button
                 key={v.id}
                 onClick={() => {
                   setVideoWallpaper(v.id);
-                  setWallpaper(""); // Clear static wallpaper
                 }}
                 style={{
                   padding: 0,
-                  background: "transparent",
+                  background: "rgba(255,255,255,0.02)",
                   border: `2px solid ${isActive ? "var(--os-amber)" : "rgba(255,255,255,0.08)"}`,
                   borderRadius: 10,
                   cursor: "pointer",
                   overflow: "hidden",
                   transition: "border-color 0.2s, box-shadow 0.2s",
-                  boxShadow: isActive ? "0 0 16px rgba(245,158,11,0.3)" : "none",
+                  boxShadow: isActive ? "0 0 16px rgba(245,158,11,0.35)" : "none",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
-                {/* Video preview thumbnail - using first frame still */}
-                <div style={{
-                  height: 56,
-                  background: v.poster ? `center/cover no-repeat url(${v.poster})` : "linear-gradient(135deg, #1a1a2e, #16213e)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 24,
-                  position: "relative",
-                }}>
-                  {isActive && (
-                    <div style={{
+                {/* Live Video Preview Frame */}
+                <div
+                  style={{
+                    height: 72,
+                    position: "relative",
+                    overflow: "hidden",
+                    background: "#0a0e17",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <video
+                    src={v.videoSrc}
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  {/* Subtle vignette gradient */}
+                  <div
+                    style={{
                       position: "absolute",
-                      top: 4,
-                      right: 6,
-                      fontSize: 10,
-                      background: "var(--os-amber)",
-                      color: "#000",
+                      inset: 0,
+                      background: "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  {/* Category Pill Tag */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 5,
+                      left: 6,
+                      fontSize: 8.5,
+                      fontWeight: 600,
+                      background: "rgba(0,0,0,0.7)",
+                      color: "#e2e8f0",
+                      backdropFilter: "blur(4px)",
+                      border: "1px solid rgba(255,255,255,0.15)",
                       borderRadius: 4,
                       padding: "1px 5px",
-                      fontWeight: 700,
                       fontFamily: "'JetBrains Mono', monospace",
-                    }}>
-                      LIVE
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    {v.category}
+                  </div>
+                  {isActive && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 5,
+                        right: 6,
+                        fontSize: 9.5,
+                        background: "var(--os-amber)",
+                        color: "#000",
+                        borderRadius: 4,
+                        padding: "1px 6px",
+                        fontWeight: 800,
+                        fontFamily: "'JetBrains Mono', monospace",
+                        boxShadow: "0 2px 6px rgba(245,158,11,0.5)",
+                      }}
+                    >
+                      ACTIVE
                     </div>
                   )}
                 </div>
-                {/* Label */}
-                <div style={{
-                  padding: "6px 8px",
-                  textAlign: "left",
-                  background: isActive ? "rgba(245,158,11,0.06)" : "rgba(255,255,255,0.02)",
-                }}>
-                  <div style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: isActive ? "var(--os-amber)" : "var(--os-text)",
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}>
+
+                {/* Details / Description */}
+                <div
+                  style={{
+                    padding: "8px 10px",
+                    textAlign: "left",
+                    background: isActive ? "rgba(245,158,11,0.06)" : "transparent",
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: isActive ? "var(--os-amber)" : "var(--os-text)",
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
                     {v.name}
                   </div>
-                  <div style={{ fontSize: 10, color: "var(--os-text-muted)", marginTop: 1 }}>
+                  <div style={{ fontSize: 10, color: "var(--os-text-muted)", marginTop: 3, lineHeight: 1.4 }}>
                     {v.desc}
                   </div>
                 </div>
@@ -216,14 +477,16 @@ export default function SettingsApp() {
         {/* Custom video upload */}
         <input
           type="file"
-          ref={fileInputRef}
+          ref={videoInputRef}
           onChange={handleVideoUpload}
           accept="video/mp4,video/webm,video/*"
           style={{ display: "none" }}
           aria-label="Upload video wallpaper"
         />
         <button
-          onClick={() => { fileInputRef.current?.click(); }}
+          onClick={() => {
+            videoInputRef.current?.click();
+          }}
           style={{
             width: "100%",
             marginTop: 10,
@@ -250,8 +513,9 @@ export default function SettingsApp() {
         <button
           onClick={() => setPerformanceMode(!performanceMode)}
           style={{
-            marginTop: 14,
-            padding: "8px 12px",
+            width: "100%",
+            marginTop: 10,
+            padding: "9px 12px",
             background: performanceMode ? "rgba(239,68,68,0.08)" : "rgba(255,255,255,0.02)",
             border: `1px solid ${performanceMode ? "rgba(239,68,68,0.4)" : "rgba(255,255,255,0.08)"}`,
             borderRadius: 8,
@@ -259,110 +523,12 @@ export default function SettingsApp() {
             color: performanceMode ? "#ef4444" : "var(--os-text-muted)",
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 11,
-            textAlign: "left",
+            textAlign: "center",
             transition: "all 0.15s",
           }}
         >
           {performanceMode ? "⏸ Video Paused (Performance Mode ON)" : "▶ Pause Video (Performance Mode)"}
         </button>
-      </div>
-
-      <hr style={{ border: "none", borderTop: "1px solid var(--os-border)", margin: 0 }} />
-
-      {/* ── Static Wallpaper ───────────────────────────────────────── */}
-      <div>
-        {sectionLabel("Static Wallpaper")}
-        <p style={{ margin: "0 0 10px", fontSize: 11, color: "var(--os-text-muted)" }}>
-          Only visible when video wallpaper is set to "Static Image".
-        </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 10 }}>
-          {presets.map(p => {
-            const isActive = wallpaper === p.path && videoWallpaper === "none";
-            return (
-              <button
-                key={p.path}
-                onClick={() => { setWallpaper(p.path); setVideoWallpaper("none"); }}
-                style={{
-                  padding: "8px",
-                  background: isActive ? "rgba(245,158,11,0.06)" : "rgba(255,255,255,0.02)",
-                  border: `1px solid ${isActive ? "var(--os-amber)" : "var(--os-border)"}`,
-                  borderRadius: 8,
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 6,
-                  transition: "all 0.15s",
-                }}
-              >
-                <div style={{
-                  width: "100%",
-                  height: "55px",
-                  borderRadius: "4px",
-                  backgroundImage: `url(${p.path})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  border: "1px solid rgba(255,255,255,0.05)",
-                }} />
-                <span style={{ fontSize: 11, fontWeight: isActive ? "bold" : "normal", color: isActive ? "var(--os-amber)" : "var(--os-text)" }}>
-                  {p.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Custom upload */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          accept="image/*"
-          style={{ display: "none" }}
-          aria-label="Upload wallpaper"
-        />
-        <button
-          onClick={() => { fileInputRef.current?.click(); setVideoWallpaper("none"); }}
-          style={{
-            width: "100%",
-            padding: "12px",
-            background: isCustomWallpaper ? "rgba(16, 185, 129, 0.05)" : "rgba(255,255,255,0.01)",
-            border: `1px dashed ${isCustomWallpaper ? "var(--os-jade)" : "var(--os-border)"}`,
-            borderRadius: 8,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 10,
-            color: isCustomWallpaper ? "var(--os-jade)" : "var(--os-text-muted)",
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            transition: "all 0.15s",
-          }}
-        >
-          {isCustomWallpaper ? (
-            <>
-              <div style={{
-                width: 32, height: 20, borderRadius: 3,
-                backgroundImage: `url(${wallpaper})`,
-                backgroundSize: "cover",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
-              }} />
-              <span style={{ fontWeight: "bold" }}>Custom Wallpaper Active (Change)</span>
-            </>
-          ) : (
-            <>
-              <span>🖼️</span>
-              <span>Upload Custom Picture (Max 2.5MB)</span>
-            </>
-          )}
-        </button>
-
-        {errorMsg && (
-          <div style={{ color: "var(--os-red)", fontSize: 11, marginTop: 6, textAlign: "center" }}>
-            {errorMsg}
-          </div>
-        )}
       </div>
     </div>
   );

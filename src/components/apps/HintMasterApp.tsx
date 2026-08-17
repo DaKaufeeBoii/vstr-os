@@ -10,6 +10,7 @@ const HINTS = [
   "A locked door reveals itself. Type 'crack password' if you dare.",
   "Something is scanning your disk. Run 'open disk_cleanup' and investigate.",
   "The terminal hides more than just commands. Try 'start desktop_pet'.",
+  "Fatal system error imminent. Type 'blue-screen' to simulate a crash.",
   "The HintMaster knows all. But knowledge has its price. You earned all the hints!",
 ];
 

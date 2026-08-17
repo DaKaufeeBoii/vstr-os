@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { OsIcon } from "@/components/icons/OsIcon";
 import { VolumeIcon, WifiIcon, BatteryIcon, NotifIcon, ShieldIcon, DisplayIcon, ChevronRightIcon, RotationLockIcon, HotspotIcon, NearbyShareIcon, CastIcon, AccessibilityIcon } from "@/components/icons";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useOSSettings } from "@/store/osSettingsStore";
+import { useSound } from "@/utils/useSound";
 
 interface QuickSettingsProps {
   isOpen: boolean;
@@ -19,17 +21,15 @@ interface QuickAction {
 }
 
 export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
-  const [volume, setVolume] = useState(0.7);
-  const [brightness, setBrightness] = useState(0.8);
-  const [batteryLevel, setBatteryLevel] = useState(100);
-  const [isCharging, setIsCharging] = useState(false);
+  const { volume, setVolume, brightness, setBrightness } = useOSSettings();
+  const { playClick } = useSound();
   const [wifiEnabled, setWifiEnabled] = useState(true);
   const [bluetoothEnabled, setBluetoothEnabled] = useState(false);
   const [nightLightEnabled, setNightLightEnabled] = useState(false);
   const [accessibilityEnabled, setAccessibilityEnabled] = useState(false);
-  
-  const volumeRef = useRef<HTMLInputElement>(null);
-  const brightnessRef = useRef<HTMLInputElement>(null);
+  const [batteryLevel, setBatteryLevel] = useState(100);
+  const [isCharging, setIsCharging] = useState(false);
+
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Focus trap for the quick settings panel
@@ -60,17 +60,15 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
     { label: "Accessibility", icon: "accessibility", active: accessibilityEnabled, onToggle: () => setAccessibilityEnabled(v => !v) },
   ];
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
+  const handleVolumeChange = useCallback((value: number) => {
     setVolume(value);
-    // In a real app, this would control actual audio
-  };
+    playClick();
+  }, [setVolume, playClick]);
 
-  const handleBrightnessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
+  const handleBrightnessChange = useCallback((value: number) => {
     setBrightness(value);
     // In a real app, this would use Screen Wake Lock API or CSS filter
-  };
+  }, [setBrightness]);
 
   const getBatteryIcon = () => {
     if (batteryLevel <= 15) return "����";
@@ -196,13 +194,12 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
                 {Math.round(volume * 100)}%
               </span>
               <input
-                ref={volumeRef}
                 type="range"
                 min="0"
                 max="1"
                 step="0.01"
                 value={volume}
-                onChange={handleVolumeChange}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
                 aria-label="Volume"
                 aria-valuemin={0}
                 aria-valuemax={100}
@@ -221,13 +218,12 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
                 {Math.round(brightness * 100)}%
               </span>
               <input
-                ref={brightnessRef}
                 type="range"
                 min="0"
                 max="1"
                 step="0.01"
                 value={brightness}
-                onChange={handleBrightnessChange}
+                onChange={(e) => handleBrightnessChange(parseFloat(e.target.value))}
                 aria-label="Brightness"
                 aria-valuemin={0}
                 aria-valuemax={100}

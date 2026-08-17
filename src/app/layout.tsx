@@ -40,9 +40,17 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  manifest: "/manifest.json",
+};
+
+export const viewport = {
+  themeColor: "#e94560",
+  width: "device-width",
+  initialScale: 1,
 };
 
 import ContextMenuManager from "@/components/ContextMenuManager";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -52,8 +60,27 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full`}
     >
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#e94560" />
+      </head>
       <body className="h-full overflow-hidden">
         <ContextMenuManager>{children}</ContextMenuManager>
+        <Script
+          id="sw-registration"
+          strategy="lazyOnload"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('[SW] Registered:', reg.scope))
+                    .catch(err => console.log('[SW] Registration failed:', err));
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

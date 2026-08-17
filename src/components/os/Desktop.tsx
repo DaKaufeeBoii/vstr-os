@@ -32,6 +32,7 @@ import PasswordCrackerApp from "../apps/PasswordCrackerApp";
 
 // Context menu removed
 import VideoWallpaper          from "./VideoWallpaper";
+import BsodScreen              from "./BsodScreen";
 
 
 const APP_CONTENT: Record<string, React.ReactNode> = {
@@ -55,6 +56,14 @@ export default function Desktop() {
   const { openWindow, closeWindow, minimizeWindow, maximizeWindow, focusWindow, restoreWindow, windows, toggleExposé, openExposé, closeExposé, toggleCommandPalette, openCommandPalette, closeCommandPalette, toggleTerminalDrawer, openTerminalDrawer, closeTerminalDrawer, isExposéOpen, isCommandPaletteOpen, isTerminalDrawerOpen } = useOS();
   const { wallpaper, videoWallpaper, performanceMode, unlockMission } = useOSSettings();
   const [booting, setBooting] = React.useState(true);
+  const [showBsod, setShowBsod] = React.useState(false);
+
+  // Listen for BSOD trigger events
+  React.useEffect(() => {
+    const handleBsodEvent = () => setShowBsod(true);
+    window.addEventListener("trigger-bsod", handleBsodEvent);
+    return () => window.removeEventListener("trigger-bsod", handleBsodEvent);
+  }, []);
 
 
   // Global hotkeys
@@ -235,6 +244,7 @@ export default function Desktop() {
           <OnboardingTip />
           <Win11ToastContainer />
           <Announcer />
+          {showBsod && <BsodScreen onClose={() => setShowBsod(false)} />}
 
 
         </>

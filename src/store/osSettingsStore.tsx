@@ -31,6 +31,8 @@ interface OSSettingsState {
   wallpaper:        string;
   videoWallpaper:   VideoWallpaperId;
   performanceMode:  boolean;
+  volume:           number;
+  brightness:       number;
   notifications:    OSNotification[];
   unlockedMissions: string[];
 }
@@ -39,6 +41,8 @@ type OSSettingsAction =
   | { type: "SET_WALLPAPER";       wallpaper: string }
   | { type: "SET_VIDEO_WALLPAPER"; videoWallpaper: VideoWallpaperId }
   | { type: "SET_PERF_MODE";       enabled: boolean }
+  | { type: "SET_VOLUME";          volume: number }
+  | { type: "SET_BRIGHTNESS";      brightness: number }
   | { type: "ADD_NOTIFICATION";    notification: OSNotification }
   | { type: "DISMISS_NOTIFICATION"; notificationId: string }
   | { type: "UNLOCK_MISSION";      missionId: string }
@@ -51,6 +55,8 @@ const KEYS = {
   missions:       "vstr_missions",
   notified:       "vstr_notified",
   perfMode:       "vstr_perf_mode",
+  volume:         "vstr_volume",
+  brightness:     "vstr_brightness",
 } as const;
 
 const VALID_VIDEOS: VideoWallpaperId[] = ["dawn", "lake", "rayquaza", "yuji-sleepy", "none"];
@@ -61,6 +67,8 @@ function buildInitial(): OSSettingsState {
     wallpaper:        "/wallpapers/static/os_wallpaper.png",
     videoWallpaper:   "none",
     performanceMode:  false,
+    volume:           0.7,
+    brightness:       0.8,
     notifications:    [],
     unlockedMissions: [],
   };
@@ -80,6 +88,22 @@ function reducer(state: OSSettingsState, action: OSSettingsAction): OSSettingsSt
         localStorage.setItem(KEYS.perfMode, String(action.enabled));
       }
       return { ...state, performanceMode: action.enabled };
+
+    case "SET_VOLUME": {
+      const vol = Math.max(0, Math.min(1, action.volume));
+      if (typeof window !== "undefined") {
+        localStorage.setItem(KEYS.volume, String(vol));
+      }
+      return { ...state, volume: vol };
+    }
+
+    case "SET_BRIGHTNESS": {
+      const bri = Math.max(0, Math.min(1, action.brightness));
+      if (typeof window !== "undefined") {
+        localStorage.setItem(KEYS.brightness, String(bri));
+      }
+      return { ...state, brightness: bri };
+    }
 
     case "ADD_NOTIFICATION":
       return { ...state, notifications: [...state.notifications, action.notification] };
@@ -113,6 +137,8 @@ interface OSSettingsContextValue {
   wallpaper:        string;
   videoWallpaper:   VideoWallpaperId;
   performanceMode:  boolean;
+  volume:           number;
+  brightness:       number;
   notifications:    OSNotification[];
   unlockedMissions: string[];
 
@@ -120,6 +146,8 @@ interface OSSettingsContextValue {
   setWallpaper:         (wallpaper: string) => void;
   setVideoWallpaper:    (videoWallpaper: VideoWallpaperId) => void;
   setPerformanceMode:   (enabled: boolean) => void;
+  setVolume:            (volume: number) => void;
+  setBrightness:        (brightness: number) => void;
   addNotification:      (title: string, description: string, icon: string) => void;
   dismissNotification:  (id: string) => void;
   unlockMission:        (id: string) => void;
@@ -173,6 +201,14 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     dispatch({ type: "SET_PERF_MODE", enabled });
   }, []);
 
+  const setVolume = useCallback((volume: number) => {
+    dispatch({ type: "SET_VOLUME", volume });
+  }, []);
+
+  const setBrightness = useCallback((brightness: number) => {
+    dispatch({ type: "SET_BRIGHTNESS", brightness });
+  }, []);
+
   /* — Hydrate from localStorage on mount — */
   useEffect(() => {
     // Wallpaper
@@ -188,6 +224,20 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     // Performance mode
     const savedPerf = localStorage.getItem(KEYS.perfMode);
     if (savedPerf === "true") dispatch({ type: "SET_PERF_MODE", enabled: true });
+
+    // Volume
+    const savedVolume = localStorage.getItem(KEYS.volume);
+    if (savedVolume) {
+      const vol = parseFloat(savedVolume);
+      if (!isNaN(vol)) dispatch({ type: "SET_VOLUME", volume: vol });
+    }
+
+    // Brightness
+    const savedBrightness = localStorage.getItem(KEYS.brightness);
+    if (savedBrightness) {
+      const bri = parseFloat(savedBrightness);
+      if (!isNaN(bri)) dispatch({ type: "SET_BRIGHTNESS", brightness: bri });
+    }
 
     // Missions
     try {
@@ -222,9 +272,11 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
       wallpaper:         state.wallpaper,
       videoWallpaper:    state.videoWallpaper,
       performanceMode:   state.performanceMode,
+      volume:            state.volume,
+      brightness:        state.brightness,
       notifications:     state.notifications,
       unlockedMissions:  state.unlockedMissions,
-      setWallpaper, setVideoWallpaper, setPerformanceMode,
+      setWallpaper, setVideoWallpaper, setPerformanceMode, setVolume, setBrightness,
       addNotification, dismissNotification, unlockMission,
     }}>
       {children}

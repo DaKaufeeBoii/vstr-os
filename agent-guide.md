@@ -76,9 +76,11 @@ components/
     Window.tsx        → Window chrome, drag/resize/snap, focus trap, traffic lights
     Taskbar.tsx       → Start button, app buttons, clock, missions widget, quick settings
     StartMenu.tsx     → App launcher, search, recommended links, shutdown confirm
-    QuickSettings.tsx → Theme picker, wallpaper, performance, volume/wifi/battery
+    QuickSettings.tsx → Theme picker, wallpaper, performance, volume/wifi/battery, brightness
     ContextMenu/      → Right-click menus (desktop, icons, titlebar)
     VideoWallpaper.tsx→ <video> element for live wallpapers
+    BsodScreen.tsx    → Blue Screen of Death Easter Egg (triggered via terminal)
+    NotificationCenter.tsx → Slide-in notification panel + toast container
   apps/
     *App.tsx          → 14 window content components (portfolio sections + games)
 hooks/

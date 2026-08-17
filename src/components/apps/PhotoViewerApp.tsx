@@ -8,7 +8,7 @@ export default function PhotoViewerApp() {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#000" }}>
       <div style={{ position: "relative", flex: 1, width: "100%", minHeight: 0 }}>
         <Image
-          src="/real.png"
+          src="/assets/images/real.png"
           alt="Real photo of Sai Tarun Reddy Velagala"
           fill
           style={{ objectFit: "contain" }}

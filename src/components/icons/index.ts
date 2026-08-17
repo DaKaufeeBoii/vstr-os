@@ -63,3 +63,6 @@ export {
   KeyIcon,
 } from "./OsIcon";
 
+export { VstrIcon, VstrLogoFull } from "./VstrIcon";
+
+

@@ -7,61 +7,13 @@ import { useOSSettings } from "@/store/osSettingsStore";
 import { systemMissions } from "@/data/systemMissions";
 import StartMenu from "./StartMenu";
 import { OsIcon } from "@/components/icons/OsIcon";
-import { VolumeIcon, WifiIcon, BatteryIcon } from "@/components/icons";
-/** VSTR logo — 4 quadrant blocks mirroring the Windows logo layout */
-function VstrLogo() {
-  const size = 26;
-  const gap = 2;
-  const q = (size - gap) / 2; // quadrant size ≈ 12px
-
-  const letters = [
-    { label: "V", x: 0,       y: 0,       color: "#e2e8f0" },
-    { label: "S", x: q + gap, y: 0,       color: "#e2e8f0" },
-    { label: "T", x: 0,       y: q + gap, color: "#e2e8f0" },
-    { label: "R", x: q + gap, y: q + gap, color: "#e2e8f0" },
-  ];
-
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="VSTR"
-      style={{ display: "block", flexShrink: 0 }}
-    >
-      {letters.map(({ label, x, y, color }) => (
-        <g key={label}>
-          <rect
-            x={x} y={y}
-            width={q} height={q}
-            rx={1.5}
-            fill={color}
-            opacity={0.12}
-          />
-          <text
-            x={x + q / 2}
-            y={y + q / 2 + 0.5}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontFamily="'JetBrains Mono', 'Geist Mono', monospace"
-            fontWeight="700"
-            fontStyle="italic"
-            fontSize={q * 0.72}
-            fill={color}
-            opacity={0.9}
-          >
-            {label}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
-}
+import { VolumeIcon, WifiIcon, BatteryIcon, VstrIcon } from "@/components/icons";
+import { useSound } from "@/utils/useSound";
 
 export default function Taskbar() {
 
   const { windows, openWindow, restoreWindow, focusWindow, minimizeWindow } = useOS();
+  const { playClick } = useSound();
   const { unlockedMissions } = useOSSettings();
   const [timeStr, setTimeStr] = useState("");
   const [dateStr, setDateStr] = useState("");
@@ -212,13 +164,13 @@ export default function Taskbar() {
         <button
           id="taskbar-start-btn"
           className="taskbar-start-btn"
-          onClick={() => setShowStart((v) => !v)}
+          onClick={() => { playClick(); setShowStart((v) => !v); }}
           title="Start Menu"
           aria-label="Start Menu"
           aria-expanded={showStart}
           aria-haspopup="true"
         >
-          <VstrLogo />
+          <VstrIcon size={24} color="currentColor" />
 
         </button>
 
@@ -227,7 +179,7 @@ export default function Taskbar() {
         {/* Search Pill */}
         <div
           id="taskbar-search-pill"
-          onClick={() => setShowStart(true)}
+          onClick={() => { playClick(); setShowStart(true); }}
           style={{
             display: "flex",
             alignItems: "center",
@@ -268,6 +220,7 @@ export default function Taskbar() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   onClick={() => {
+                    playClick();
                     if (win.isMinimized) {
                       restoreWindow(win.id);
                     } else if (isFocused) {
@@ -308,7 +261,7 @@ export default function Taskbar() {
         }}>
           {/* Missions Quick View Icon */}
           <button
-            onClick={() => setShowMissionsWidget((v) => !v)}
+            onClick={() => { playClick(); setShowMissionsWidget((v) => !v); }}
             title="Missions Progress"
             aria-label="Missions Progress"
             aria-expanded={showMissionsWidget}

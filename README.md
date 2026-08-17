@@ -10,6 +10,11 @@ An interactive OS-themed portfolio for **Sai Tarun Reddy Velagala**, built with 
 - **Mobile support** — fullscreen windows and compact taskbar on small screens
 - **Web resume** — printable resume at `/resume` (use browser Print → Save as PDF)
 - **Easter eggs** — hidden games and apps discoverable via the Terminal
+- **PWA support** — installable with offline caching via service worker
+- **System sounds** — UI interaction feedback (clicks, window actions)
+- **Notification Center** — system notifications with toast and panel views
+- **BSOD Easter Egg** — triggerable via `blue-screen` or `bsod` terminal command
+- **Brightness & Volume controls** — in Settings and Quick Settings panel
 
 ## Running locally
 
@@ -38,6 +43,7 @@ Open the **Terminal** app and try:
 | `open disk_cleanup` | Disk Cleanup easter egg |
 | `start desktop_pet` | Desktop Pet companion |
 | `crack password` | PwnTool typing challenge |
+| `blue-screen` / `bsod` | Trigger BSOD Easter Egg |
 | `resume` | Resume page info |
 
 Hidden route: [`/games/secret`](/games/secret)

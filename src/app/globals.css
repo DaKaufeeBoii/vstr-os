@@ -27,10 +27,10 @@
   --color-text-dim:  #581c87;
 
   /* Win11 Mica/Acrylic tokens */
-  --mica-base:       rgba(15, 12, 41, 0.85);
-  --mica-alt:        rgba(23, 20, 58, 0.9);
-  --acrylic:         rgba(15, 12, 41, 0.75);
-  --acrylic-strong:  rgba(15, 12, 41, 0.9);
+  --mica-base:       rgba(15, 12, 41, 0.72);
+  --mica-alt:        rgba(23, 20, 58, 0.85);
+  --acrylic:         rgba(15, 12, 41, 0.65);
+  --acrylic-strong:  rgba(15, 12, 41, 0.85);
 
   /* Semantic */
   --os-bg:           var(--color-bg);
