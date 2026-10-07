@@ -113,5 +113,26 @@ export const systemMissions: SystemMission[] = [
     icon: "🗝️",
     difficulty: "Hard",
   },
+  {
+    id: "root-access",
+    title: "Ring 0 Superuser",
+    description: "Elevate to root and access the restricted /root security ring.",
+    icon: "🛡️",
+    difficulty: "Hard",
+  },
+  {
+    id: "kernel-surgeon",
+    title: "Kernel Surgeon",
+    description: "Diagnose and patch a simulated Blue Screen kernel panic.",
+    icon: "🩺",
+    difficulty: "Hard",
+  },
+  {
+    id: "vfs-author",
+    title: "VFS Author",
+    description: "Create and persist a custom file to the IndexedDB filesystem.",
+    icon: "📝",
+    difficulty: "Easy",
+  },
 ];
 

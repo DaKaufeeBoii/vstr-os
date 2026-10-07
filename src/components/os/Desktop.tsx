@@ -29,10 +29,13 @@ import PhotoViewerApp     from "@/components/apps/PhotoViewerApp";
 import DiskCleanupApp     from "../apps/DiskCleanupApp";
 import DesktopPetApp      from "../apps/DesktopPetApp";
 import PasswordCrackerApp from "../apps/PasswordCrackerApp";
+import NotepadApp         from "@/components/apps/NotepadApp";
+import GuestbookApp       from "@/components/apps/GuestbookApp";
 
-// Context menu removed
 import VideoWallpaper          from "./VideoWallpaper";
 import BsodScreen              from "./BsodScreen";
+import TaskView                from "./TaskView";
+import WidgetBoard             from "./WidgetBoard";
 
 
 const APP_CONTENT: Record<string, React.ReactNode> = {
@@ -42,6 +45,8 @@ const APP_CONTENT: Record<string, React.ReactNode> = {
   experience:       <ExperienceApp />,
   achievements:     <AchievementsApp />,
   terminal:         <TerminalApp />,
+  notepad:          <NotepadApp />,
+  guestbook:        <GuestbookApp />,
   contact:          <ContactApp />,
   flappy:           <FlappyGameApp />,
   hintmaster:       <HintMasterApp />,
@@ -53,7 +58,34 @@ const APP_CONTENT: Record<string, React.ReactNode> = {
 };
 
 export default function Desktop() {
-  const { openWindow, closeWindow, minimizeWindow, maximizeWindow, focusWindow, restoreWindow, windows, toggleExposé, openExposé, closeExposé, toggleCommandPalette, openCommandPalette, closeCommandPalette, toggleTerminalDrawer, openTerminalDrawer, closeTerminalDrawer, isExposéOpen, isCommandPaletteOpen, isTerminalDrawerOpen } = useOS();
+  const {
+    openWindow,
+    closeWindow,
+    minimizeWindow,
+    maximizeWindow,
+    focusWindow,
+    restoreWindow,
+    windows,
+    workspaces,
+    activeWorkspaceId,
+    switchWorkspace,
+    addWorkspace,
+    toggleExposé,
+    openExposé,
+    closeExposé,
+    toggleCommandPalette,
+    openCommandPalette,
+    closeCommandPalette,
+    toggleTerminalDrawer,
+    openTerminalDrawer,
+    closeTerminalDrawer,
+    isExposéOpen,
+    isCommandPaletteOpen,
+    isTerminalDrawerOpen,
+    isWidgetBoardOpen,
+    toggleWidgetBoard,
+    closeWidgetBoard,
+  } = useOS();
   const { wallpaper, videoWallpaper, performanceMode, unlockMission } = useOSSettings();
   const [booting, setBooting] = React.useState(true);
   const [showBsod, setShowBsod] = React.useState(false);
@@ -79,6 +111,12 @@ export default function Desktop() {
       allowInInput: false,
     },
     {
+      keys: ["Meta", "KeyW"], // Win+W
+      description: "Toggle Widgets Board",
+      handler: () => toggleWidgetBoard(),
+      allowInInput: false,
+    },
+    {
       keys: ["Meta", "Tab"], // Win+Tab
       description: "Open Exposé / Window Overview",
       handler: () => toggleExposé(),
@@ -89,17 +127,22 @@ export default function Desktop() {
       description: "Switch windows",
       handler: (e) => {
         e.preventDefault();
-        const openWindows = windows.filter(w => w.isOpen && !w.isMinimized);
+        const openWindows = windows.filter(
+          (w) =>
+            w.isOpen &&
+            !w.isMinimized &&
+            (w.desktopId === undefined || w.desktopId === activeWorkspaceId || w.isSticky)
+        );
         if (openWindows.length < 2) return;
         
         // Find current focused window (highest zIndex)
-        const focused = openWindows.reduce((max, w) => w.zIndex > max.zIndex ? w : max);
-        const currentIndex = openWindows.findIndex(w => w.id === focused.id);
+        const focused = openWindows.reduce((max, w) => (w.zIndex > max.zIndex ? w : max));
+        const currentIndex = openWindows.findIndex((w) => w.instanceId === focused.instanceId);
         const nextIndex = e.shiftKey 
           ? (currentIndex - 1 + openWindows.length) % openWindows.length
           : (currentIndex + 1) % openWindows.length;
         
-        focusWindow(openWindows[nextIndex].id);
+        focusWindow(openWindows[nextIndex].instanceId);
       },
       allowInInput: false,
     },
@@ -122,8 +165,33 @@ export default function Desktop() {
         if (isExposéOpen) closeExposé();
         if (isCommandPaletteOpen) closeCommandPalette();
         if (isTerminalDrawerOpen) closeTerminalDrawer();
+        if (isWidgetBoardOpen) closeWidgetBoard();
       },
       allowInInput: true,
+    },
+    {
+      keys: ["Control", "Meta", "ArrowLeft"], // Ctrl+Win+Left
+      description: "Switch to previous desktop",
+      handler: () => {
+        const prevId = (activeWorkspaceId - 1 + workspaces.length) % workspaces.length;
+        switchWorkspace(prevId);
+      },
+      allowInInput: false,
+    },
+    {
+      keys: ["Control", "Meta", "ArrowRight"], // Ctrl+Win+Right
+      description: "Switch to next desktop",
+      handler: () => {
+        const nextId = (activeWorkspaceId + 1) % workspaces.length;
+        switchWorkspace(nextId);
+      },
+      allowInInput: false,
+    },
+    {
+      keys: ["Control", "Meta", "KeyD"], // Ctrl+Win+D
+      description: "New virtual desktop",
+      handler: () => addWorkspace(),
+      allowInInput: false,
     },
     {
       keys: ["ArrowLeft", "Meta"], // Win+Left
@@ -162,6 +230,8 @@ export default function Desktop() {
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "projects"),
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "experience"),
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "achievements"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "notepad"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "guestbook"),
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "contact"),
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "terminal"),
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "settings"),
@@ -225,21 +295,47 @@ export default function Desktop() {
             ))}
           </div>
 
-          {WINDOW_CONFIGS.map((cfg: WindowConfig) => (
-            <Window
-              key={cfg.id}
-              id={cfg.id}
-              title={cfg.title}
-              icon={cfg.icon}
-              fluentIcon={cfg.fluentIcon}
-              defaultW={cfg.defaultW}
-              defaultH={cfg.defaultH}
-              noPadding={cfg.id === "terminal"}
-            >
-              {APP_CONTENT[cfg.id]}
-            </Window>
-          ))}
+          {windows.map((win) => {
+            const cfg = WINDOW_CONFIGS.find((c: WindowConfig) => c.id === win.id);
+            if (!cfg) return null;
+            if (
+              win.desktopId !== undefined &&
+              win.desktopId !== activeWorkspaceId &&
+              !win.isSticky
+            ) {
+              return null;
+            }
+            return (
+              <Window
+                key={win.instanceId}
+                id={win.id}
+                instanceId={win.instanceId}
+                title={win.title || cfg.title}
+                icon={cfg.icon}
+                fluentIcon={cfg.fluentIcon}
+                defaultW={cfg.defaultW}
+                defaultH={cfg.defaultH}
+                noPadding={win.id === "terminal" || win.id === "notepad"}
+              >
+                {win.id === "terminal" ? (
+                  <TerminalApp key={win.instanceId} instanceId={win.instanceId} />
+                ) : win.id === "notepad" ? (
+                  <NotepadApp
+                    key={win.instanceId}
+                    instanceId={win.instanceId}
+                    initialFilePath={
+                      win.customData?.filePath || "/home/saitarun/portfolio/README.md"
+                    }
+                  />
+                ) : (
+                  APP_CONTENT[win.id]
+                )}
+              </Window>
+            );
+          })}
 
+          <WidgetBoard />
+          <TaskView />
           <Taskbar />
           <OnboardingTip />
           <Win11ToastContainer />

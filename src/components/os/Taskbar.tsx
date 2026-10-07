@@ -12,7 +12,18 @@ import { useSound } from "@/utils/useSound";
 
 export default function Taskbar() {
 
-  const { windows, openWindow, restoreWindow, focusWindow, minimizeWindow } = useOS();
+  const {
+    windows,
+    openWindow,
+    restoreWindow,
+    focusWindow,
+    minimizeWindow,
+    activeWorkspaceId,
+    toggleExposé,
+    isExposéOpen,
+    toggleWidgetBoard,
+    isWidgetBoardOpen,
+  } = useOS();
   const { playClick } = useSound();
   const { unlockedMissions } = useOSSettings();
   const [timeStr, setTimeStr] = useState("");
@@ -40,7 +51,9 @@ export default function Taskbar() {
     return () => clearInterval(id);
   }, []);
 
-  const openWindows = windows.filter((w) => w.isOpen);
+  const openWindows = windows.filter(
+    (w) => w.isOpen && (w.desktopId === undefined || w.desktopId === activeWorkspaceId || w.isSticky)
+  );
 
   return (
     <>
@@ -174,6 +187,68 @@ export default function Taskbar() {
 
         </button>
 
+        {/* Task View / Desktops Button */}
+        <button
+          id="taskbar-task-view-btn"
+          onClick={() => { playClick(); toggleExposé(); }}
+          title="Task View / Desktops (Win + Tab)"
+          aria-label="Task View"
+          aria-pressed={isExposéOpen}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 38,
+            height: 38,
+            borderRadius: 8,
+            border: "none",
+            background: isExposéOpen ? "rgba(255, 255, 255, 0.15)" : "transparent",
+            color: isExposéOpen ? "var(--os-amber)" : "var(--os-text)",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            fontSize: 15,
+          }}
+          onMouseEnter={(e) => {
+            if (!isExposéOpen) e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+          }}
+          onMouseLeave={(e) => {
+            if (!isExposéOpen) e.currentTarget.style.background = "transparent";
+          }}
+        >
+          🗔
+        </button>
+
+        {/* Widgets Board Button */}
+        <button
+          id="taskbar-widgets-btn"
+          onClick={() => { playClick(); toggleWidgetBoard(); }}
+          title="Widgets Board (Win + W)"
+          aria-label="Widgets Board"
+          aria-pressed={isWidgetBoardOpen}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 38,
+            height: 38,
+            borderRadius: 8,
+            border: "none",
+            background: isWidgetBoardOpen ? "rgba(255, 255, 255, 0.15)" : "transparent",
+            color: isWidgetBoardOpen ? "var(--os-amber)" : "var(--os-text)",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            fontSize: 15,
+          }}
+          onMouseEnter={(e) => {
+            if (!isWidgetBoardOpen) e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+          }}
+          onMouseLeave={(e) => {
+            if (!isWidgetBoardOpen) e.currentTarget.style.background = "transparent";
+          }}
+        >
+          🗂️
+        </button>
+
         <div className="taskbar-divider" />
 
         {/* Search Pill */}
@@ -215,23 +290,23 @@ export default function Taskbar() {
               
               return (
                 <motion.button
-                  key={win.id}
+                  key={win.instanceId}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   onClick={() => {
                     playClick();
                     if (win.isMinimized) {
-                      restoreWindow(win.id);
+                      restoreWindow(win.instanceId);
                     } else if (isFocused) {
-                      minimizeWindow(win.id);
+                      minimizeWindow(win.instanceId);
                     } else {
-                      focusWindow(win.id);
+                      focusWindow(win.instanceId);
                     }
                   }}
                   className={`taskbar-app-btn ${isFocused ? 'active' : ''} ${win.isMinimized ? 'minimized' : ''}`}
-                  title={cfg.title}
-                  aria-label={cfg.title}
+                  title={win.title || cfg.title}
+                  aria-label={win.title || cfg.title}
                   aria-pressed={isFocused}
                   role="tab"
                 >

@@ -21,12 +21,11 @@ interface QuickAction {
 }
 
 export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
-  const { volume, setVolume, brightness, setBrightness } = useOSSettings();
+  const { volume, setVolume, brightness, setBrightness, highContrast, setHighContrast } = useOSSettings();
   const { playClick } = useSound();
   const [wifiEnabled, setWifiEnabled] = useState(true);
   const [bluetoothEnabled, setBluetoothEnabled] = useState(false);
   const [nightLightEnabled, setNightLightEnabled] = useState(false);
-  const [accessibilityEnabled, setAccessibilityEnabled] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState(100);
   const [isCharging, setIsCharging] = useState(false);
 
@@ -57,7 +56,15 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
     { label: "Wi-Fi", icon: "wifi", active: wifiEnabled, onToggle: () => setWifiEnabled(v => !v) },
     { label: "Bluetooth", icon: "bluetooth", active: bluetoothEnabled, onToggle: () => setBluetoothEnabled(v => !v) },
     { label: "Night light", icon: "nightLight", active: nightLightEnabled, onToggle: () => setNightLightEnabled(v => !v) },
-    { label: "Accessibility", icon: "accessibility", active: accessibilityEnabled, onToggle: () => setAccessibilityEnabled(v => !v) },
+    { 
+      label: "High Contrast", 
+      icon: "accessibility", 
+      active: highContrast, 
+      onToggle: () => { 
+        setHighContrast(!highContrast); 
+        playClick(); 
+      } 
+    },
   ];
 
   const handleVolumeChange = useCallback((value: number) => {

@@ -15,6 +15,7 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface WindowProps {
   id: WindowId;
+  instanceId?: string;
   title: string;
   /** Legacy emoji icon */
   icon: string;
@@ -28,6 +29,7 @@ interface WindowProps {
 
 export default function Window({
   id,
+  instanceId,
   title,
   icon,
   fluentIcon,
@@ -48,7 +50,8 @@ export default function Window({
     stack,
   } = useOS();
   const { playClick } = useSound();
-  const win = getWindow(id);
+  const targetId = instanceId || id;
+  const win = getWindow(targetId);
 
   const dragControls = useDragControls();
   const windowRef = useRef<HTMLDivElement>(null);
@@ -61,12 +64,12 @@ export default function Window({
   // Focus trap for the window
   const focusTrapRef = useFocusTrap({
     enabled: win?.isOpen && !win?.isMinimized,
-    onEscape: () => minimizeWindow(id),
+    onEscape: () => minimizeWindow(targetId),
     initialFocusRef: windowRef,
   });
 
   // A window is focused if it is the topmost entry in the z-index stack
-  const isFocused = stack[stack.length - 1] === id;
+  const isFocused = stack[stack.length - 1] === targetId;
 
   /* ── Sync store -> motion values when changed externally ────────
      (snap, maximize, center-on-open). Skip while dragging. */
@@ -80,11 +83,11 @@ export default function Window({
   const onTitlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if ((e.target as HTMLElement).closest(".os-traffic-light")) return;
-      focusWindow(id);
+      focusWindow(targetId);
       // Hand off pointer to framer-motion drag controls
       (dragControls as any).start(e.nativeEvent);
     },
-    [id, focusWindow, dragControls]
+    [targetId, focusWindow, dragControls]
   );
 
   const onDragEnd = useCallback(
@@ -104,9 +107,9 @@ export default function Window({
       const finalX = Math.max(0, Math.min(newX, maxX));
       const finalY = Math.max(0, Math.min(newY, maxY));
       
-      moveWindow(id, finalX, finalY);
+      moveWindow(targetId, finalX, finalY);
     },
-    [id, win, moveWindow, defaultW, defaultH]
+    [targetId, win, moveWindow, defaultW, defaultH]
   );
 
   // Center on first open
@@ -114,7 +117,7 @@ export default function Window({
     if (win?.isOpen && win.x === 0 && win.y === 0) {
       const cx = Math.max(40, (window.innerWidth - defaultW) / 2);
       const cy = Math.max(40, (window.innerHeight - defaultH - 48) / 2);
-      moveWindow(id, cx, cy);
+      moveWindow(targetId, cx, cy);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [win?.isOpen]);
@@ -126,14 +129,14 @@ export default function Window({
         if (entry.target === windowRef.current) {
           const { width, height } = entry.contentRect;
           if (width !== win?.width || height !== win?.height) {
-            resizeWindow(id, width, height);
+            resizeWindow(targetId, width, height);
           }
         }
       }
     });
     if (windowRef.current) observer.observe(windowRef.current);
     return () => observer.disconnect();
-  }, [id, win?.width, win?.height, resizeWindow]);
+  }, [targetId, win?.width, win?.height, resizeWindow]);
 
   if (!win || !win.isOpen) return null;
 
@@ -145,7 +148,7 @@ export default function Window({
             windowRef.current = el;
             if (focusTrapRef.current) focusTrapRef.current = el;
           }}
-          key={id}
+          key={targetId}
           className={`os-window${isFocused ? " focused" : ""}`}
           drag
           dragControls={dragControls}
@@ -174,8 +177,8 @@ export default function Window({
             minWidth: 300,
             minHeight: 200,
           }}
-          onMouseDown={() => focusWindow(id)}
-          onPointerDown={() => focusWindow(id)}
+          onMouseDown={() => focusWindow(targetId)}
+          onPointerDown={() => focusWindow(targetId)}
           role="dialog"
           aria-modal="true"
           aria-label={title}
@@ -185,30 +188,30 @@ export default function Window({
           <div className="os-titlebar" onPointerDown={onTitlePointerDown}>
             <div className="os-traffic-lights">
               <button
-                id={`${id}-close`}
+                id={`${targetId}-close`}
                 className="os-traffic-light close"
-                onClick={() => { playClick(); closeWindow(id); }}
+                onClick={() => { playClick(); closeWindow(targetId); }}
                 title="Close"
                 aria-label="Close window"
               >
                 ✕
               </button>
               <button
-                id={`${id}-minimize`}
+                id={`${targetId}-minimize`}
                 className="os-traffic-light min"
-                onClick={() => { playClick(); minimizeWindow(id); }}
+                onClick={() => { playClick(); minimizeWindow(targetId); }}
                 title="Minimize"
                 aria-label="Minimize window"
               >
                 −
               </button>
               <button
-                id={`${id}-maximize`}
+                id={`${targetId}-maximize`}
                 className="os-traffic-light max"
                 onClick={(e) => {
                   playClick();
                   e.stopPropagation();
-                  maximizeWindow(id);
+                  maximizeWindow(targetId);
                 }}
                 title="Maximize"
                 aria-label="Maximize window"

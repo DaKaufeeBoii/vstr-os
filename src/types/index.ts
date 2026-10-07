@@ -60,7 +60,9 @@ export type WindowId =
   | "photo_viewer"
   | "disk_cleanup"
   | "desktop_pet"
-  | "password_cracker";
+  | "password_cracker"
+  | "notepad"
+  | "guestbook";
 
 export interface WindowConfig {
   id: WindowId;
@@ -71,12 +73,20 @@ export interface WindowConfig {
   fluentIcon?: string;
   defaultW: number;
   defaultH: number;
+  allowMultipleInstances?: boolean;
 }
 
 export type SnapZone = "left" | "right" | "top" | "bottom" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "maximize" | null;
 
+export interface Workspace {
+  id: number;
+  name: string;
+}
+
 export interface WindowState {
+  instanceId: string;
   id: WindowId;
+  title?: string;
   isOpen: boolean;
   isMinimized: boolean;
   x: number;
@@ -86,10 +96,14 @@ export interface WindowState {
   zIndex: number;
   hasBeenOpened: boolean;
   snapZone?: SnapZone;
+  desktopId?: number;
+  isSticky?: boolean;
+  customData?: Record<string, any>;
 }
 
 export interface OSUIState {
   isExposéOpen: boolean;
   isCommandPaletteOpen: boolean;
   isTerminalDrawerOpen: boolean;
+  isWidgetBoardOpen?: boolean;
 }

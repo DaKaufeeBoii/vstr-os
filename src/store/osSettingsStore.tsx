@@ -33,6 +33,8 @@ interface OSSettingsState {
   performanceMode:  boolean;
   volume:           number;
   brightness:       number;
+  theme:            string;
+  highContrast:     boolean;
   notifications:    OSNotification[];
   unlockedMissions: string[];
 }
@@ -43,6 +45,8 @@ type OSSettingsAction =
   | { type: "SET_PERF_MODE";       enabled: boolean }
   | { type: "SET_VOLUME";          volume: number }
   | { type: "SET_BRIGHTNESS";      brightness: number }
+  | { type: "SET_THEME";           theme: string }
+  | { type: "SET_HIGH_CONTRAST";   enabled: boolean }
   | { type: "ADD_NOTIFICATION";    notification: OSNotification }
   | { type: "DISMISS_NOTIFICATION"; notificationId: string }
   | { type: "UNLOCK_MISSION";      missionId: string }
@@ -57,6 +61,8 @@ const KEYS = {
   perfMode:       "vstr_perf_mode",
   volume:         "vstr_volume",
   brightness:     "vstr_brightness",
+  theme:          "vstr_theme",
+  highContrast:   "vstr_high_contrast",
 } as const;
 
 const VALID_VIDEOS: VideoWallpaperId[] = ["dawn", "lake", "rayquaza", "yuji-sleepy", "none"];
@@ -69,6 +75,8 @@ function buildInitial(): OSSettingsState {
     performanceMode:  false,
     volume:           0.7,
     brightness:       0.8,
+    theme:            "anime",
+    highContrast:     false,
     notifications:    [],
     unlockedMissions: [],
   };
@@ -126,6 +134,23 @@ function reducer(state: OSSettingsState, action: OSSettingsAction): OSSettingsSt
     case "SET_MISSIONS":
       return { ...state, unlockedMissions: action.missionIds };
 
+    case "SET_THEME":
+      if (typeof window !== "undefined") {
+        localStorage.setItem(KEYS.theme, action.theme);
+        document.documentElement.dataset.theme = action.theme;
+      }
+      return { ...state, theme: action.theme, highContrast: action.theme === "high-contrast" };
+
+    case "SET_HIGH_CONTRAST": {
+      const theme = action.enabled ? "high-contrast" : "anime";
+      if (typeof window !== "undefined") {
+        localStorage.setItem(KEYS.highContrast, String(action.enabled));
+        localStorage.setItem(KEYS.theme, theme);
+        document.documentElement.dataset.theme = theme;
+      }
+      return { ...state, highContrast: action.enabled, theme };
+    }
+
     default:
       return state;
   }
@@ -139,6 +164,8 @@ interface OSSettingsContextValue {
   performanceMode:  boolean;
   volume:           number;
   brightness:       number;
+  theme:            string;
+  highContrast:     boolean;
   notifications:    OSNotification[];
   unlockedMissions: string[];
 
@@ -148,6 +175,8 @@ interface OSSettingsContextValue {
   setPerformanceMode:   (enabled: boolean) => void;
   setVolume:            (volume: number) => void;
   setBrightness:        (brightness: number) => void;
+  setTheme:             (theme: string) => void;
+  setHighContrast:      (enabled: boolean) => void;
   addNotification:      (title: string, description: string, icon: string) => void;
   dismissNotification:  (id: string) => void;
   unlockMission:        (id: string) => void;
@@ -209,6 +238,14 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     dispatch({ type: "SET_BRIGHTNESS", brightness });
   }, []);
 
+  const setTheme = useCallback((theme: string) => {
+    dispatch({ type: "SET_THEME", theme });
+  }, []);
+
+  const setHighContrast = useCallback((enabled: boolean) => {
+    dispatch({ type: "SET_HIGH_CONTRAST", enabled });
+  }, []);
+
   /* — Hydrate from localStorage on mount — */
   useEffect(() => {
     // Wallpaper
@@ -237,6 +274,21 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     if (savedBrightness) {
       const bri = parseFloat(savedBrightness);
       if (!isNaN(bri)) dispatch({ type: "SET_BRIGHTNESS", brightness: bri });
+    }
+
+    // Theme & High Contrast
+    const savedTheme = localStorage.getItem(KEYS.theme);
+    const savedHighContrast = localStorage.getItem(KEYS.highContrast);
+    if (savedHighContrast === "true" || savedTheme === "high-contrast") {
+      dispatch({ type: "SET_HIGH_CONTRAST", enabled: true });
+      if (typeof document !== "undefined") {
+        document.documentElement.dataset.theme = "high-contrast";
+      }
+    } else if (savedTheme) {
+      dispatch({ type: "SET_THEME", theme: savedTheme });
+      if (typeof document !== "undefined") {
+        document.documentElement.dataset.theme = savedTheme;
+      }
     }
 
     // Missions
@@ -274,9 +326,12 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
       performanceMode:   state.performanceMode,
       volume:            state.volume,
       brightness:        state.brightness,
+      theme:             state.theme,
+      highContrast:      state.highContrast,
       notifications:     state.notifications,
       unlockedMissions:  state.unlockedMissions,
       setWallpaper, setVideoWallpaper, setPerformanceMode, setVolume, setBrightness,
+      setTheme, setHighContrast,
       addNotification, dismissNotification, unlockMission,
     }}>
       {children}

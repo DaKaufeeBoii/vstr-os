@@ -32,13 +32,23 @@ export default function DesktopIcon({ id, icon, fluentIcon, label }: DesktopIcon
       className={`desktop-icon${isOpen ? " selected" : ""}`}
       id={`desktop-icon-${id}`}
       onDoubleClick={handleOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleOpen();
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label={`Open ${label}`}
+      aria-pressed={isOpen}
       drag
       dragMomentum={false}
       dragElastic={0.1}
       whileHover={{ scale: 1.07 }}
       whileDrag={{ scale: 1.1, zIndex: 50 }}
       whileTap={{ scale: 0.93 }}
-      title={`Double-click to open ${label}`}
+      title={`Double-click or press Enter to open ${label}`}
     >
       <motion.div
         className="desktop-icon-emoji"

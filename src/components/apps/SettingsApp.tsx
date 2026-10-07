@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useOSSettings } from "@/store/osSettingsStore";
 import type { VideoWallpaperId } from "@/store/osSettingsStore";
+import { appRegistry } from "@/lib/sdk/appRegistry";
+import type { AppManifest } from "@/lib/sdk/appManifest";
+import { OsIcon } from "@/components/icons/OsIcon";
 
 interface LiveWallpaperOption {
   id: Exclude<VideoWallpaperId, "none">;
@@ -50,10 +53,52 @@ export default function SettingsApp() {
     performanceMode, setPerformanceMode,
     volume, setVolume,
     brightness, setBrightness,
+    highContrast, setHighContrast,
+    addNotification,
   } = useOSSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // App SDK / Registry state
+  const [apps, setApps] = useState<AppManifest[]>(() => appRegistry.listApps());
+  const [appFilter, setAppFilter] = useState<string>("all");
+  const [pluginJson, setPluginJson] = useState<string>(`{
+  "id": "matrix-screensaver",
+  "name": "Matrix Rain",
+  "version": "1.0.0",
+  "description": "Digital green rain animation simulator with falling glyph speed controls.",
+  "author": "Community Contributor",
+  "category": "utilities",
+  "icon": "🟢",
+  "permissions": ["system:telemetry", "notifications"],
+  "defaultConfig": {
+    "width": 640,
+    "height": 480
+  }
+}`);
+  const [pluginStatus, setPluginStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    return appRegistry.subscribe(() => {
+      setApps(appRegistry.listApps());
+    });
+  }, []);
+
+  const handleInstallPlugin = () => {
+    try {
+      const parsed = JSON.parse(pluginJson);
+      if (!parsed.id || !parsed.name || !parsed.version) {
+        setPluginStatus("Error: Manifest must contain 'id', 'name', and 'version'.");
+        return;
+      }
+      appRegistry.registerApp(parsed);
+      setPluginStatus(`Successfully registered "${parsed.name}" v${parsed.version}!`);
+      addNotification?.("Plugin Registered", `Loaded "${parsed.name}" manifest successfully`, "📦");
+    } catch (e: any) {
+      setPluginStatus(`JSON Error: ${e.message}`);
+    }
+  };
 
   const presets = [
     { path: "/wallpapers/static/os_wallpaper.png", name: "VSTR-OS Default" },
@@ -217,6 +262,57 @@ export default function SettingsApp() {
               />
             </div>
           </div>
+        </div>
+      </div>
+
+      <hr style={{ border: "none", borderTop: "1px solid var(--os-border)", margin: 0 }} />
+
+      {/* ── Accessibility & Contrast ──────────────────────────────── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div>
+          {sectionLabel("♿ Accessibility & Contrast")}
+          <p style={{ margin: "0 0 14px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
+            Configure high-contrast themes conforming to WCAG 2.1 AAA contrast guidelines (≥ 7:1 ratio) with enhanced keyboard focus indicators.
+          </p>
+        </div>
+
+        <div style={{
+          background: "rgba(255,255,255,0.02)",
+          border: `1px solid ${highContrast ? "#ffff00" : "var(--os-border)"}`,
+          borderRadius: 8,
+          padding: "14px 16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 16,
+        }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: highContrast ? "#ffff00" : "var(--os-text)", marginBottom: 4 }}>
+              High-Contrast Mode (WCAG AAA)
+            </div>
+            <div style={{ fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.4 }}>
+              Stark black background, pure neon yellow active focus states, and high visibility borders for low-vision navigation.
+            </div>
+          </div>
+
+          <button
+            onClick={() => setHighContrast(!highContrast)}
+            style={{
+              padding: "8px 16px",
+              background: highContrast ? "#ffff00" : "rgba(255,255,255,0.08)",
+              color: highContrast ? "#000000" : "var(--os-text)",
+              border: `1px solid ${highContrast ? "#ffff00" : "var(--os-border)"}`,
+              borderRadius: 6,
+              fontWeight: 700,
+              fontSize: 12,
+              fontFamily: "'JetBrains Mono', monospace",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {highContrast ? "ENABLED" : "ENABLE"}
+          </button>
         </div>
       </div>
 
@@ -529,6 +625,180 @@ export default function SettingsApp() {
         >
           {performanceMode ? "⏸ Video Paused (Performance Mode ON)" : "▶ Pause Video (Performance Mode)"}
         </button>
+      </div>
+
+      <hr style={{ border: "none", borderTop: "1px solid var(--os-border)", margin: 0 }} />
+
+      {/* ── d. Application SDK & Plugins ───────────────────────────── */}
+      <div>
+        {sectionLabel("📦 Application SDK & Plugin Registry")}
+        <p style={{ margin: "0 0 12px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
+          View installed system applications, inspect capability permissions (VFS, Windowing, Notifications), or register external dynamic plugins.
+        </p>
+
+        {/* Filter pills */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
+          {["all", "developer", "productivity", "system", "network", "utilities"].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setAppFilter(cat)}
+              style={{
+                padding: "4px 10px",
+                fontSize: 11,
+                borderRadius: 4,
+                cursor: "pointer",
+                background: appFilter === cat ? "var(--os-amber)" : "rgba(255,255,255,0.05)",
+                color: appFilter === cat ? "#000" : "var(--os-text-muted)",
+                fontWeight: appFilter === cat ? 700 : 500,
+                border: "1px solid rgba(255,255,255,0.1)",
+                fontFamily: "'JetBrains Mono', monospace",
+                textTransform: "capitalize",
+              }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Installed Applications List */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+          {apps
+            .filter((a) => appFilter === "all" || a.category === appFilter)
+            .map((app) => (
+              <div
+                key={app.id}
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid var(--os-border)",
+                  borderRadius: 8,
+                  padding: "10px 14px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {app.fluentIcon ? (
+                      <OsIcon name={app.fluentIcon} size="sm" />
+                    ) : (
+                      <span style={{ fontSize: 18 }}>{app.icon}</span>
+                    )}
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--os-text)" }}>
+                        {app.name} <span style={{ fontSize: 10, color: "var(--os-text-muted)", fontWeight: 400 }}>v{app.version}</span>
+                      </div>
+                      <div style={{ fontSize: 10, color: "var(--os-text-muted)" }}>
+                        By {app.author} • {app.category}
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      background: "rgba(245,158,11,0.1)",
+                      color: "var(--os-amber)",
+                      border: "1px solid rgba(245,158,11,0.3)",
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
+                    READY
+                  </span>
+                </div>
+
+                <div style={{ fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.4 }}>
+                  {app.description}
+                </div>
+
+                {/* Permissions Granted Chips */}
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
+                  <span style={{ fontSize: 9, color: "var(--os-text-muted)", marginRight: 4 }}>PERMISSIONS:</span>
+                  {app.permissions.length === 0 ? (
+                    <span style={{ fontSize: 9, color: "var(--os-text-muted)" }}>None (Sandboxed)</span>
+                  ) : (
+                    app.permissions.map((p) => (
+                      <span
+                        key={p}
+                        style={{
+                          fontSize: 9,
+                          padding: "1px 6px",
+                          borderRadius: 3,
+                          background: "rgba(255,255,255,0.06)",
+                          color: "var(--os-cyan)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          fontFamily: "'JetBrains Mono', monospace",
+                        }}
+                      >
+                        {p}
+                      </span>
+                    ))
+                  )}
+                </div>
+              </div>
+            ))}
+        </div>
+
+        {/* Plugin Manifest Loader */}
+        <div style={{
+          background: "rgba(255,255,255,0.02)",
+          border: "1px solid var(--os-border)",
+          borderRadius: 8,
+          padding: "12px",
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--os-text)", marginBottom: 6 }}>
+            ⚙️ Register Dynamic Plugin Manifest (JSON)
+          </div>
+          <p style={{ margin: "0 0 8px", fontSize: 10, color: "var(--os-text-muted)" }}>
+            Extend VSTR-OS at runtime by registering a sandboxed Application SDK manifest.
+          </p>
+          <textarea
+            value={pluginJson}
+            onChange={(e) => setPluginJson(e.target.value)}
+            rows={7}
+            style={{
+              width: "100%",
+              background: "#080c14",
+              border: "1px solid var(--os-border)",
+              borderRadius: 6,
+              color: "#38bdf8",
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10.5,
+              padding: "8px",
+              boxSizing: "border-box",
+              resize: "vertical",
+            }}
+          />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+            {pluginStatus && (
+              <span style={{
+                fontSize: 10,
+                color: pluginStatus.startsWith("Error") || pluginStatus.startsWith("JSON") ? "#ef4444" : "#22c55e",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
+                {pluginStatus}
+              </span>
+            )}
+            <button
+              onClick={handleInstallPlugin}
+              style={{
+                marginLeft: "auto",
+                padding: "6px 14px",
+                background: "var(--os-amber)",
+                color: "#000",
+                border: "none",
+                borderRadius: 4,
+                fontWeight: 700,
+                fontSize: 11,
+                cursor: "pointer",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+            >
+              + Install Manifest
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -281,6 +281,11 @@ html, body {
   background: var(--os-primary-dim);
   transform: translateY(-2px);
 }
+.desktop-icon:focus-visible {
+  outline: 2px solid var(--os-primary);
+  outline-offset: 2px;
+  background: var(--os-primary-dim);
+}
 .desktop-icon.selected {
   background: var(--os-primary-dim);
   border: 1px solid var(--os-primary);
@@ -941,6 +946,61 @@ html, body {
     --os-amber: #0078d4;
     --os-jade: #005a9e;
   }
+
+  [data-theme="high-contrast"] {
+    --color-bg: #000000;
+    --color-surface: #000000;
+    --color-border: #ffffff;
+    --color-glass: #000000;
+    --os-bg: #000000;
+    --os-surface: #050505;
+    --os-border: #ffffff;
+    --os-glass: #000000;
+    --os-primary: #ffff00;
+    --os-primary-hover: #ffff66;
+    --os-secondary: #00ffff;
+    --os-amber: #ffff00;
+    --os-amber-dim: rgba(255, 255, 0, 0.3);
+    --os-amber-glow: rgba(255, 255, 0, 0.2);
+    --os-jade: #00ffff;
+    --os-cyan: #00ffff;
+    --os-text: #ffffff;
+    --os-text-muted: #f1f5f9;
+    --os-text-dim: #cbd5e1;
+    --mica-base: #000000;
+    --acrylic: #000000;
+    --acrylic-strong: #000000;
+  }
+}
+
+/* ── High Contrast Accessibility Rules ────────────────────────────── */
+[data-theme="high-contrast"] .os-window {
+  border: 2px solid #ffffff !important;
+  box-shadow: none !important;
+  background: #000000 !important;
+}
+
+[data-theme="high-contrast"] .os-window.focused {
+  border: 2px solid #ffff00 !important;
+}
+
+[data-theme="high-contrast"] button:focus-visible,
+[data-theme="high-contrast"] input:focus-visible,
+[data-theme="high-contrast"] textarea:focus-visible,
+[data-theme="high-contrast"] [tabindex]:focus-visible {
+  outline: 3px solid #ffff00 !important;
+  outline-offset: 2px !important;
+}
+
+[data-theme="high-contrast"] .desktop-icon {
+  background: #000000 !important;
+  border: 1px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-theme="high-contrast"] .desktop-icon-label {
+  color: #ffff00 !important;
+  font-weight: 700 !important;
 }
 
 /* ── Snap Overlay Visual Indicators ───────────────────────────────── */

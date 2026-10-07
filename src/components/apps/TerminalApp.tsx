@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useOS, WINDOW_CONFIGS } from "@/store/windowStore";
+import { useOSSettings } from "@/store/osSettingsStore";
+import * as vfs from "@/lib/vfs/vfsEngine";
 
 interface TerminalLine {
   type: "input" | "output" | "error" | "success" | "dim";
@@ -10,12 +13,20 @@ interface TerminalLine {
 /* ── Static text blobs ─────────────────────────────────────────────── */
 const HELP_TEXT = `
 Available commands:
-  whoami            — about Sai Tarun
-  ls / dir          — list all sections
-  ls projects/      — list projects
-  cat skills        — print skill stack
-  contact           — show contact info
-  resume            — resume page info
+  whoami            — view user & developer identity
+  ls / dir [path]   — list directory contents (VFS backed)
+  cd <dir>          — change current working directory
+  pwd               — print current working directory
+  cat <file>        — print file contents
+  notepad [file]    — open GUI editor (alias: nano)
+  mkdir <name>      — create new directory
+  touch <file>      — create empty file
+  rm [-r] <file>    — delete file or directory
+  tree              — display ASCII hierarchy of current path
+  echo <txt> > <f>  — redirect text to file (> overwrite, >> append)
+  sudo <cmd> / su   — elevate privileges to root
+  chmod <mode> <f>  — change file permissions (octal)
+  grep <pattern>    — search portfolio corpus
   neofetch          — display system information
   systeminfo        — detailed OS system report
   ipconfig          — network adapter configuration
@@ -24,13 +35,6 @@ Available commands:
   ping <host>       — simulate ICMP ping
   ver               — Windows version string
   wmic              — WMI hardware overview
-  get-process       — PowerShell process list
-  tree              — ASCII directory tree
-  mkdir <name>      — create virtual directory
-  cd <dir>          — change directory
-  grep <pattern>    — search portfolio content
-  findstr <pattern> — Windows alias for grep
-  find <pattern>    — find matching projects
   matrix            — toggle Matrix rain mode
   color <code>      — change terminal accent color
   play flappy       — launch Flappy.exe
@@ -38,13 +42,12 @@ Available commands:
   open disk_cleanup — disk cleanup utility
   start desktop_pet — desktop pet companion
   crack password    — PwnTool 3.0 hacking sim
-  blue-screen       — trigger BSOD easter egg
-  bsod              — alias for blue-screen
+  blue-screen       — trigger BSOD crash debugger (alias: bsod)
   clear / cls       — clear the screen
   help              — show this help
 `.trim();
 
-const WHOAMI = `
+const WHOAMI_BIO = `
 > Sai Tarun Reddy Velagala
 > CS Undergrad & AI Developer — Hyderabad, Telangana
 > KG Reddy College of Engg & Technology (Expected: 2027)
@@ -55,59 +58,16 @@ const WHOAMI = `
 > Currently: Secretary, Student Council Editorial Board
 `.trim();
 
-const LS_ROOT = [
-  "drwxr-xr-x  about/",
-  "drwxr-xr-x  projects/",
-  "drwxr-xr-x  skills/",
-  "drwxr-xr-x  experience/",
-  "drwxr-xr-x  achievements/",
-  "-rw-r--r--   contact.txt",
-  "-rw-r--r--   resume         (open /resume in browser)",
-  "-rwx------   [hidden easter eggs — explore to find them]",
-].join("\n");
+const VER_STRING = `Microsoft Windows [Version 10.0.22631.3880]
+(c) Microsoft Corporation. All rights reserved. [VSTR-OS Shell v2.0.0]`;
 
-const DIR_ROOT = () => {
-  const now = new Date();
-  const date = `${now.getDate().toString().padStart(2, "0")}/${(now.getMonth() + 1).toString().padStart(2, "0")}/${now.getFullYear()}`;
-  const time = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-  return [
-    ` Directory of C:\\Users\\saitarun\\portfolio`,
-    ``,
-    `${date}  ${time}    <DIR>          .`,
-    `${date}  ${time}    <DIR>          ..`,
-    `${date}  ${time}    <DIR>          about`,
-    `${date}  ${time}    <DIR>          projects`,
-    `${date}  ${time}    <DIR>          skills`,
-    `${date}  ${time}    <DIR>          experience`,
-    `${date}  ${time}    <DIR>          achievements`,
-    `${date}  ${time}               842 contact.txt`,
-    `${date}  ${time}             1,779 README.md`,
-    `               2 File(s)          2,621 bytes`,
-    `               5 Dir(s)   ∞ bytes free`,
-  ].join("\n");
-};
-
-const LS_PROJECTS = [
-  "-rw-r--r--   VSTR-OS        (Interactive OS Portfolio)",
-  "-rw-r--r--   EventOS        (Event Management Platform)",
-  "-rw-r--r--   MailGenius     (AI Email Automation Tool)",
-  "-rw-r--r--   EchoLens       (Real-Time Sentiment Dashboard)",
-].join("\n");
-
-const CAT_SKILLS = `
-Languages:    Python · JavaScript · HTML · CSS · TypeScript
-Frontend:     React.js · Next.js · Tailwind CSS
-Backend:      Firebase · REST APIs · DBMS
-AI & Tools:   NLP · Prompt Engineering · WatsonX · Chatbot Dev
-Workflow:     Git · GitHub · Vercel · UI/UX Design
-`.trim();
-
-const CONTACT = `
-📧  saitarunrdy@gmail.com
-📞  +91 7043692980
-📍  Hyderabad, Telangana, India
-🔗  LinkedIn  →  linkedin.com/in/sai-tarun-reddy
-🐙  GitHub    →  github.com/DaKaufeeBoii
+const WMIC_OUTPUT = `
+Processor  : Virtual AI Engine, 2 Cores, 3.20 GHz
+RAM        : 16384 MB
+Disk       : 512 GB IndexedDB VFS (VSTR-STORAGE-0)
+GPU        : Virtual Render Engine (WebGL 2.0)
+BIOS       : VSTR-BIOS v2.0 (2026-10-07)
+Board      : Portfolio Systems MainBoard v2
 `.trim();
 
 const SYSTEMINFO = () => `
@@ -122,10 +82,7 @@ System Type:               x64-based PC
 Processor:                 Virtual AI Engine @ 3.20GHz, 2 Core(s)
 Total Physical Memory:     16,384 MB
 Available Physical Memory: 12,742 MB
-Page File Space:           32,768 MB
-Boot Device:               \\Device\\HarddiskVolume3
-System Locale:             en-in;English (India)
-Time Zone:                 (UTC+05:30) Chennai, Kolkata, Mumbai
+Storage Engine:            IndexedDB Persistent VFS Driver
 Uptime:                    ${Math.floor(performance.now() / 1000)}s
 `.trim();
 
@@ -139,101 +96,35 @@ Ethernet adapter vEthernet (Portfolio LAN):
    IPv4 Address. . . . . . . . . . . : 192.168.1.42
    Subnet Mask . . . . . . . . . . . : 255.255.255.0
    Default Gateway . . . . . . . . . : 192.168.1.1
-
-Wireless LAN adapter Wi-Fi:
-
-   Connection-specific DNS Suffix  . :
-   IPv4 Address. . . . . . . . . . . : 10.0.0.77
-   Subnet Mask . . . . . . . . . . . : 255.255.0.0
-   Default Gateway . . . . . . . . . : 10.0.0.1
-   DNS Servers . . . . . . . . . . . : 8.8.8.8
-                                       1.1.1.1
-`.trim();
-
-const IPCONFIG_ALL = `
-${IPCONFIG}
-
-   DHCP Enabled. . . . . . . . . . . : Yes
-   Lease Obtained. . . . . . . . . . : ${new Date().toLocaleDateString("en-IN")} 09:14:22 AM
-   Lease Expires . . . . . . . . . . : ${new Date(Date.now() + 86400000).toLocaleDateString("en-IN")} 09:14:22 AM
-   Physical Address. . . . . . . . . : 3C-52-82-1A-B7-D9
 `.trim();
 
 const TASKLIST_HEADER = `
 Image Name                     PID Session Name        Session#    Mem Usage
 ========================= ======== ================ =========== ============`;
 
-const VER_STRING = `Microsoft Windows [Version 10.0.22631.3880]
-(c) Microsoft Corporation. All rights reserved. [VSTR-OS Shell v2.0.0]`;
-
-const TREE_OUTPUT = `
-C:\\Users\\saitarun\\portfolio
-├── about\\
-│   └── profile.json
-├── projects\\
-│   ├── VSTR-OS.json
-│   ├── EventOS.json
-│   ├── MailGenius.json
-│   └── EchoLens.json
-├── skills\\
-│   └── stack.json
-├── experience\\
-│   └── timeline.log
-├── achievements\\
-│   └── awards.txt
-├── contact.txt
-└── README.md
-`.trim();
-
-const WMIC_OUTPUT = `
-Processor  : Virtual AI Engine, 2 Cores, 3.20 GHz
-RAM        : 16384 MB
-Disk       : 512 GB SSD (VSTR-DISK-0)
-GPU        : Virtual Render Engine (WebGL 2.0)
-BIOS       : VSTR-BIOS v1.0 (2025-01-01)
-Board      : Portfolio Systems MainBoard v2
-`.trim();
-
-const GET_PROCESS = (openWindows: string[]) => {
-  const rows = [
-    ["System", "4", "0.0", "0.1"],
-    ["vstr-os.exe", "1024", "1.2", "48.3"],
-    ["next-server.exe", "2048", "3.4", "92.1"],
-    ...openWindows.map((name, i) => [
-      `${name}.exe`,
-      String(3000 + i * 128),
-      (Math.random() * 2).toFixed(1),
-      (Math.random() * 40 + 10).toFixed(1),
-    ]),
-  ];
-  const header = `Handles  NPM(K)    PM(K)      WS(K) CPU(s)     Id  SI ProcessName\n-------  ------    -----      ----- ------     --  -- -----------`;
-  const rowStr = rows
-    .map(([name, pid, cpu, mem]) =>
-      `    ${Math.floor(Math.random() * 500)}      ${Math.floor(Math.random() * 50)}   ${Math.floor(Math.random() * 20000)}     ${Math.floor(Math.random() * 80000)} ${cpu.padStart(6)}  ${pid.padStart(5)}   0 ${name}`
-    )
-    .join("\n");
-  return `${header}\n${rowStr}`;
-};
-
 const BOOT_LINES: TerminalLine[] = [
-  { type: "success", text: "VSTR-OS Terminal v2.0.0" },
-  { type: "dim", text: "Copyright © 2025 Sai Tarun Reddy Velagala" },
-  { type: "dim", text: "─".repeat(46) },
-  { type: "dim", text: 'Type "help" to see available commands.' },
+  { type: "success", text: "VSTR-OS Terminal v2.0.0 [IndexedDB VFS Enabled]" },
+  { type: "dim", text: "Copyright © 2026 Sai Tarun Reddy Velagala" },
+  { type: "dim", text: "─".repeat(48) },
+  { type: "dim", text: 'Type "help" to see available commands. Try "ls", "cat README.md", or "notepad".' },
   { type: "dim", text: "" },
 ];
 
-import { useOS, WINDOW_CONFIGS } from "@/store/windowStore";
-import { useOSSettings } from "@/store/osSettingsStore";
+interface TerminalAppProps {
+  instanceId?: string;
+}
 
-export default function TerminalApp() {
+export default function TerminalApp({ instanceId = "terminal" }: TerminalAppProps = {}) {
   const { openWindow, windows } = useOS();
   const { unlockMission, unlockedMissions } = useOSSettings();
+
   const [lines, setLines] = useState<TerminalLine[]>(BOOT_LINES);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
-  const [cwd, setCwd] = useState("C:\\Users\\saitarun\\portfolio");
+  const [cwd, setCwd] = useState("/home/saitarun/portfolio");
+  const [currentUser, setCurrentUser] = useState<"guest" | "root">("guest");
+  const [awaitingSudoPass, setAwaitingSudoPass] = useState<{ pendingCmd?: string } | null>(null);
   const [matrixMode, setMatrixMode] = useState(false);
   const [accentColor, setAccentColor] = useState("var(--os-amber)");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -248,67 +139,311 @@ export default function TerminalApp() {
   }, []);
 
   const runCommand = useCallback(
-    (raw: string) => {
-      const cmd = raw.trim().toLowerCase();
+    async (raw: string) => {
       const rawTrimmed = raw.trim();
-      push({ type: "input", text: `PS ${cwd}> ${rawTrimmed}` });
 
-      if (!cmd) return;
+      // Handle password entry for sudo
+      if (awaitingSudoPass) {
+        push({ type: "input", text: `[sudo] password for ${currentUser}: ********` });
+        if (rawTrimmed.toLowerCase() === "ikarus" || rawTrimmed.toLowerCase() === "ikarus2024") {
+          setCurrentUser("root");
+          push({ type: "success", text: "Access granted. Session elevated to root (Ring 0)." });
+          unlockMission("terminal-hacker");
+          unlockMission("root-access");
+          if (awaitingSudoPass.pendingCmd) {
+            const pending = awaitingSudoPass.pendingCmd;
+            setAwaitingSudoPass(null);
+            await runCommand(pending);
+            return;
+          }
+        } else {
+          push({ type: "error", text: "sudo: 1 incorrect password attempt. Access denied." });
+        }
+        setAwaitingSudoPass(null);
+        push({ type: "dim", text: "" });
+        return;
+      }
+
+      const promptLabel = currentUser === "root" ? `PS [ADMIN] ${cwd}> ` : `PS ${cwd}> `;
+      push({ type: "input", text: `${promptLabel}${rawTrimmed}` });
+
+      if (!rawTrimmed) return;
 
       setHistory((h) => [rawTrimmed, ...h]);
       setHistIdx(-1);
 
-      // ── Navigation helpers ──────────────────────────────────────────
-      if (cmd === "help") {
-        push({ type: "output", text: HELP_TEXT });
+      const cmdLower = rawTrimmed.toLowerCase();
+      const parts = rawTrimmed.split(/\s+/);
+      const mainCmd = parts[0].toLowerCase();
+      const args = parts.slice(1);
 
-      } else if (cmd === "whoami") {
-        push({ type: "output", text: WHOAMI });
+      // ── Output Redirection (echo "..." > file / >> file) ────────────
+      if (rawTrimmed.includes(">")) {
+        const isAppend = rawTrimmed.includes(">>");
+        const delimiter = isAppend ? ">>" : ">";
+        const [cmdPart, filePart] = rawTrimmed.split(delimiter);
+        if (filePart && filePart.trim()) {
+          const targetPath = vfs.resolvePath(cwd, filePart.trim());
+          let textToWrite = cmdPart.replace(/^echo\s*/i, "").trim();
+          if (
+            (textToWrite.startsWith('"') && textToWrite.endsWith('"')) ||
+            (textToWrite.startsWith("'") && textToWrite.endsWith("'"))
+          ) {
+            textToWrite = textToWrite.slice(1, -1);
+          }
+          try {
+            let finalContent = textToWrite;
+            if (isAppend) {
+              try {
+                const existing = await vfs.readFile(targetPath, currentUser);
+                finalContent = existing + (existing.endsWith("\n") ? "" : "\n") + textToWrite;
+              } catch {
+                finalContent = textToWrite;
+              }
+            }
+            await vfs.writeFile(targetPath, finalContent, currentUser);
+            push({ type: "success", text: `Wrote output to ${targetPath}` });
+            push({ type: "dim", text: "" });
+            return;
+          } catch (err: any) {
+            push({ type: "error", text: err.message });
+            push({ type: "dim", text: "" });
+            return;
+          }
+        }
+      }
 
-      } else if (cmd === "ls" || cmd === "ls ." || cmd === "ls /" || cmd === "dir") {
-        if (cmd === "dir") {
-          push({ type: "success", text: DIR_ROOT() });
+      // ── Sudo / Su Elevation ─────────────────────────────────────────
+      if (mainCmd === "sudo" || mainCmd === "su") {
+        if (currentUser === "root") {
+          push({ type: "dim", text: "Already running as root superuser." });
+          if (args.length > 0) {
+            await runCommand(args.join(" "));
+            return;
+          }
         } else {
-          push({ type: "success", text: LS_ROOT });
+          push({ type: "output", text: `[sudo] password for ${currentUser}: ` });
+          setAwaitingSudoPass({ pendingCmd: args.length > 0 ? args.join(" ") : undefined });
+          return;
         }
 
-      } else if (cmd === "ls projects" || cmd === "ls projects/") {
-        push({ type: "success", text: LS_PROJECTS });
+      // ── Help ────────────────────────────────────────────────────────
+      } else if (mainCmd === "help") {
+        push({ type: "output", text: HELP_TEXT });
 
-      } else if (cmd === "cat skills" || cmd === "cat skills.txt") {
-        push({ type: "output", text: CAT_SKILLS });
+      // ── Whoami ──────────────────────────────────────────────────────
+      } else if (mainCmd === "whoami") {
+        push({
+          type: "output",
+          text: `Current Session: ${currentUser}@vstr-pc [${currentUser === "root" ? "Superuser" : "Standard User"}]\n\n${WHOAMI_BIO}`,
+        });
 
-      } else if (cmd === "contact" || cmd === "cat contact.txt") {
-        push({ type: "output", text: CONTACT });
+      // ── PWD ─────────────────────────────────────────────────────────
+      } else if (mainCmd === "pwd") {
+        push({ type: "output", text: cwd });
 
-      } else if (cmd === "clear" || cmd === "cls") {
+      // ── LS / DIR ────────────────────────────────────────────────────
+      } else if (mainCmd === "ls" || mainCmd === "dir") {
+        const targetPath = args[0] ? vfs.resolvePath(cwd, args[0]) : cwd;
+        try {
+          const items = await vfs.readDir(targetPath, currentUser);
+          if (items.length === 0) {
+            push({ type: "dim", text: "(directory is empty)" });
+          } else if (mainCmd === "dir") {
+            const rows = items.map((item) => {
+              const d = new Date(item.updatedAt);
+              const dateStr =
+                d.toLocaleDateString("en-GB") +
+                "  " +
+                d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+              const typeStr = item.type === "dir" ? "<DIR>          " : `${item.size.toString().padStart(8)} bytes`;
+              return `${dateStr}    ${typeStr} ${item.name}`;
+            });
+            push({
+              type: "success",
+              text: ` Directory of ${targetPath}\n\n` + rows.join("\n"),
+            });
+          } else {
+            const rows = items.map((item) => {
+              const perm = item.type === "dir" ? "d" : "-";
+              const rwx =
+                (item.permissions & 0o400 ? "r" : "-") +
+                (item.permissions & 0o200 ? "w" : "-") +
+                (item.permissions & 0o100 ? "x" : "-") +
+                (item.permissions & 0o040 ? "r" : "-") +
+                (item.permissions & 0o020 ? "w" : "-") +
+                (item.permissions & 0o010 ? "x" : "-") +
+                (item.permissions & 0o004 ? "r" : "-") +
+                (item.permissions & 0o002 ? "w" : "-") +
+                (item.permissions & 0o001 ? "x" : "-");
+              const size = item.size.toString().padStart(6);
+              const owner = item.owner.padEnd(5);
+              return `${perm}${rwx}  ${owner}  ${size}  ${item.name}${item.type === "dir" ? "/" : ""}`;
+            });
+            push({ type: "success", text: rows.join("\n") });
+          }
+        } catch (err: any) {
+          push({ type: "error", text: err.message });
+        }
+
+      // ── CD ──────────────────────────────────────────────────────────
+      } else if (mainCmd === "cd") {
+        const target = args[0] || "/home/saitarun/portfolio";
+        const resolved = vfs.resolvePath(cwd, target);
+        try {
+          const node = await vfs.stat(resolved);
+          if (!node) {
+            push({ type: "error", text: `cd: no such file or directory: ${target}` });
+          } else if (node.type !== "dir") {
+            push({ type: "error", text: `cd: not a directory: ${target}` });
+          } else if (!vfs.checkPermission(node, "x", currentUser)) {
+            push({ type: "error", text: `cd: permission denied: ${target}` });
+          } else {
+            setCwd(resolved);
+          }
+        } catch (err: any) {
+          push({ type: "error", text: err.message });
+        }
+
+      // ── CAT ─────────────────────────────────────────────────────────
+      } else if (mainCmd === "cat") {
+        if (!args[0]) {
+          push({ type: "error", text: "Usage: cat <filename>" });
+        } else {
+          const resolved = vfs.resolvePath(cwd, args[0]);
+          try {
+            const content = await vfs.readFile(resolved, currentUser);
+            push({ type: "output", text: content });
+            if (resolved.includes("flag.txt") && currentUser === "root") {
+              unlockMission("root-access");
+            }
+          } catch (err: any) {
+            push({ type: "error", text: err.message });
+          }
+        }
+
+      // ── MKDIR ───────────────────────────────────────────────────────
+      } else if (mainCmd === "mkdir") {
+        if (!args[0]) {
+          push({ type: "error", text: "Usage: mkdir <directory_name>" });
+        } else {
+          const resolved = vfs.resolvePath(cwd, args[0]);
+          try {
+            await vfs.mkdir(resolved, currentUser);
+            push({ type: "success", text: `Directory created: ${resolved}` });
+          } catch (err: any) {
+            push({ type: "error", text: err.message });
+          }
+        }
+
+      // ── TOUCH ───────────────────────────────────────────────────────
+      } else if (mainCmd === "touch") {
+        if (!args[0]) {
+          push({ type: "error", text: "Usage: touch <filename>" });
+        } else {
+          const resolved = vfs.resolvePath(cwd, args[0]);
+          try {
+            const existing = await vfs.stat(resolved);
+            if (!existing) {
+              await vfs.writeFile(resolved, "", currentUser);
+              push({ type: "success", text: `Created file: ${resolved}` });
+            } else {
+              push({ type: "dim", text: `Updated timestamp for ${resolved}` });
+            }
+          } catch (err: any) {
+            push({ type: "error", text: err.message });
+          }
+        }
+
+      // ── RM / DEL ────────────────────────────────────────────────────
+      } else if (mainCmd === "rm" || mainCmd === "del") {
+        const isRec = args.includes("-r") || args.includes("-rf");
+        const targetArg = args.find((a) => !a.startsWith("-"));
+        if (!targetArg) {
+          push({ type: "error", text: "Usage: rm [-r] <file_or_dir>" });
+        } else {
+          const resolved = vfs.resolvePath(cwd, targetArg);
+          try {
+            await vfs.remove(resolved, currentUser, isRec);
+            push({ type: "success", text: `Removed: ${resolved}` });
+          } catch (err: any) {
+            push({ type: "error", text: err.message });
+          }
+        }
+
+      // ── TREE ────────────────────────────────────────────────────────
+      } else if (mainCmd === "tree") {
+        const target = args[0] ? vfs.resolvePath(cwd, args[0]) : cwd;
+        try {
+          const treeStr = await vfs.generateTree(target, currentUser);
+          push({ type: "success", text: treeStr });
+        } catch (err: any) {
+          push({ type: "error", text: err.message });
+        }
+
+      // ── NOTEPAD / NANO ──────────────────────────────────────────────
+      } else if (mainCmd === "notepad" || mainCmd === "nano") {
+        const filePath = args[0]
+          ? vfs.resolvePath(cwd, args[0])
+          : `${cwd}/Untitled.txt`;
+        push({ type: "success", text: `Opening Notepad with '${filePath}'...` });
+        openWindow({
+          id: "notepad",
+          customData: { filePath },
+        });
+
+      // ── CHMOD ───────────────────────────────────────────────────────
+      } else if (mainCmd === "chmod") {
+        if (args.length < 2) {
+          push({ type: "error", text: "Usage: chmod <octal_mode> <file>" });
+        } else {
+          const mode = parseInt(args[0], 8);
+          const resolved = vfs.resolvePath(cwd, args[1]);
+          try {
+            await vfs.chmod(resolved, mode, currentUser);
+            push({ type: "success", text: `Updated permissions on ${resolved}` });
+          } catch (err: any) {
+            push({ type: "error", text: err.message });
+          }
+        }
+
+      // ── CHOWN ───────────────────────────────────────────────────────
+      } else if (mainCmd === "chown") {
+        if (args.length < 2) {
+          push({ type: "error", text: "Usage: chown <owner> <file>" });
+        } else {
+          const owner = args[0] as "guest" | "root";
+          const resolved = vfs.resolvePath(cwd, args[1]);
+          try {
+            await vfs.chown(resolved, owner, currentUser);
+            push({ type: "success", text: `Changed owner of ${resolved} to ${owner}` });
+          } catch (err: any) {
+            push({ type: "error", text: err.message });
+          }
+        }
+
+      // ── CLEAR / CLS ─────────────────────────────────────────────────
+      } else if (mainCmd === "clear" || mainCmd === "cls") {
         setLines([]);
         return;
 
-      } else if (cmd === "resume" || cmd === "cat resume.pdf") {
-        push({ type: "output", text: "Open /resume in your browser to view or print to PDF." });
-
-      } else if (cmd === "pwd") {
-        push({ type: "output", text: cwd });
-
-      } else if (cmd === "date") {
+      // ── DATE / VER ──────────────────────────────────────────────────
+      } else if (mainCmd === "date") {
         push({ type: "output", text: new Date().toLocaleString("en-IN") });
-
-      } else if (cmd === "ver") {
+      } else if (mainCmd === "ver") {
         push({ type: "output", text: VER_STRING });
 
-      // ── System Commands ─────────────────────────────────────────────
-      } else if (cmd === "systeminfo") {
+      // ── SYSTEMINFO ──────────────────────────────────────────────────
+      } else if (mainCmd === "systeminfo") {
         push({ type: "success", text: SYSTEMINFO() });
         unlockMission("terminal-hacker");
 
-      } else if (cmd === "ipconfig") {
+      // ── IPCONFIG ────────────────────────────────────────────────────
+      } else if (mainCmd === "ipconfig") {
         push({ type: "output", text: IPCONFIG });
 
-      } else if (cmd === "ipconfig /all") {
-        push({ type: "output", text: IPCONFIG_ALL });
-
-      } else if (cmd === "tasklist") {
+      // ── TASKLIST ────────────────────────────────────────────────────
+      } else if (mainCmd === "tasklist") {
         const openWindowNames = windows
           .filter((w) => w.isOpen)
           .map((w) => WINDOW_CONFIGS.find((c) => c.id === w.id)?.title ?? w.id);
@@ -317,205 +452,165 @@ export default function TerminalApp() {
           ["System", "4"],
           ["vstr-os.exe", "1024"],
           ["next-server.exe", "2048"],
-          ...openWindowNames.map((name, i) => [name.replace(/[^a-z0-9]/gi, "") + ".exe", String(3000 + i * 128)]),
+          ...openWindowNames.map((name, i) => [
+            name.replace(/[^a-z0-9]/gi, "") + ".exe",
+            String(3000 + i * 128),
+          ]),
         ];
-        const body = rows.map(([n, pid]) =>
-          `${n.padEnd(30)}${pid.padStart(6)}   Console                    1    ${Math.floor(Math.random() * 50000).toLocaleString()} K`
-        ).join("\n");
+        const body = rows
+          .map(
+            ([n, pid]) =>
+              `${n.padEnd(30)}${pid.padStart(6)}   Console                    1    ${Math.floor(
+                Math.random() * 50000
+              ).toLocaleString()} K`
+          )
+          .join("\n");
         push({ type: "success", text: TASKLIST_HEADER + "\n" + body });
 
-      } else if (cmd.startsWith("taskkill")) {
-        const parts = rawTrimmed.split(" ");
-        const flagIdx = parts.findIndex((p) => p.toLowerCase() === "/im");
-        if (flagIdx !== -1 && parts[flagIdx + 1]) {
-          push({ type: "success", text: `SUCCESS: Sent termination signal to the process "${parts[flagIdx + 1]}".` });
+      // ── TASKKILL ────────────────────────────────────────────────────
+      } else if (mainCmd === "taskkill") {
+        const flagIdx = args.findIndex((p) => p.toLowerCase() === "/im");
+        if (flagIdx !== -1 && args[flagIdx + 1]) {
+          push({
+            type: "success",
+            text: `SUCCESS: Sent termination signal to process "${args[flagIdx + 1]}".`,
+          });
         } else {
-          push({ type: "error", text: "Usage: taskkill /im <process.exe>\nUsage: taskkill /pid <PID>" });
+          push({ type: "error", text: "Usage: taskkill /im <process.exe>" });
         }
 
-      } else if (cmd.startsWith("ping")) {
-        const host = rawTrimmed.split(" ").slice(1).join(" ") || "localhost";
-        const lines: TerminalLine[] = [
+      // ── PING ────────────────────────────────────────────────────────
+      } else if (mainCmd === "ping") {
+        const host = args[0] || "localhost";
+        push(
           { type: "output", text: `\nPinging ${host} with 32 bytes of data:` },
-          { type: "success", text: `Reply from 142.250.77.46: bytes=32 time=${Math.floor(Math.random() * 30 + 5)}ms TTL=117` },
-          { type: "success", text: `Reply from 142.250.77.46: bytes=32 time=${Math.floor(Math.random() * 30 + 5)}ms TTL=117` },
-          { type: "success", text: `Reply from 142.250.77.46: bytes=32 time=${Math.floor(Math.random() * 30 + 5)}ms TTL=117` },
-          { type: "success", text: `Reply from 142.250.77.46: bytes=32 time=${Math.floor(Math.random() * 30 + 5)}ms TTL=117` },
-          { type: "output", text: `\nPing statistics for ${host}:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)\nApproximate round trip times in milli-seconds:\n    Minimum = 5ms, Maximum = 35ms, Average = ${Math.floor(Math.random() * 20 + 8)}ms` },
-        ];
-        push(...lines);
+          {
+            type: "success",
+            text: `Reply from 142.250.77.46: bytes=32 time=${Math.floor(Math.random() * 20 + 5)}ms TTL=117`,
+          },
+          {
+            type: "success",
+            text: `Reply from 142.250.77.46: bytes=32 time=${Math.floor(Math.random() * 20 + 5)}ms TTL=117`,
+          },
+          {
+            type: "output",
+            text: `Ping statistics for ${host}:\n    Packets: Sent = 2, Received = 2, Lost = 0 (0% loss)`,
+          }
+        );
 
-      } else if (cmd === "wmic") {
+      // ── WMIC ────────────────────────────────────────────────────────
+      } else if (mainCmd === "wmic") {
         push({ type: "output", text: WMIC_OUTPUT });
 
-      } else if (cmd === "get-process") {
-        const openWindowNames = windows
-          .filter((w) => w.isOpen)
-          .map((w) => WINDOW_CONFIGS.find((c) => c.id === w.id)?.title ?? w.id);
-        push({ type: "output", text: GET_PROCESS(openWindowNames) });
-
-      // ── Directory Navigation ────────────────────────────────────────
-      } else if (cmd === "tree") {
-        push({ type: "success", text: TREE_OUTPUT });
-
-      } else if (cmd.startsWith("mkdir ")) {
-        const dir = rawTrimmed.slice(6).trim();
-        push({ type: "success", text: `Directory created: ${cwd}\\${dir}` });
-
-      } else if (cmd.startsWith("cd ")) {
-        const target = rawTrimmed.slice(3).trim();
-        if (target === ".." || target === "..\\") {
-          const parts = cwd.split("\\");
-          if (parts.length > 1) {
-            setCwd(parts.slice(0, -1).join("\\"));
-            push({ type: "dim", text: "" });
-            return;
-          }
-        } else {
-          setCwd(`${cwd}\\${target}`);
-          push({ type: "dim", text: "" });
-          return;
-        }
-
-      // ── Fun / Visual ────────────────────────────────────────────────
-      } else if (cmd === "matrix") {
+      // ── MATRIX ──────────────────────────────────────────────────────
+      } else if (mainCmd === "matrix") {
         setMatrixMode((v) => !v);
         push({
           type: "success",
           text: matrixMode ? "Matrix rain disabled." : "Matrix rain enabled. 🟩 Wake up, Neo...",
         });
 
-      } else if (cmd.startsWith("color ")) {
-        const code = rawTrimmed.split(" ")[1];
+      // ── COLOR ───────────────────────────────────────────────────────
+      } else if (mainCmd === "color") {
+        const code = args[0] || "0a";
         const colorMap: Record<string, string> = {
           "0a": "#00ff00",
           "0b": "#00ffff",
           "0c": "#ff0000",
           "0e": "#ffff00",
           "0f": "#ffffff",
-          "f0": "#000000",
         };
         const resolved = colorMap[code] ?? code;
         setAccentColor(resolved);
-        push({ type: "success", text: `Terminal color changed to: ${resolved}` });
+        push({ type: "success", text: `Terminal accent color changed.` });
 
-      } else if (cmd === "neofetch") {
+      // ── NEOFETCH ────────────────────────────────────────────────────
+      } else if (mainCmd === "neofetch") {
         const logo = `
-   /\\_/\\      saitarun@vstr-os
+   /\\_/\\      ${currentUser}@vstr-os
   ( o.o )     ----------------
    > ^ <      OS: VSTR-OS v2.0.0
-  /     \\     Host: Portfolio-Website-PC
-  |  |  |     Kernel: Next.js 15.3.3
+  /     \\     Kernel: Next.js 15.3.3 / IndexedDB POSIX VFS
+  |  |  |     Shell: PowerShell & Hybrid Bash
   \\__/__/     Uptime: ${Math.floor(performance.now() / 1000)}s
-              Shell: PowerShell 7.4
-              CPU: Virtual AI Engine (Dual-Core)
-              RAM: 16 GB (Allocated)
-              GPU: WebGL 2.0 Virtual Engine
-              Missions: ${unlockedMissions.length} / 12 unlocked 🏆
+              Storage: IndexedDB Persistent Mount
+              User Ring: ${currentUser === "root" ? "Ring 0 (Root)" : "Ring 3 (Guest)"}
+              Missions: ${unlockedMissions.length} unlocked 🏆
         `.trim();
         push({ type: "success", text: logo });
         unlockMission("terminal-hacker");
 
-      } else if (cmd === "echo hello") {
-        push({ type: "output", text: "Hello, World!" });
-
-      } else if (cmd === "sudo rm -rf /" || cmd === "rm -rf /") {
-        push({ type: "error", text: "Nice try 😄  Permission denied. Access is denied." });
-
-      // ── App Launchers ───────────────────────────────────────────────
-      } else if (cmd === "play flappy") {
-        push({ type: "success", text: "Launching Flappy.exe... good luck 🐦" });
+      // ── APP SHORTCUTS ───────────────────────────────────────────────
+      } else if (cmdLower === "play flappy") {
+        push({ type: "success", text: "Launching Flappy.exe..." });
         openWindow("flappy");
-
-      } else if (cmd === "ask hintmaster") {
-        push({ type: "success", text: "Summoning the HintMaster..." });
+      } else if (cmdLower === "ask hintmaster") {
+        push({ type: "success", text: "Summoning HintMaster..." });
         openWindow("hintmaster");
-
-      } else if (cmd === "open disk_cleanup" || cmd === "disk_cleanup") {
-        push({ type: "success", text: "Launching Disk Cleanup.app — scanning for corrupted sectors..." });
+      } else if (cmdLower === "open disk_cleanup" || cmdLower === "disk_cleanup") {
+        push({ type: "success", text: "Launching Disk Cleanup.app..." });
         openWindow("disk_cleanup");
-
-      } else if (cmd === "start desktop_pet" || cmd === "desktop_pet") {
-        push({ type: "success", text: "Installing Desktop Pet companion..." });
+      } else if (cmdLower === "start desktop_pet" || cmdLower === "desktop_pet") {
+        push({ type: "success", text: "Starting Desktop Pet..." });
         openWindow("desktop_pet");
-
-      } else if (cmd === "crack password" || cmd === "pwntool") {
-        push({ type: "success", text: "Initializing PwnTool 3.0... connecting to target..." });
+      } else if (cmdLower === "crack password" || cmdLower === "pwntool") {
+        push({ type: "success", text: "Launching PwnTool 3.0..." });
         openWindow("password_cracker");
 
-      // ── BSOD Easter Egg ───────────────────────────────────────────
-      } else if (cmd === "blue-screen" || cmd === "bsod") {
+      // ── BSOD CRASH TRIGGER ──────────────────────────────────────────
+      } else if (mainCmd === "blue-screen" || mainCmd === "bsod" || mainCmd === "crash") {
         push({ type: "error", text: "*** STOP: 0x0000007F (UNEXPECTED_KERNEL_MODE_TRAP)" });
-        push({ type: "error", text: "*** Initing BSOD sequence... 💀" });
+        push({ type: "error", text: "*** Routing to interactive kernel debugger..." });
         window.dispatchEvent(new Event("trigger-bsod"));
 
-      // ── Grep / Findstr ────────────────────────────────────────────
-      } else if (cmd.startsWith("grep ") || cmd.startsWith("findstr ") || cmd.startsWith("find ")) {
-        const spaceIdx = rawTrimmed.indexOf(" ");
-        const pattern = rawTrimmed.slice(spaceIdx + 1).trim().toLowerCase();
+      // ── GREP / FIND ─────────────────────────────────────────────────
+      } else if (mainCmd === "grep" || mainCmd === "findstr" || mainCmd === "find") {
+        const pattern = args[0]?.toLowerCase();
         if (!pattern) {
-          push({ type: "error", text: "Usage: grep <pattern>\nSearches through all portfolio content for a matching keyword." });
+          push({ type: "error", text: "Usage: grep <pattern>" });
         } else {
-          // Portfolio search corpus
-          const CORPUS = [
-            { file: "about.txt",       text: "CS Undergrad AI Developer Hyderabad CGPA 8.41 B.Tech CSE AI ML KGRCET hackathon Secretary" },
-            { file: "skills.txt",      text: "Python JavaScript TypeScript React Next.js Node.js TailwindCSS PyTorch TensorFlow Flask FastAPI SQL PostgreSQL MongoDB Docker AWS Git C++ Java" },
-            { file: "projects/klyf",   text: "KLYF AI-powered social media analysis sentiment NLP Twitter Flask Python" },
-            { file: "projects/solveit",text: "SolveIt HackerRank LeetCode problem tracker dashboard React TypeScript" },
-            { file: "projects/aurora", text: "Aurora 3D portfolio WebGL Three.js interactive generative art shader" },
-            { file: "projects/questly",text: "Questly gamification learning platform React quizzes achievements" },
-            { file: "experience.log",  text: "internship student council secretary editorial board leadership communication" },
-            { file: "achievements.txt",text: "IKARUS 2024 First Prize hackathon Dean list top 10% batch" },
-            { file: "contact.txt",     text: "email kaufeeblaster@gmail.com GitHub LinkedIn Twitter" },
-            { file: "terminal.tsx",    text: "grep findstr matrix neofetch systeminfo powerShell commands" },
-          ];
-          const matches = CORPUS.filter((c) => c.text.toLowerCase().includes(pattern));
-          if (matches.length === 0) {
-            push({ type: "dim", text: `grep: no matches found for '${pattern}'` });
-          } else {
-            const output = matches
-              .map((m) => {
-                const words = m.text.split(" ");
-                const matchWords = words.filter((w) => w.toLowerCase().includes(pattern));
-                return `${m.file}: ${matchWords.slice(0, 5).join(", ")}...`;
-              })
-              .join("\n");
-            push({ type: "success", text: `Matches for '${pattern}' in ${matches.length} file(s):\n${output}` });
+          try {
+            const allFiles = await vfs.readDir(cwd, currentUser);
+            const matches: string[] = [];
+            for (const file of allFiles) {
+              if (file.type === "file") {
+                const text = await vfs.readFile(file.path, currentUser);
+                if (text.toLowerCase().includes(pattern)) {
+                  matches.push(`${file.name}: contains '${pattern}'`);
+                }
+              }
+            }
+            if (matches.length === 0) {
+              push({ type: "dim", text: `grep: no matches found for '${pattern}' in ${cwd}` });
+            } else {
+              push({ type: "success", text: matches.join("\n") });
+            }
+          } catch (err: any) {
+            push({ type: "error", text: err.message });
           }
-          unlockMission("terminal-hacker");
         }
 
       } else {
         push({
           type: "error",
-          text: `'${rawTrimmed}' is not recognized as an internal or external command,\noperable program or batch file.\nType "help" to see available commands.`,
+          text: `'${rawTrimmed}' is not recognized as an internal or external command.\nType "help" to see available commands.`,
         });
       }
 
       push({ type: "dim", text: "" });
     },
-    [push, openWindow, unlockMission, unlockedMissions, windows, cwd, matrixMode]
+    [
+      push,
+      openWindow,
+      unlockMission,
+      unlockedMissions,
+      windows,
+      cwd,
+      currentUser,
+      awaitingSudoPass,
+      matrixMode,
+    ]
   );
-
-  // ── Ghost text autocomplete (history-based) ──────────────────────────
-  const ghostSuggestion = React.useMemo(() => {
-    if (!input || input.length < 2) return "";
-    const match = history.find(
-      (h) => h.toLowerCase().startsWith(input.toLowerCase()) && h !== input
-    );
-    return match ? match.slice(input.length) : "";
-  }, [input, history]);
-
-  // Accept ghost text with Tab or ArrowRight at end of input
-  const onAcceptGhost = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (
-      ghostSuggestion &&
-      (e.key === "Tab" || (e.key === "ArrowRight" && (e.target as HTMLInputElement).selectionStart === input.length))
-    ) {
-      e.preventDefault();
-      setInput(input + ghostSuggestion);
-    }
-  };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -533,12 +628,39 @@ export default function TerminalApp() {
       setInput(idx === -1 ? "" : history[idx]);
     } else if (e.key === "Tab") {
       e.preventDefault();
-      // Tab completion for known commands
-      const cmds = ["help", "whoami", "ls", "dir", "cat skills", "contact", "neofetch", "systeminfo", "ipconfig", "tasklist", "ping", "ver", "wmic", "get-process", "tree", "matrix", "clear", "cls", "play flappy", "ask hintmaster", "crack password", "resume"];
+      const cmds = [
+        "help",
+        "whoami",
+        "ls",
+        "dir",
+        "cat",
+        "cd",
+        "pwd",
+        "notepad",
+        "mkdir",
+        "touch",
+        "rm",
+        "tree",
+        "sudo",
+        "neofetch",
+        "systeminfo",
+        "ipconfig",
+        "tasklist",
+        "ping",
+        "ver",
+        "wmic",
+        "matrix",
+        "clear",
+        "cls",
+        "blue-screen",
+      ];
       const match = cmds.find((c) => c.startsWith(input.toLowerCase()));
       if (match) setInput(match);
     }
   };
+
+  const promptPrefix =
+    currentUser === "root" ? `PS [ADMIN] ${cwd}>` : `PS ${cwd}>`;
 
   return (
     <div
@@ -548,11 +670,10 @@ export default function TerminalApp() {
         minHeight: 0,
         cursor: "text",
         position: "relative",
-        /* overflow-y: auto is provided by .terminal-body CSS class */
       }}
       onClick={() => inputRef.current?.focus()}
     >
-      {/* Matrix rain overlay — sits on top of scrolling content, doesn't scroll */}
+      {/* Matrix rain overlay */}
       {matrixMode && (
         <div
           style={{
@@ -574,7 +695,8 @@ export default function TerminalApp() {
               right: 0,
               height: "100vh",
               opacity: 0.12,
-              background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,70,0.06) 2px, rgba(0,255,70,0.06) 4px)",
+              background:
+                "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,70,0.06) 2px, rgba(0,255,70,0.06) 4px)",
               animation: "matrixScroll 3s linear infinite",
             }}
           />
@@ -605,18 +727,19 @@ export default function TerminalApp() {
         </div>
       ))}
 
-      {/* Input row — native terminal style */}
+      {/* Input row */}
       <div className="terminal-input-row">
         <span className="terminal-prompt" style={{ color: accentColor }}>
-          PS {cwd}{'>'}
+          {awaitingSudoPass ? `[sudo] password for ${currentUser}: ` : promptPrefix}
         </span>
         <input
           ref={inputRef}
-          id="terminal-input"
+          id={`terminal-input-${instanceId}`}
           className="terminal-input"
+          type={awaitingSudoPass ? "password" : "text"}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => onKeyDown(e)}
+          onKeyDown={onKeyDown}
           autoFocus
           autoComplete="off"
           autoCorrect="off"
