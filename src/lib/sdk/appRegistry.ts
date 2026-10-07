@@ -51,7 +51,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     author: "Sai Tarun",
     category: "network",
     icon: "📖",
-    fluentIcon: "chat",
+    fluentIcon: "guestbook",
     permissions: ["notifications", "window:manage"],
     defaultConfig: {
       width: 720,

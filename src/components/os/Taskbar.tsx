@@ -191,7 +191,7 @@ export default function Taskbar() {
         <button
           id="taskbar-task-view-btn"
           onClick={() => { playClick(); toggleExposé(); }}
-          title="Task View / Desktops (Win + Tab)"
+          title="Task View / Desktops (Alt + T)"
           aria-label="Task View"
           aria-pressed={isExposéOpen}
           style={{
@@ -222,7 +222,7 @@ export default function Taskbar() {
         <button
           id="taskbar-widgets-btn"
           onClick={() => { playClick(); toggleWidgetBoard(); }}
-          title="Widgets Board (Win + W)"
+          title="Widgets Board (Alt + W)"
           aria-label="Widgets Board"
           aria-pressed={isWidgetBoardOpen}
           style={{
@@ -255,6 +255,7 @@ export default function Taskbar() {
         <div
           id="taskbar-search-pill"
           onClick={() => { playClick(); setShowStart(true); }}
+          title="Search / Command Palette (Ctrl + K)"
           style={{
             display: "flex",
             alignItems: "center",

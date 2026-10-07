@@ -20,6 +20,8 @@ import {
   GameIcon,
   DiskIcon,
   PawIcon,
+  NotepadIcon,
+  GuestbookIcon,
 } from "./categories/Application";
 
 import {
@@ -87,6 +89,10 @@ const ICON_COLORS: Record<string, string> = {
   mail:          "#60a5fa", // blue-400
   game:          "#f472b6", // pink-400
   info:          "#38bdf8", // sky-400
+  notepad:       "#38bdf8", // sky-400
+  document:      "#38bdf8",
+  guestbook:     "#ec4899", // pink-500
+  chat:          "#ec4899",
   settings:      "#94a3b8", // slate-400
   photo:         "#fb923c", // orange-400
   image:         "#fb923c",
@@ -154,6 +160,10 @@ const FLUENT_MAP: Record<string, IconComponentType> = {
   mail:          MailIcon,
   game:          GameIcon,
   info:          InfoIcon,
+  notepad:       NotepadIcon,
+  document:      NotepadIcon,
+  guestbook:     GuestbookIcon,
+  chat:          GuestbookIcon,
   settings:      SettingsIcon,
   photo:         PhotoIcon,
   image:         PhotoIcon,
@@ -241,6 +251,8 @@ export {
   GameIcon,
   DiskIcon,
   PawIcon,
+  NotepadIcon,
+  GuestbookIcon,
   WindowsLogoIcon,
   SearchIcon,
   VolumeIcon,

@@ -79,7 +79,7 @@ export default function TaskView() {
                   borderRadius: "4px",
                 }}
               >
-                Win + Tab
+                Alt + T
               </span>
             </div>
             <button
@@ -108,7 +108,7 @@ export default function TaskView() {
               paddingBottom: "8px",
             }}
           >
-            {workspaces.map((ws) => {
+            {workspaces.map((ws, idx) => {
               const isActive = ws.id === activeWorkspaceId;
               const count = windows.filter(
                 (w) => w.isOpen && (w.desktopId === ws.id || w.isSticky)
@@ -121,6 +121,7 @@ export default function TaskView() {
                     playClick();
                     switchWorkspace(ws.id);
                   }}
+                  title={`Switch to ${ws.name} (Alt + ${idx + 1})`}
                   style={{
                     minWidth: "160px",
                     height: "96px",
@@ -141,9 +142,21 @@ export default function TaskView() {
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: "13px", fontWeight: isActive ? 600 : 400 }}>
-                      {ws.name}
-                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: "13px", fontWeight: isActive ? 600 : 400 }}>
+                        {ws.name}
+                      </span>
+                      <span style={{
+                        fontSize: "9px",
+                        background: "rgba(255, 255, 255, 0.1)",
+                        padding: "1px 4px",
+                        borderRadius: "3px",
+                        color: "var(--os-text-muted)",
+                        fontFamily: "var(--font-mono)",
+                      }}>
+                        Alt+{idx + 1}
+                      </span>
+                    </div>
                     {workspaces.length > 1 && (
                       <button
                         onClick={(e) => {
@@ -180,6 +193,7 @@ export default function TaskView() {
                 playClick();
                 addWorkspace();
               }}
+              title="New Desktop (Alt + Shift + D)"
               style={{
                 minWidth: "130px",
                 height: "96px",

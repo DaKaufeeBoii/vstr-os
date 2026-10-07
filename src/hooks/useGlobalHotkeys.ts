@@ -3,7 +3,8 @@
 import { useEffect, useCallback, useRef } from "react";
 
 export interface HotkeyAction {
-  keys: string[];
+  /** A single chord like ["Alt", "w"] or multiple alternative chords like [["Alt", "w"], ["Meta", "w"]] */
+  keys: string[] | string[][];
   description: string;
   handler: (e: KeyboardEvent) => void;
   preventDefault?: boolean;
@@ -16,66 +17,87 @@ interface HotkeyEntry {
   id: string;
 }
 
-const MODIFIER_KEYS = new Set(["Control", "Alt", "Shift", "Meta", "OS"]);
-const KEY_ALIASES: Record<string, string> = {
-  " ": "Space",
-  Escape: "Escape",
-  Enter: "Enter",
-  Tab: "Tab",
-  ArrowUp: "ArrowUp",
-  ArrowDown: "ArrowDown",
-  ArrowLeft: "ArrowLeft",
-  ArrowRight: "ArrowRight",
-  Backspace: "Backspace",
-  Delete: "Delete",
-  Home: "Home",
-  End: "End",
-  PageUp: "PageUp",
-  PageDown: "PageDown",
-  F1: "F1",
-  F2: "F2",
-  F3: "F3",
-  F4: "F4",
-  F5: "F5",
-  F6: "F6",
-  F7: "F7",
-  F8: "F8",
-  F9: "F9",
-  F10: "F10",
-  F11: "F11",
-  F12: "F12",
+const MODIFIER_NAMES: Record<string, string> = {
+  ctrl: "Control",
+  control: "Control",
+  alt: "Alt",
+  shift: "Shift",
+  meta: "Meta",
+  os: "Meta",
+  win: "Meta",
+  cmd: "Meta",
+  command: "Meta",
 };
 
-function normalizeKey(key: string): string {
-  return KEY_ALIASES[key] ?? key;
+const MODIFIER_KEYS = new Set(["Control", "Alt", "Shift", "Meta"]);
+
+function normalizeModifier(mod: string): string | null {
+  const lower = mod.toLowerCase();
+  return MODIFIER_NAMES[lower] ?? (MODIFIER_KEYS.has(mod) ? mod : null);
 }
 
-function keysMatch(event: KeyboardEvent, keys: string[]): boolean {
+function normalizeKey(key: string): string {
+  const lower = key.toLowerCase();
+  if (lower === " " || lower === "spacebar") return "space";
+  if (lower === "esc") return "escape";
+  if (lower === "return") return "enter";
+  if (lower.startsWith("key") && lower.length === 4) return lower.slice(3); // e.g. KeyW -> w
+  if (lower.startsWith("digit") && lower.length === 6) return lower.slice(5); // e.g. Digit1 -> 1
+  return lower;
+}
+
+function singleChordMatches(event: KeyboardEvent, chord: string[]): boolean {
   const requiredModifiers = new Set<string>();
   const requiredKeys = new Set<string>();
 
-  for (const k of keys) {
-    const normalized = normalizeKey(k);
-    if (MODIFIER_KEYS.has(normalized)) {
-      requiredModifiers.add(normalized);
+  for (const k of chord) {
+    const mod = normalizeModifier(k);
+    if (mod) {
+      requiredModifiers.add(mod);
     } else {
-      requiredKeys.add(normalized);
+      requiredKeys.add(normalizeKey(k));
     }
   }
 
+  // Check event modifiers
   const eventModifiers = new Set<string>();
   if (event.ctrlKey) eventModifiers.add("Control");
   if (event.altKey) eventModifiers.add("Alt");
   if (event.shiftKey) eventModifiers.add("Shift");
   if (event.metaKey) eventModifiers.add("Meta");
 
-  const eventKey = normalizeKey(event.key);
+  if (requiredModifiers.size !== eventModifiers.size) return false;
+  for (const m of requiredModifiers) {
+    if (!eventModifiers.has(m)) return false;
+  }
 
-  return (
-    requiredKeys.has(eventKey) &&
-    requiredModifiers.size === eventModifiers.size &&
-    [...requiredModifiers].every((m) => eventModifiers.has(m))
-  );
+  // Check event key / code against required keys
+  const eventKeyNorm = normalizeKey(event.key);
+  const eventCodeNorm = normalizeKey(event.code);
+
+  for (const reqKey of requiredKeys) {
+    const matches =
+      eventKeyNorm === reqKey ||
+      eventCodeNorm === reqKey ||
+      (reqKey === "`" && (eventKeyNorm === "`" || eventCodeNorm === "backquote")) ||
+      (reqKey === "tilde" && (eventKeyNorm === "~" || eventCodeNorm === "backquote"));
+
+    if (!matches) return false;
+  }
+
+  return true;
+}
+
+function keysMatch(event: KeyboardEvent, keys: string[] | string[][]): boolean {
+  if (keys.length === 0) return false;
+
+  // If keys is array of arrays: [["Alt", "w"], ["Meta", "w"]]
+  if (Array.isArray(keys[0])) {
+    return (keys as string[][]).some((chord) => singleChordMatches(event, chord));
+  }
+
+  // Single chord: ["Alt", "w"]
+  return singleChordMatches(event, keys as string[]);
 }
 
 function isTypingElement(element: HTMLElement | null): boolean {
@@ -112,8 +134,6 @@ function attachGlobalListener() {
   };
 
   window.addEventListener("keydown", handler, { passive: false });
-
-  // Cleanup function reference for potential removal
   (window as any).__vstrHotkeyHandler = handler;
 }
 
@@ -132,20 +152,20 @@ export function useGlobalHotkeys(actions: HotkeyAction[]) {
   actionsRef.current = actions;
 
   useEffect(() => {
-    // Register all actions
-    globalRegistry = actions.map((action, index) => ({
+    // Register actions
+    const entries = actions.map((action, index) => ({
       action,
       id: `hotkey-${index}-${Math.random().toString(36).slice(2)}`,
     }));
 
+    globalRegistry = entries;
     attachGlobalListener();
 
     return () => {
       detachGlobalListener();
     };
-  }, []);
+  }, [actions]);
 
-  // Helper to register a single hotkey imperatively
   const register = useCallback((action: HotkeyAction) => {
     const id = `hotkey-${Math.random().toString(36).slice(2)}`;
     globalRegistry.push({ action, id });
@@ -163,7 +183,6 @@ export function useGlobalHotkeys(actions: HotkeyAction[]) {
   return { register, unregisterAll };
 }
 
-// Export a singleton registry for cross-component access
 export const hotkeyRegistry = {
   register: (action: HotkeyAction) => {
     const id = `hotkey-${Math.random().toString(36).slice(2)}`;

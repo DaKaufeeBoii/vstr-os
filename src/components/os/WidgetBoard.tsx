@@ -187,7 +187,7 @@ export default function WidgetBoard() {
               <div>
                 <div style={{ fontSize: "15px", fontWeight: 600 }}>Widgets & Telemetry</div>
                 <div style={{ fontSize: "11px", color: "var(--os-text-muted)" }}>
-                  Live metrics • Win + W
+                  Live metrics • Alt + W
                 </div>
               </div>
             </div>

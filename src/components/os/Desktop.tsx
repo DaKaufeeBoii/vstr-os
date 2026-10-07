@@ -98,35 +98,33 @@ export default function Desktop() {
   }, []);
 
 
-  // Global hotkeys
+  // Global hotkeys (Conflict-free browser chords with OS fallbacks)
   useGlobalHotkeys([
     {
-      keys: ["Meta"], // Win key
-      description: "Open Start Menu",
+      keys: [["Control", "Space"], ["Alt", "s"], ["Meta"]],
+      description: "Open Start Menu (Ctrl+Space / Alt+S)",
       handler: () => {
-        // Start menu is handled by Taskbar
         const startBtn = document.getElementById("taskbar-start-btn") as HTMLButtonElement;
         startBtn?.click();
       },
       allowInInput: false,
     },
     {
-      keys: ["Meta", "KeyW"], // Win+W
-      description: "Toggle Widgets Board",
+      keys: [["Alt", "w"], ["Meta", "w"]],
+      description: "Toggle Widgets Board (Alt+W)",
       handler: () => toggleWidgetBoard(),
       allowInInput: false,
     },
     {
-      keys: ["Meta", "Tab"], // Win+Tab
-      description: "Open Exposé / Window Overview",
+      keys: [["Alt", "t"], ["Alt", "ArrowUp"], ["Meta", "Tab"]],
+      description: "Open Task View / Window Overview (Alt+T)",
       handler: () => toggleExposé(),
       allowInInput: false,
     },
     {
-      keys: ["Alt", "Tab"], // Alt+Tab
-      description: "Switch windows",
+      keys: [["Alt", "Tab"], ["Alt", "["], ["Alt", "]"], ["Control", "Alt", "Tab"]],
+      description: "Switch windows (Alt+[ / Alt+])",
       handler: (e) => {
-        e.preventDefault();
         const openWindows = windows.filter(
           (w) =>
             w.isOpen &&
@@ -134,33 +132,32 @@ export default function Desktop() {
             (w.desktopId === undefined || w.desktopId === activeWorkspaceId || w.isSticky)
         );
         if (openWindows.length < 2) return;
-        
-        // Find current focused window (highest zIndex)
+
         const focused = openWindows.reduce((max, w) => (w.zIndex > max.zIndex ? w : max));
         const currentIndex = openWindows.findIndex((w) => w.instanceId === focused.instanceId);
-        const nextIndex = e.shiftKey 
+        const nextIndex = e.shiftKey || e.key === "["
           ? (currentIndex - 1 + openWindows.length) % openWindows.length
           : (currentIndex + 1) % openWindows.length;
-        
+
         focusWindow(openWindows[nextIndex].instanceId);
       },
       allowInInput: false,
     },
     {
-      keys: ["Meta", "KeyS"], // Win+S
-      description: "Open Command Palette / Search",
+      keys: [["Control", "k"], ["Alt", "k"], ["Meta", "s"]],
+      description: "Open Command Palette / Search (Ctrl+K)",
       handler: () => toggleCommandPalette(),
       allowInInput: false,
     },
     {
-      keys: ["Meta", "`"], // Win+`
-      description: "Toggle Terminal Drawer",
+      keys: [["Control", "`"], ["Alt", "`"], ["Meta", "`"]],
+      description: "Toggle Terminal Drawer (Ctrl+`)",
       handler: () => toggleTerminalDrawer(),
       allowInInput: false,
     },
     {
       keys: ["Escape"],
-      description: "Close modals / Cancel",
+      description: "Close modals / Cancel (Esc)",
       handler: () => {
         if (isExposéOpen) closeExposé();
         if (isCommandPaletteOpen) closeCommandPalette();
@@ -169,9 +166,44 @@ export default function Desktop() {
       },
       allowInInput: true,
     },
+    // Instant workspace jumps (Alt + 1, Alt + 2, Alt + 3, Alt + 4)
     {
-      keys: ["Control", "Meta", "ArrowLeft"], // Ctrl+Win+Left
-      description: "Switch to previous desktop",
+      keys: ["Alt", "1"],
+      description: "Switch to Desktop 1 (Alt+1)",
+      handler: () => switchWorkspace(0),
+      allowInInput: false,
+    },
+    {
+      keys: ["Alt", "2"],
+      description: "Switch to Desktop 2 (Alt+2)",
+      handler: () => {
+        if (workspaces.length > 1) {
+          switchWorkspace(1);
+        } else {
+          addWorkspace();
+        }
+      },
+      allowInInput: false,
+    },
+    {
+      keys: ["Alt", "3"],
+      description: "Switch to Desktop 3 (Alt+3)",
+      handler: () => {
+        if (workspaces.length > 2) switchWorkspace(2);
+      },
+      allowInInput: false,
+    },
+    {
+      keys: ["Alt", "4"],
+      description: "Switch to Desktop 4 (Alt+4)",
+      handler: () => {
+        if (workspaces.length > 3) switchWorkspace(3);
+      },
+      allowInInput: false,
+    },
+    {
+      keys: [["Alt", "ArrowLeft"], ["Control", "Meta", "ArrowLeft"], ["Control", "Alt", "ArrowLeft"]],
+      description: "Switch to previous desktop (Alt+Left)",
       handler: () => {
         const prevId = (activeWorkspaceId - 1 + workspaces.length) % workspaces.length;
         switchWorkspace(prevId);
@@ -179,8 +211,8 @@ export default function Desktop() {
       allowInInput: false,
     },
     {
-      keys: ["Control", "Meta", "ArrowRight"], // Ctrl+Win+Right
-      description: "Switch to next desktop",
+      keys: [["Alt", "ArrowRight"], ["Control", "Meta", "ArrowRight"], ["Control", "Alt", "ArrowRight"]],
+      description: "Switch to next desktop (Alt+Right)",
       handler: () => {
         const nextId = (activeWorkspaceId + 1) % workspaces.length;
         switchWorkspace(nextId);
@@ -188,29 +220,39 @@ export default function Desktop() {
       allowInInput: false,
     },
     {
-      keys: ["Control", "Meta", "KeyD"], // Ctrl+Win+D
-      description: "New virtual desktop",
+      keys: [["Alt", "Shift", "d"], ["Alt", "d"], ["Control", "Meta", "d"]],
+      description: "New virtual desktop (Alt+Shift+D)",
       handler: () => addWorkspace(),
       allowInInput: false,
     },
     {
-      keys: ["ArrowLeft", "Meta"], // Win+Left
+      keys: [["ArrowLeft", "Meta"], ["ArrowLeft", "Alt", "Shift"]],
       description: "Snap window left",
       handler: () => {
-        const focused = windows.find(w => w.isOpen && !w.isMinimized && w.zIndex === Math.max(...windows.filter(w => w.isOpen && !w.isMinimized).map(w => w.zIndex)));
+        const focused = windows.find(
+          (w) =>
+            w.isOpen &&
+            !w.isMinimized &&
+            w.zIndex === Math.max(...windows.filter((win) => win.isOpen && !win.isMinimized).map((win) => win.zIndex))
+        );
         if (focused) {
-          // Snap logic would be added here
+          // Window snapping handler
         }
       },
       allowInInput: false,
     },
     {
-      keys: ["ArrowRight", "Meta"], // Win+Right
+      keys: [["ArrowRight", "Meta"], ["ArrowRight", "Alt", "Shift"]],
       description: "Snap window right",
       handler: () => {
-        const focused = windows.find(w => w.isOpen && !w.isMinimized && w.zIndex === Math.max(...windows.filter(w => w.isOpen && !w.isMinimized).map(w => w.zIndex)));
+        const focused = windows.find(
+          (w) =>
+            w.isOpen &&
+            !w.isMinimized &&
+            w.zIndex === Math.max(...windows.filter((win) => win.isOpen && !win.isMinimized).map((win) => win.zIndex))
+        );
         if (focused) {
-          // Snap logic would be added here
+          // Window snapping handler
         }
       },
       allowInInput: false,

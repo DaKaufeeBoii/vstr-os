@@ -21,6 +21,8 @@ export {
   GameIcon,
   DiskIcon,
   PawIcon,
+  NotepadIcon,
+  GuestbookIcon,
   WindowsLogoIcon,
   SearchIcon,
   VolumeIcon,
