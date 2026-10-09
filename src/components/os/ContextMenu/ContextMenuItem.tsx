@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { OsIcon } from "@/components/icons/OsIcon";
 
 export interface ContextMenuAction {
@@ -28,11 +28,21 @@ export function ContextMenuItem({
   isFocused = false,
 }: ContextMenuItemProps) {
   const ref = useRef<HTMLButtonElement>(null);
-  const [showSubMenu, setShowSubMenu] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [submenuSide, setSubmenuSide] = React.useState<"right" | "left">("right");
-  const [submenuAlign, setSubmenuAlign] = React.useState<"top" | "bottom">("top");
+  const [showSubMenu, setShowSubMenu] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [submenuSide, setSubmenuSide] = useState<"right" | "left">("right");
+  const [submenuAlign, setSubmenuAlign] = useState<"top" | "bottom">("top");
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobileScreen(window.innerWidth < 640);
+    };
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   // Scroll into view when keyboard-focused
   useEffect(() => {
@@ -41,19 +51,24 @@ export function ContextMenuItem({
     }
   }, [isFocused]);
 
+  const hasSubMenu = Boolean(items && items.length > 0);
+
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (disabled || items) return; // Items (submenus) shouldn't click-to-close
+    if (disabled) return;
+    if (hasSubMenu) {
+      setShowSubMenu((prev) => !prev);
+      return;
+    }
     onClick?.();
     onClose();
   };
 
   const hoveredBg = danger ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.08)";
-  const hasSubMenu = items && items.length > 0;
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    if (hasSubMenu && ref.current) {
+    if (hasSubMenu && !isMobileScreen && ref.current) {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         const rect = ref.current!.getBoundingClientRect();
@@ -62,20 +77,22 @@ export function ContextMenuItem({
         setSubmenuSide(rect.right + SUBMENU_WIDTH > window.innerWidth - 8 ? "left" : "right");
         setSubmenuAlign(rect.top + SUBMENU_HEIGHT > window.innerHeight - 8 ? "bottom" : "top");
         setShowSubMenu(true);
-      }, 150); // 150ms delay
+      }, 150);
     }
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      setShowSubMenu(false);
-    }, 200); // 200ms delay to allow moving to submenu
+    if (!isMobileScreen) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setShowSubMenu(false);
+      }, 200);
+    }
   };
 
   return (
-    <div 
+    <div
       style={{ position: "relative" }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -85,6 +102,7 @@ export function ContextMenuItem({
         role="menuitem"
         aria-disabled={disabled}
         aria-haspopup={hasSubMenu ? "true" : undefined}
+        aria-expanded={hasSubMenu ? showSubMenu : undefined}
         tabIndex={-1}
         onClick={handleClick}
         disabled={disabled}
@@ -133,29 +151,51 @@ export function ContextMenuItem({
         </span>
         <span style={{ flex: 1 }}>{label}</span>
         {hasSubMenu && (
-          <span style={{
-            fontSize: 10,
-            opacity: 0.5,
-            marginLeft: 8,
-            transform: submenuSide === "left" ? "scaleX(-1)" : undefined,
-            display: "inline-flex",
-          }}>
+          <span
+            style={{
+              fontSize: 10,
+              opacity: 0.5,
+              marginLeft: 8,
+              transform: isMobileScreen && showSubMenu ? "rotate(90deg)" : submenuSide === "left" ? "scaleX(-1)" : undefined,
+              display: "inline-flex",
+              transition: "transform 0.15s ease",
+            }}
+          >
             <OsIcon name="chevronRight" size="sm" color="rgba(255,255,255,0.5)" />
           </span>
         )}
       </button>
 
-      {hasSubMenu && showSubMenu && (
-        <div style={{
-          position: "absolute",
-          ...(submenuAlign === "bottom" ? { bottom: -4 } : { top: -4 }),
-          ...(submenuSide === "left"
-            ? { right: "100%", paddingRight: 4 }
-            : { left: "100%", paddingLeft: 4 }),
-          zIndex: 100,
-        }}>
-          <SubMenu items={items} onClose={onClose} />
-        </div>
+      {/* SubMenu Rendering: Accordion on mobile, Floating on Desktop */}
+      {hasSubMenu && showSubMenu && items && (
+        isMobileScreen ? (
+          <div
+            style={{
+              paddingLeft: 24,
+              borderLeft: "2px solid rgba(255, 255, 255, 0.1)",
+              margin: "4px 8px 4px 16px",
+              background: "rgba(0, 0, 0, 0.2)",
+              borderRadius: 6,
+            }}
+          >
+            {items.map((subItem, i) => (
+              <ContextMenuItem key={i} {...subItem} onClose={onClose} />
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              ...(submenuAlign === "bottom" ? { bottom: -4 } : { top: -4 }),
+              ...(submenuSide === "left"
+                ? { right: "100%", paddingRight: 4 }
+                : { left: "100%", paddingLeft: 4 }),
+              zIndex: 100,
+            }}
+          >
+            <SubMenu items={items} onClose={onClose} />
+          </div>
+        )
       )}
     </div>
   );
@@ -166,15 +206,17 @@ export function ContextMenuItem({
  */
 function SubMenu({ items, onClose }: { items: ContextMenuAction[]; onClose: () => void }) {
   return (
-    <div style={{
-      minWidth: 180,
-      background: "rgba(22, 32, 28, 0.95)", // Win11 Dark Green Acrylic
-      backdropFilter: "blur(24px) saturate(140%)",
-      border: "1px solid rgba(255, 255, 255, 0.08)",
-      borderRadius: 12,
-      boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-      padding: "4px 0",
-    }}>
+    <div
+      style={{
+        minWidth: 190,
+        background: "rgba(22, 32, 28, 0.95)", // Win11 Dark Green Acrylic
+        backdropFilter: "blur(24px) saturate(140%)",
+        border: "1px solid rgba(255, 255, 255, 0.08)",
+        borderRadius: 12,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+        padding: "4px 0",
+      }}
+    >
       {items.map((item, i) => (
         <ContextMenuItem key={i} {...item} onClose={onClose} />
       ))}

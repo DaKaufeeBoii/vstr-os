@@ -46,7 +46,11 @@ const LIVE_WALLPAPER_OPTIONS: LiveWallpaperOption[] = [
   },
 ];
 
-export default function SettingsApp() {
+interface SettingsAppProps {
+  initialSection?: string;
+}
+
+export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
   const {
     wallpaper, setWallpaper,
     videoWallpaper, setVideoWallpaper,
@@ -59,6 +63,18 @@ export default function SettingsApp() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialSection) {
+      const sectionId = initialSection === "display" ? "settings-section-display" : "settings-section-personalize";
+      const el = document.getElementById(sectionId);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 150);
+      }
+    }
+  }, [initialSection]);
 
   // App SDK / Registry state
   const [apps, setApps] = useState<AppManifest[]>(() => appRegistry.listApps());
@@ -196,7 +212,7 @@ export default function SettingsApp() {
       <hr style={{ border: "none", borderTop: "1px solid var(--os-border)", margin: 0 }} />
 
       {/* ── a. Display and Audio ───────────────────────────────────── */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <div id="settings-section-display" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <div>
           {sectionLabel("🖥️ Display & 🔊 Audio")}
           <p style={{ margin: "0 0 14px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
@@ -319,7 +335,7 @@ export default function SettingsApp() {
       <hr style={{ border: "none", borderTop: "1px solid var(--os-border)", margin: 0 }} />
 
       {/* ── b. Static Wallpaper ────────────────────────────────────── */}
-      <div>
+      <div id="settings-section-personalize">
         {sectionLabel("🖼️ Static Wallpaper")}
         <p style={{ margin: "0 0 12px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
           Choose a desktop background image or upload your own high-resolution image.

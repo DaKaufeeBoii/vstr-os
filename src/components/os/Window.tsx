@@ -71,17 +71,35 @@ export default function Window({
   // A window is focused if it is the topmost entry in the z-index stack
   const isFocused = stack[stack.length - 1] === targetId;
 
+  // Responsive detection
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   /* ── Sync store -> motion values when changed externally ────────
-     (snap, maximize, center-on-open). Skip while dragging. */
+     (snap, maximize, center-on-open). Skip while dragging or on mobile. */
   useEffect(() => {
     if (!win || isDragging.current) return;
+    if (isMobile) {
+      x.set(0);
+      y.set(0);
+      return;
+    }
     x.set(win.x);
     y.set(win.y);
-  }, [win?.x, win?.y, win?.isOpen, win?.isMinimized, x, y]);
+  }, [win?.x, win?.y, win?.isOpen, win?.isMinimized, x, y, isMobile]);
 
   /* ── Drag via titlebar (framer-motion drag controls) ──────────── */
   const onTitlePointerDown = useCallback(
     (e: React.PointerEvent) => {
+      if (isMobile) return; // Disable dragging on mobile
       if ((e.target as HTMLElement).closest(".os-traffic-light")) return;
       focusWindow(targetId);
       // Hand off pointer to framer-motion drag controls
@@ -150,7 +168,7 @@ export default function Window({
           }}
           key={targetId}
           className={`os-window${isFocused ? " focused" : ""}`}
-          drag
+          drag={!isMobile}
           dragControls={dragControls}
           dragListener={false}
           dragMomentum={false}
@@ -164,18 +182,20 @@ export default function Window({
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ type: "spring", stiffness: 340, damping: 28 }}
           style={{
-            x,
-            y,
-            width: win.width,
-            height: win.height,
+            x: isMobile ? 0 : x,
+            y: isMobile ? 0 : y,
+            width: isMobile ? "100vw" : win.width,
+            height: isMobile ? "calc(100dvh - var(--taskbar-h))" : win.height,
+            maxWidth: "100vw",
+            maxHeight: "calc(100dvh - var(--taskbar-h))",
             zIndex: win.zIndex,
-            position: "absolute",
+            position: isMobile ? "fixed" : "absolute",
             left: 0,
             top: 0,
-            resize: "both",
+            resize: isMobile ? "none" : "both",
             overflow: "auto",
-            minWidth: 300,
-            minHeight: 200,
+            minWidth: isMobile ? "100vw" : 280,
+            minHeight: isMobile ? "auto" : 200,
           }}
           onMouseDown={() => focusWindow(targetId)}
           onPointerDown={() => focusWindow(targetId)}

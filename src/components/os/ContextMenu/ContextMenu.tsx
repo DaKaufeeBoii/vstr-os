@@ -12,7 +12,6 @@ interface ContextMenuProps {
   onClose: () => void;
 }
 
-
 const MENU_WIDTH = 220;
 const ITEM_HEIGHT = 38;
 const GROUP_HEADER = 24;
@@ -36,16 +35,19 @@ export function ContextMenu({ isOpen, position, groups, onClose }: ContextMenuPr
   );
 
   // ── Flip position to prevent viewport clipping ────────────────────────
-  const flippedX = position.x + MENU_WIDTH > window.innerWidth - 8
+  const viewportW = typeof window !== "undefined" ? window.innerWidth : 1024;
+  const viewportH = typeof window !== "undefined" ? window.innerHeight : 768;
+
+  const flippedX = position.x + MENU_WIDTH > viewportW - 8
     ? position.x - MENU_WIDTH
     : position.x;
 
-  const flippedY = position.y + estimatedHeight > window.innerHeight - 8
+  const flippedY = position.y + estimatedHeight > viewportH - 8
     ? Math.max(8, position.y - estimatedHeight)
     : position.y;
 
-  const x = Math.max(8, Math.min(flippedX, window.innerWidth - MENU_WIDTH - 8));
-  const y = Math.max(8, flippedY);
+  const x = Math.max(8, Math.min(flippedX, viewportW - MENU_WIDTH - 8));
+  const y = Math.max(8, Math.min(flippedY, viewportH - 60));
 
   // ── Keyboard navigation ───────────────────────────────────────────────
   const handleKeyDown = useCallback(
@@ -76,7 +78,6 @@ export function ContextMenu({ isOpen, position, groups, onClose }: ContextMenuPr
           }
         }
       } else if (e.key === "Tab") {
-
         // Tab moves focus forward like ArrowDown
         e.preventDefault();
         setFocusedIndex((prev) => (prev + 1) % total);
@@ -112,30 +113,31 @@ export function ContextMenu({ isOpen, position, groups, onClose }: ContextMenuPr
           key="context-menu"
           role="menu"
           aria-label="Context menu"
-            // Win11-accurate entrance: scale from 0.95 + tiny upward shift
-            initial={{ opacity: 0, scale: 0.95, y: -6 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -6 }}
-            transition={{ duration: 0.12, ease: [0.2, 0, 0, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            onContextMenu={(e) => e.preventDefault()}
-            style={{
-              position: "fixed",
-              top: y,
-              left: x,
-              width: MENU_WIDTH,
-              zIndex: 99999,
-              // Win11 Acrylic Dark Green
-              background: "rgba(22, 32, 28, 0.95)",
-              backdropFilter: "blur(24px) saturate(140%)",
-              WebkitBackdropFilter: "blur(24px) saturate(140%)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              borderRadius: 16,
-              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-              padding: "4px 0",
-              overflow: "hidden",
-            }}
-          >
+          // Win11-accurate entrance: scale from 0.95 + tiny upward shift
+          initial={{ opacity: 0, scale: 0.95, y: -6 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -6 }}
+          transition={{ duration: 0.12, ease: [0.2, 0, 0, 1] }}
+          onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.preventDefault()}
+          style={{
+            position: "fixed",
+            top: y,
+            left: x,
+            width: MENU_WIDTH,
+            maxHeight: "calc(100vh - 16px)",
+            overflowY: "auto",
+            zIndex: 99999,
+            // Win11 Acrylic Dark Green
+            background: "rgba(22, 32, 28, 0.95)",
+            backdropFilter: "blur(24px) saturate(140%)",
+            WebkitBackdropFilter: "blur(24px) saturate(140%)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: 14,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+            padding: "4px 0",
+          }}
+        >
           {groupsWithIndex.map(({ group, startIdx }, i) => (
             <ContextMenuGroup
               key={i}

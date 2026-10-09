@@ -313,6 +313,24 @@ const BUILT_IN_APPS: AppManifest[] = [
       allowMultipleInstances: false,
     },
   },
+  {
+    id: "music_player",
+    name: "Music Player",
+    version: "1.0.0",
+    description: "Personal audio playback for custom playlists.",
+    author: "Sai Tarun",
+    category: "utilities",
+    icon: "🎵",
+    fluentIcon: "music",
+    permissions: ["window:manage"],
+    defaultConfig: {
+      width: 400,
+      height: 350,
+      minWidth: 300,
+      minHeight: 300,
+      allowMultipleInstances: false,
+    },
+  },
 ];
 
 class AppRegistryManager {

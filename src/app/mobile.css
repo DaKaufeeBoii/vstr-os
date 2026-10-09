@@ -1,44 +1,249 @@
-/* ── Mobile Responsiveness ──────────────────────────────────────── */
+/* ── VSTR-OS Mobile & Multi-Device Responsiveness ──────────────────────── */
+
+/* Touch & Mobile Base Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices (phones, tablets, touchscreens) */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .desktop-icon {
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+/* ── Tablet & Small Laptops (max-width: 1024px) ─────────────────────── */
+@media (max-width: 1024px) {
+  .os-taskbar {
+    padding: 0 6px;
+    gap: 6px;
+  }
+
+  #start-menu {
+    width: min(580px, 94vw) !important;
+  }
+}
+
+/* ── Mobile Phones & Phablets (max-width: 768px) ───────────────────── */
 @media (max-width: 768px) {
-  /* Windows snap to full screen on mobile */
+  /* Windows fill the viewport flush above the taskbar on mobile */
   .os-window {
+    position: fixed !important;
     left: 0 !important;
     top: 0 !important;
+    right: 0 !important;
     width: 100vw !important;
     height: calc(100dvh - var(--taskbar-h)) !important;
+    transform: none !important;
     border-radius: 0 !important;
     resize: none !important;
-    /* remove the shadow to make it flush */
     box-shadow: none !important;
     border: none !important;
   }
-  
+
   .os-window.focused {
     box-shadow: none !important;
     border: none !important;
   }
 
-  /* Make taskbar more compact */
+  .os-titlebar {
+    height: 42px !important;
+    padding: 0 10px !important;
+  }
+
+  .os-traffic-lights {
+    gap: 10px !important;
+  }
+
+  .os-traffic-light {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+  }
+
+  .os-window-body {
+    padding: 14px 12px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Desktop Icons — Flexible wrapping grid so no icons are cropped */
+  #desktop-icons {
+    position: absolute !important;
+    top: 12px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: calc(100vw - 16px) !important;
+    max-height: calc(100dvh - var(--taskbar-h) - 16px) !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)) !important;
+    grid-template-rows: none !important;
+    grid-auto-flow: row !important;
+    gap: 12px 6px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 24px !important;
+    scrollbar-width: thin !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .desktop-icon {
+    width: 100% !important;
+    padding: 8px 2px !important;
+    gap: 4px !important;
+  }
+
+  .desktop-icon-emoji {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .desktop-icon-label {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    max-width: 70px !important;
+  }
+
+  /* Taskbar on Mobile */
   .os-taskbar {
+    height: var(--taskbar-h) !important;
     padding: 0 4px !important;
     gap: 2px !important;
   }
 
-  .taskbar-app-btn {
-    max-width: 80px !important;
-    padding: 4px 6px !important;
-    font-size: 10px !important;
-  }
-  
-  .taskbar-clock {
-    display: none !important; /* Hide clock to save space */
+  .taskbar-start-btn {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 18px !important;
   }
 
-  /* Adjust Desktop Icons for mobile portrait layout */
+  /* Hide bulky taskbar elements on narrow screens */
+  .taskbar-task-view-btn,
+  .taskbar-widgets-btn,
+  .taskbar-divider,
+  .taskbar-missions-btn {
+    display: none !important;
+  }
+
+  /* Compact Search Button on mobile */
+  .taskbar-search-pill {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  .taskbar-search-text {
+    display: none !important;
+  }
+
+  /* Open / Pinned Apps on mobile */
+  .taskbar-apps {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    flex-shrink: 1 !important;
+    gap: 2px !important;
+  }
+
+  .taskbar-apps::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .taskbar-app-btn {
+    min-width: 36px !important;
+    max-width: 44px !important;
+    height: 36px !important;
+    padding: 0 4px !important;
+    border-radius: 6px !important;
+  }
+
+  /* System Tray on mobile */
+  .taskbar-lang-span {
+    display: none !important; /* Hide "ENG" */
+  }
+
+  .taskbar-tray-btn {
+    padding: 4px 6px !important;
+    gap: 6px !important;
+  }
+
+  .taskbar-clock-btn {
+    padding: 4px 6px !important;
+  }
+
+  .taskbar-date-span {
+    display: none !important; /* Hide date on small mobile, show just time */
+  }
+
+  .taskbar-time-span {
+    font-size: 11px !important;
+  }
+
+  /* Start Menu on Mobile */
+  #start-menu {
+    width: calc(100vw - 12px) !important;
+    max-height: calc(100dvh - var(--taskbar-h) - 12px) !important;
+    height: auto !important;
+    border-radius: 14px !important;
+    padding: 14px 12px !important;
+    bottom: calc(var(--taskbar-h) + 6px) !important;
+  }
+
+  /* Panels on Mobile */
+  div[role="dialog"][aria-label="Quick Settings"] {
+    width: calc(100vw - 16px) !important;
+    right: 8px !important;
+    left: 8px !important;
+    bottom: calc(var(--taskbar-h) + 8px) !important;
+    max-width: 100vw !important;
+  }
+
+  div[role="dialog"][aria-label="Notification Center"],
+  div[aria-label="Notification Center"] {
+    width: calc(100vw - 16px) !important;
+    right: 8px !important;
+    left: 8px !important;
+    bottom: calc(var(--taskbar-h) + 8px) !important;
+    max-width: 100vw !important;
+  }
+
+  /* Command Palette on Mobile */
+  #command-palette {
+    width: calc(100vw - 20px) !important;
+    max-height: 80vh !important;
+  }
+
+  /* Widget Board on Mobile */
+  #widget-board-panel {
+    width: 100vw !important;
+  }
+
+  /* Toast Notifications on Mobile */
+  .win11-toast-container {
+    right: 8px !important;
+    left: 8px !important;
+    max-width: calc(100vw - 16px) !important;
+    bottom: calc(var(--taskbar-h) + 8px) !important;
+  }
+}
+
+/* ── Extra Small Phones (max-width: 380px) ─────────────────────────── */
+@media (max-width: 380px) {
   #desktop-icons {
-    grid-template-rows: repeat(4, auto) !important;
-    gap: 16px 12px !important;
-    top: 10px !important;
-    left: 10px !important;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)) !important;
+    gap: 8px 4px !important;
+  }
+
+  .desktop-icon-label {
+    font-size: 10px !important;
+    max-width: 60px !important;
+  }
+
+  .taskbar-app-btn {
+    min-width: 32px !important;
+    max-width: 38px !important;
   }
 }

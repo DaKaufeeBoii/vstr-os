@@ -1,31 +1,39 @@
 import type { ContextMenuGroupDef } from "../ContextMenuGroup";
 import type { WindowId } from "@/types";
 
-interface IconMenuActions {
-  id: WindowId;
+export interface IconMenuActions {
+  id: WindowId | string;
   label: string;
   fluentIcon?: string;
-  onOpen: (id: WindowId) => void;
-  onClose?: (id: WindowId) => void;
-  onPin?: (id: WindowId) => void;
-  onMinimize?: (id: WindowId) => void;
-  onMaximize?: (id: WindowId) => void;
-  onRestore?: (id: WindowId) => void;
-  onCloseWindow?: (id: WindowId) => void;
+  isOpenWindow?: boolean;
+  isPinned?: boolean;
+  isCustom?: boolean;
+  onOpen: (id: string) => void;
+  onMinimize?: (id: string) => void;
+  onMaximize?: (id: string) => void;
+  onRestore?: (id: string) => void;
+  onCloseWindow?: (id: string) => void;
+  onPin?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onPropertyClick?: (id: string) => void;
 }
 
 export function getIconMenuGroups(actions: IconMenuActions): ContextMenuGroupDef[] {
-  return [
+  const groups: ContextMenuGroupDef[] = [
     {
       items: [
         {
           label: `Open ${actions.label}`,
-          icon: actions.fluentIcon,
+          icon: actions.fluentIcon || "new",
           onClick: () => actions.onOpen(actions.id),
         },
       ],
     },
-    {
+  ];
+
+  // Window management group (only if currently open)
+  if (actions.isOpenWindow) {
+    groups.push({
       items: [
         {
           label: "Minimize",
@@ -39,38 +47,62 @@ export function getIconMenuGroups(actions: IconMenuActions): ContextMenuGroupDef
         },
         {
           label: "Restore",
-          icon: "maximize",
+          icon: "restore",
           onClick: () => actions.onRestore?.(actions.id),
         },
         {
           label: "Close",
           icon: "close",
+          danger: true,
           onClick: () => actions.onCloseWindow?.(actions.id),
         },
       ],
-    },
-    {
+    });
+  }
+
+  // Pin / Unpin group (only for system apps)
+  if (!actions.isCustom) {
+    groups.push({
+      items: [
+        actions.isPinned
+          ? {
+              label: "Unpin from Taskbar",
+              icon: "unpin",
+              onClick: () => actions.onPin?.(actions.id),
+            }
+          : {
+              label: "Pin to Taskbar",
+              icon: "pin",
+              onClick: () => actions.onPin?.(actions.id),
+            },
+      ],
+    });
+  }
+
+  // Delete for custom items
+  if (actions.isCustom && actions.onDelete) {
+    groups.push({
       items: [
         {
-          label: "Pin to Taskbar",
-          icon: "pin",
-          onClick: () => actions.onPin?.(actions.id),
-        },
-        {
-          label: "Unpin from Taskbar",
-          icon: "unpin",
-          onClick: () => actions.onPin?.(actions.id),
+          label: "Delete",
+          icon: "trash",
+          danger: true,
+          onClick: () => actions.onDelete?.(actions.id),
         },
       ],
-    },
-    {
-      items: [
-        {
-          label: "Properties",
-          icon: "info",
-          onClick: () => {},
-        },
-      ],
-    },
-  ];
+    });
+  }
+
+  // Properties group
+  groups.push({
+    items: [
+      {
+        label: "Properties",
+        icon: "properties",
+        onClick: () => actions.onPropertyClick?.(actions.id),
+      },
+    ],
+  });
+
+  return groups;
 }

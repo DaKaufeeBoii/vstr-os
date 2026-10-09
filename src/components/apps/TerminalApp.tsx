@@ -112,9 +112,10 @@ const BOOT_LINES: TerminalLine[] = [
 
 interface TerminalAppProps {
   instanceId?: string;
+  initialCwd?: string;
 }
 
-export default function TerminalApp({ instanceId = "terminal" }: TerminalAppProps = {}) {
+export default function TerminalApp({ instanceId = "terminal", initialCwd }: TerminalAppProps = {}) {
   const { openWindow, windows } = useOS();
   const { unlockMission, unlockedMissions } = useOSSettings();
 
@@ -122,7 +123,7 @@ export default function TerminalApp({ instanceId = "terminal" }: TerminalAppProp
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
-  const [cwd, setCwd] = useState("/home/saitarun/portfolio");
+  const [cwd, setCwd] = useState(initialCwd || "/home/saitarun/portfolio");
   const [currentUser, setCurrentUser] = useState<"guest" | "root">("guest");
   const [awaitingSudoPass, setAwaitingSudoPass] = useState<{ pendingCmd?: string } | null>(null);
   const [matrixMode, setMatrixMode] = useState(false);

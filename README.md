@@ -5,16 +5,17 @@ An interactive OS-themed portfolio for **Sai Tarun Reddy Velagala**, built with 
 ## Features
 
 - **Window manager** — draggable, minimizable, focus-stacked windows with taskbar and start menu
-- **Portfolio apps** — About, Projects, Skills, Experience, Achievements, Contact, Terminal, Settings
-- **Themes** — Cyberpunk (default), Retro 95, and Light mode (persisted in localStorage)
-- **Mobile support** — fullscreen windows and compact taskbar on small screens
-- **Web resume** — printable resume at `/resume` (use browser Print → Save as PDF)
+- **Portfolio apps** — About, Projects, Skills, Experience, Achievements, Contact, Terminal, Settings, App Gallery, Disk Cleanup, etc.
+- **Themes** — Dark mode (default) and WCAG AAA High Contrast mode (persisted in localStorage)
+- **Interactive UI** — Context menus, real-time widget board, quick settings panel, notification center with calendar
+- **Desktop widgets** — Pinned telemetry/stats on the desktop canvas
+- **Web resume** — printable resume at `/resume`
 - **Easter eggs** — hidden games and apps discoverable via the Terminal
-- **PWA support** — installable with offline caching via service worker
-- **System sounds** — UI interaction feedback (clicks, window actions)
-- **Notification Center** — system notifications with toast and panel views
-- **BSOD Easter Egg** — triggerable via `blue-screen` or `bsod` terminal command
-- **Brightness & Volume controls** — in Settings and Quick Settings panel
+- **Virtual File System** — IndexedDB-backed sandbox supporting full POSIX file operations
+- **System sounds** — UI interaction feedback (clicks)
+- **Gamification** — 19 system missions with toast notification feedback
+- **Command Palette** — Global `Ctrl + K` search for apps
+- **App SDK** — Manifest-based system for registering runtime plugins
 
 ## Running locally
 

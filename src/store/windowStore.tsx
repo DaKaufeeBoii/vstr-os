@@ -27,6 +27,7 @@ export const WINDOW_CONFIGS: WindowConfig[] = [
   { id: "desktop_pet",      title: "Desktop Pet.app",     icon: "🐾", fluentIcon: "paw",              defaultW: 460, defaultH: 380 },
   { id: "password_cracker", title: "PwnTool 3.0.app",     icon: "🔓", fluentIcon: "shield",           defaultW: 600, defaultH: 540 },
   { id: "app_gallery",      title: "App Gallery.app",      icon: "📦", fluentIcon: "folder",           defaultW: 600, defaultH: 500 },
+  { id: "music_player",     title: "MusicPlayer.app",     icon: "🎵", fluentIcon: "music",            defaultW: 400, defaultH: 350 },
 ];
 
 /* ── Workspaces ──────────────────────────────────────────────────── */
@@ -42,6 +43,7 @@ export interface OSState {
   stack: string[]; // Z-index stack of instanceIds
   workspaces: Workspace[];
   activeWorkspaceId: number;
+  pinnedApps: WindowId[];
   // UI state
   isExposéOpen: boolean;
   isCommandPaletteOpen: boolean;
@@ -93,7 +95,9 @@ export type OSAction =
   | { type: "CLOSE_QUICK_SETTINGS" }
   | { type: "TOGGLE_NOTIFICATION_CENTER" }
   | { type: "OPEN_NOTIFICATION_CENTER" }
-  | { type: "CLOSE_NOTIFICATION_CENTER" };
+  | { type: "CLOSE_NOTIFICATION_CENTER" }
+  | { type: "PIN_APP"; appId: WindowId }
+  | { type: "UNPIN_APP"; appId: WindowId };
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 let instanceCounter = 0;
@@ -130,6 +134,7 @@ function buildInitial(): OSState {
     stack: [],
     workspaces: DEFAULT_WORKSPACES,
     activeWorkspaceId: 0,
+    pinnedApps: ["terminal", "notepad", "settings"],
     isExposéOpen: false,
     isCommandPaletteOpen: false,
     isTerminalDrawerOpen: false,
@@ -501,6 +506,11 @@ function reducer(state: OSState, action: OSAction): OSState {
       return { ...state, isNotificationCenterOpen: true };
     case "CLOSE_NOTIFICATION_CENTER":
       return { ...state, isNotificationCenterOpen: false };
+    case "PIN_APP":
+      if (state.pinnedApps.includes(action.appId)) return state;
+      return { ...state, pinnedApps: [...state.pinnedApps, action.appId] };
+    case "UNPIN_APP":
+      return { ...state, pinnedApps: state.pinnedApps.filter((id) => id !== action.appId) };
 
     default:
       return state;
@@ -537,6 +547,7 @@ export interface OSContextValue {
   isWidgetBoardOpen: boolean;
   isQuickSettingsOpen: boolean;
   isNotificationCenterOpen: boolean;
+  pinnedApps: WindowId[];
   // UI actions
   toggleExposé: () => void;
   openExposé: () => void;
@@ -556,6 +567,8 @@ export interface OSContextValue {
   toggleNotificationCenter: () => void;
   openNotificationCenter: () => void;
   closeNotificationCenter: () => void;
+  pinApp: (appId: WindowId) => void;
+  unpinApp: (appId: WindowId) => void;
 }
 
 const OSContext = createContext<OSContextValue | null>(null);
@@ -649,6 +662,9 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
   const openNotificationCenter = useCallback(() => dispatch({ type: "OPEN_NOTIFICATION_CENTER" }), []);
   const closeNotificationCenter = useCallback(() => dispatch({ type: "CLOSE_NOTIFICATION_CENTER" }), []);
 
+  const pinApp = useCallback((appId: WindowId) => dispatch({ type: "PIN_APP", appId }), []);
+  const unpinApp = useCallback((appId: WindowId) => dispatch({ type: "UNPIN_APP", appId }), []);
+
   const getWindow = useCallback(
     (idOrInstanceId: string) =>
       state.windows.find(
@@ -691,6 +707,7 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         isWidgetBoardOpen: state.isWidgetBoardOpen,
         isQuickSettingsOpen: state.isQuickSettingsOpen,
         isNotificationCenterOpen: state.isNotificationCenterOpen,
+        pinnedApps: state.pinnedApps,
         toggleExposé,
         openExposé,
         closeExposé,
@@ -709,6 +726,8 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         toggleNotificationCenter,
         openNotificationCenter,
         closeNotificationCenter,
+        pinApp,
+        unpinApp,
       }}
     >
       {children}

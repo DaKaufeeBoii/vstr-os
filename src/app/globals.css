@@ -312,6 +312,46 @@ html, body {
   word-break: break-word;
 }
 
+/* ── Desktop Icon Size Variants ──────────────────────────────────── */
+.desktop-icon.size-large {
+  width: 104px;
+  padding: 12px 14px;
+  gap: 8px;
+}
+.desktop-icon.size-large .desktop-icon-emoji {
+  width: 44px;
+  height: 44px;
+}
+.desktop-icon.size-large .desktop-icon-label {
+  font-size: 13px;
+}
+
+.desktop-icon.size-medium {
+  width: 88px;
+  padding: 10px 12px;
+  gap: 6px;
+}
+.desktop-icon.size-medium .desktop-icon-emoji {
+  width: 32px;
+  height: 32px;
+}
+.desktop-icon.size-medium .desktop-icon-label {
+  font-size: 12px;
+}
+
+.desktop-icon.size-small {
+  width: 72px;
+  padding: 6px 6px;
+  gap: 4px;
+}
+.desktop-icon.size-small .desktop-icon-emoji {
+  width: 24px;
+  height: 24px;
+}
+.desktop-icon.size-small .desktop-icon-label {
+  font-size: 11px;
+}
+
 /* ── Taskbar (Windows Standard - Left Aligned, Full Width) ───────── */
 .os-taskbar {
   position: fixed;

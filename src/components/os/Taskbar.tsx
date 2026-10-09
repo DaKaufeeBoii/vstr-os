@@ -9,6 +9,7 @@ import StartMenu from "./StartMenu";
 import { OsIcon } from "@/components/icons/OsIcon";
 import { VolumeIcon, WifiIcon, BatteryIcon, VstrIcon } from "@/components/icons";
 import { useSound } from "@/utils/useSound";
+import type { WindowId } from "@/types";
 
 interface TaskbarProps {
   onContextMenu?: (e: React.MouseEvent) => void;
@@ -31,14 +32,16 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
     toggleQuickSettings,
     isNotificationCenterOpen,
     toggleNotificationCenter,
+    pinnedApps,
   } = useOS();
+  
   const { playClick } = useSound();
   const { unlockedMissions } = useOSSettings();
   const [timeStr, setTimeStr] = useState("");
   const [dateStr, setDateStr] = useState("");
   const [showStart, setShowStart] = useState(false);
   const [showMissionsWidget, setShowMissionsWidget] = useState(false);
-
+  
   // Live clock and date (stacked Windows 11 style)
   useEffect(() => {
     const tick = () => {
@@ -208,6 +211,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
         {/* Task View / Desktops Button */}
         <button
           id="taskbar-task-view-btn"
+          className="taskbar-task-view-btn"
           onClick={() => { playClick(); toggleExposé(); }}
           title="Task View / Desktops (Alt + T)"
           aria-label="Task View"
@@ -239,6 +243,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
         {/* Widgets Board Button */}
         <button
           id="taskbar-widgets-btn"
+          className="taskbar-widgets-btn"
           onClick={() => { playClick(); toggleWidgetBoard(); }}
           title="Widgets Board (Alt + W)"
           aria-label="Widgets Board"
@@ -272,6 +277,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
         {/* Search Pill */}
         <div
           id="taskbar-search-pill"
+          className="taskbar-search-pill"
           onClick={() => { playClick(); setShowStart(true); }}
           title="Search / Command Palette (Ctrl + K)"
           style={{
@@ -294,15 +300,37 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)"}
         >
           <OsIcon name="search" size="sm" color="var(--os-text-muted)" />
-          <span>Search</span>
+          <span className="taskbar-search-text">Search</span>
         </div>
 
         <div className="taskbar-divider" />
 
         {/* Open/Pinned Apps */}
-        <div className="taskbar-apps">
+        <div className="taskbar-apps" style={{ display: "flex", gap: "4px" }}>
           <AnimatePresence>
-            {openWindows.map((win) => {
+            {/* Pinned Apps */}
+            {pinnedApps.map(appId => {
+              const cfg = WINDOW_CONFIGS.find(c => c.id === appId);
+              if (!cfg) return null;
+              
+              const isRunning = windows.some(w => w.id === appId && w.isOpen);
+              
+              return (
+                <button
+                  key={`pinned-${appId}`}
+                  onClick={() => { playClick(); openWindow(appId); }}
+                  className={`taskbar-app-btn ${isRunning ? 'active' : ''}`}
+                  title={cfg.title}
+                  style={{ position: 'relative' }}
+                >
+                  <span style={{ fontSize: 20 }}>{cfg.icon}</span>
+                  {isRunning && <div style={{ position: 'absolute', bottom: 2, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: '50%', background: 'var(--os-amber)' }} />}
+                </button>
+              );
+            })}
+
+            {/* Runing Apps */}
+            {windows.filter(w => w.isOpen && !pinnedApps.includes(w.id as WindowId)).map((win) => {
               const cfg = WINDOW_CONFIGS.find((c) => c.id === win.id);
               if (!cfg) return null;
               const isFocused = !win.isMinimized && win.zIndex === Math.max(...windows.map(w => w.isOpen && !w.isMinimized ? w.zIndex : 0));
@@ -355,6 +383,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
         }}>
           {/* Missions Quick View Icon */}
           <button
+            className="taskbar-missions-btn"
             onClick={() => { playClick(); setShowMissionsWidget((v) => !v); }}
             title="Missions Progress"
             aria-label="Missions Progress"
@@ -382,10 +411,11 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
             💬
           </button>
 
-          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
+          <div className="taskbar-divider" style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
 
           {/* Language & Network Icons (Quick Settings trigger) */}
           <button
+            className="taskbar-tray-btn"
             onClick={() => { playClick(); toggleQuickSettings(); }}
             title="Quick Settings (Win + A)"
             aria-label="Quick Settings"
@@ -412,7 +442,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
               if (!isQuickSettingsOpen) e.currentTarget.style.background = "transparent";
             }}
           >
-            <span>ENG</span>
+            <span className="taskbar-lang-span">ENG</span>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <WifiIcon size="sm" color="var(--os-text-muted)" />
               <VolumeIcon size="sm" color="var(--os-text-muted)" />
@@ -420,10 +450,11 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
             </div>
           </button>
 
-          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
+          <div className="taskbar-divider" style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
 
           {/* Windows 11 Stacked Date/Time (Notification Center trigger) */}
           <button
+            className="taskbar-clock-btn"
             onClick={() => { playClick(); toggleNotificationCenter(); }}
             title="Notification Center (Win + N)"
             aria-label="Notification Center"
@@ -452,8 +483,8 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
               if (!isNotificationCenterOpen) e.currentTarget.style.background = "transparent";
             }}
           >
-            <span style={{ fontWeight: 500 }}>{timeStr}</span>
-            <span style={{ color: "var(--os-text-muted)", fontSize: 10 }}>{dateStr}</span>
+            <span className="taskbar-time-span" style={{ fontWeight: 500 }}>{timeStr}</span>
+            <span className="taskbar-date-span" style={{ color: "var(--os-text-muted)", fontSize: 10 }}>{dateStr}</span>
           </button>
         </div>
       </div>
