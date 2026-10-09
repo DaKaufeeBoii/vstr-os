@@ -26,6 +26,7 @@ export const WINDOW_CONFIGS: WindowConfig[] = [
   { id: "disk_cleanup",     title: "Disk Cleanup.app",    icon: "💾", fluentIcon: "disk",             defaultW: 560, defaultH: 520 },
   { id: "desktop_pet",      title: "Desktop Pet.app",     icon: "🐾", fluentIcon: "paw",              defaultW: 460, defaultH: 380 },
   { id: "password_cracker", title: "PwnTool 3.0.app",     icon: "🔓", fluentIcon: "shield",           defaultW: 600, defaultH: 540 },
+  { id: "app_gallery",      title: "App Gallery.app",      icon: "📦", fluentIcon: "folder",           defaultW: 600, defaultH: 500 },
 ];
 
 /* ── Workspaces ──────────────────────────────────────────────────── */
@@ -46,6 +47,8 @@ export interface OSState {
   isCommandPaletteOpen: boolean;
   isTerminalDrawerOpen: boolean;
   isWidgetBoardOpen: boolean;
+  isQuickSettingsOpen: boolean;
+  isNotificationCenterOpen: boolean;
 }
 
 export type OpenWindowTarget =
@@ -84,7 +87,13 @@ export type OSAction =
   | { type: "CLOSE_TERMINAL_DRAWER" }
   | { type: "TOGGLE_WIDGET_BOARD" }
   | { type: "OPEN_WIDGET_BOARD" }
-  | { type: "CLOSE_WIDGET_BOARD" };
+  | { type: "CLOSE_WIDGET_BOARD" }
+  | { type: "TOGGLE_QUICK_SETTINGS" }
+  | { type: "OPEN_QUICK_SETTINGS" }
+  | { type: "CLOSE_QUICK_SETTINGS" }
+  | { type: "TOGGLE_NOTIFICATION_CENTER" }
+  | { type: "OPEN_NOTIFICATION_CENTER" }
+  | { type: "CLOSE_NOTIFICATION_CENTER" };
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 let instanceCounter = 0;
@@ -125,6 +134,8 @@ function buildInitial(): OSState {
     isCommandPaletteOpen: false,
     isTerminalDrawerOpen: false,
     isWidgetBoardOpen: false,
+    isQuickSettingsOpen: false,
+    isNotificationCenterOpen: false,
   };
 }
 
@@ -477,6 +488,20 @@ function reducer(state: OSState, action: OSAction): OSState {
     case "CLOSE_WIDGET_BOARD":
       return { ...state, isWidgetBoardOpen: false };
 
+    case "TOGGLE_QUICK_SETTINGS":
+      return { ...state, isQuickSettingsOpen: !state.isQuickSettingsOpen };
+    case "OPEN_QUICK_SETTINGS":
+      return { ...state, isQuickSettingsOpen: true };
+    case "CLOSE_QUICK_SETTINGS":
+      return { ...state, isQuickSettingsOpen: false };
+
+    case "TOGGLE_NOTIFICATION_CENTER":
+      return { ...state, isNotificationCenterOpen: !state.isNotificationCenterOpen };
+    case "OPEN_NOTIFICATION_CENTER":
+      return { ...state, isNotificationCenterOpen: true };
+    case "CLOSE_NOTIFICATION_CENTER":
+      return { ...state, isNotificationCenterOpen: false };
+
     default:
       return state;
   }
@@ -510,6 +535,8 @@ export interface OSContextValue {
   isCommandPaletteOpen: boolean;
   isTerminalDrawerOpen: boolean;
   isWidgetBoardOpen: boolean;
+  isQuickSettingsOpen: boolean;
+  isNotificationCenterOpen: boolean;
   // UI actions
   toggleExposé: () => void;
   openExposé: () => void;
@@ -523,6 +550,12 @@ export interface OSContextValue {
   toggleWidgetBoard: () => void;
   openWidgetBoard: () => void;
   closeWidgetBoard: () => void;
+  toggleQuickSettings: () => void;
+  openQuickSettings: () => void;
+  closeQuickSettings: () => void;
+  toggleNotificationCenter: () => void;
+  openNotificationCenter: () => void;
+  closeNotificationCenter: () => void;
 }
 
 const OSContext = createContext<OSContextValue | null>(null);
@@ -608,6 +641,14 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
   const openWidgetBoard = useCallback(() => dispatch({ type: "OPEN_WIDGET_BOARD" }), []);
   const closeWidgetBoard = useCallback(() => dispatch({ type: "CLOSE_WIDGET_BOARD" }), []);
 
+  const toggleQuickSettings = useCallback(() => dispatch({ type: "TOGGLE_QUICK_SETTINGS" }), []);
+  const openQuickSettings = useCallback(() => dispatch({ type: "OPEN_QUICK_SETTINGS" }), []);
+  const closeQuickSettings = useCallback(() => dispatch({ type: "CLOSE_QUICK_SETTINGS" }), []);
+
+  const toggleNotificationCenter = useCallback(() => dispatch({ type: "TOGGLE_NOTIFICATION_CENTER" }), []);
+  const openNotificationCenter = useCallback(() => dispatch({ type: "OPEN_NOTIFICATION_CENTER" }), []);
+  const closeNotificationCenter = useCallback(() => dispatch({ type: "CLOSE_NOTIFICATION_CENTER" }), []);
+
   const getWindow = useCallback(
     (idOrInstanceId: string) =>
       state.windows.find(
@@ -648,6 +689,8 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         isCommandPaletteOpen: state.isCommandPaletteOpen,
         isTerminalDrawerOpen: state.isTerminalDrawerOpen,
         isWidgetBoardOpen: state.isWidgetBoardOpen,
+        isQuickSettingsOpen: state.isQuickSettingsOpen,
+        isNotificationCenterOpen: state.isNotificationCenterOpen,
         toggleExposé,
         openExposé,
         closeExposé,
@@ -660,6 +703,12 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
         toggleWidgetBoard,
         openWidgetBoard,
         closeWidgetBoard,
+        toggleQuickSettings,
+        openQuickSettings,
+        closeQuickSettings,
+        toggleNotificationCenter,
+        openNotificationCenter,
+        closeNotificationCenter,
       }}
     >
       {children}

@@ -14,9 +14,10 @@ interface DesktopIconProps {
   /** Fluent SVG icon registry key */
   fluentIcon?: string;
   label: string;
+  onContextMenu?: (e: React.MouseEvent, id: WindowId, label: string, fluentIcon?: string) => void;
 }
 
-export default function DesktopIcon({ id, icon, fluentIcon, label }: DesktopIconProps) {
+export default function DesktopIcon({ id, icon, fluentIcon, label, onContextMenu }: DesktopIconProps) {
   const { openWindow, getWindow } = useOS();
   const { playClick } = useSound();
   const win = getWindow(id);
@@ -27,11 +28,20 @@ export default function DesktopIcon({ id, icon, fluentIcon, label }: DesktopIcon
     openWindow(id);
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (onContextMenu) {
+      e.preventDefault();
+      e.stopPropagation();
+      onContextMenu(e, id, label, fluentIcon);
+    }
+  };
+
   return (
     <motion.div
       className={`desktop-icon${isOpen ? " selected" : ""}`}
       id={`desktop-icon-${id}`}
       onDoubleClick={handleOpen}
+      onContextMenu={handleContextMenu}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

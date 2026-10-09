@@ -78,11 +78,8 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
   }, [setBrightness]);
 
   const getBatteryIcon = () => {
-    if (batteryLevel <= 15) return "����";
-    if (batteryLevel <= 30) return "����";
-    if (batteryLevel <= 60) return "����";
-    if (batteryLevel <= 90) return "����";
-    return "����";
+    if (batteryLevel <= 20) return "🪫";
+    return "🔋";
   };
 
   return (
@@ -149,7 +146,7 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
                 border: `1px solid ${batteryLevel <= 15 ? "rgba(239,68,68,0.4)" : "rgba(255,255,255,0.1)"}`,
                 color: batteryLevel <= 15 ? "#ef4444" : "var(--os-text-muted)"
               }}>
-                {isCharging ? "���" : getBatteryIcon()} {Math.round(batteryLevel)}%
+                {isCharging ? "⚡" : getBatteryIcon()} {Math.round(batteryLevel)}%
               </span>
             </div>
           </div>
@@ -314,7 +311,7 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
                 }
               }}
             >
-              {isCharging ? "���" : "����"} {isCharging ? "Charging" : "Battery Saver"}
+              {isCharging ? "⚡" : "🔋"} {isCharging ? "Charging" : "Battery Saver"}
             </button>
           </div>
         </motion.div>

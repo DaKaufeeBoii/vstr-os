@@ -14,6 +14,8 @@ import type { WindowConfig } from "@/types";
 import { useGlobalHotkeys } from "@/hooks/useGlobalHotkeys";
 import { Announcer, focusManager } from "@/hooks/useFocusTrap";
 
+import { DynamicAppLoader } from "./DynamicAppLoader";
+import { appRegistry } from "@/lib/sdk/appRegistry";
 import AboutApp        from "@/components/apps/AboutApp";
 import ProjectsApp     from "@/components/apps/ProjectsApp";
 import SkillsApp       from "@/components/apps/SkillsApp";
@@ -31,11 +33,24 @@ import DesktopPetApp      from "../apps/DesktopPetApp";
 import PasswordCrackerApp from "../apps/PasswordCrackerApp";
 import NotepadApp         from "@/components/apps/NotepadApp";
 import GuestbookApp       from "@/components/apps/GuestbookApp";
+import AppGalleryApp      from "@/components/apps/AppGalleryApp";
 
 import VideoWallpaper          from "./VideoWallpaper";
 import BsodScreen              from "./BsodScreen";
 import TaskView                from "./TaskView";
 import WidgetBoard             from "./WidgetBoard";
+import CommandPalette          from "./CommandPalette";
+import QuickSettings           from "./QuickSettings";
+import NotificationCenter      from "./NotificationCenter";
+import { DesktopWidgets }      from "./DesktopWidgets";
+import { useSound }            from "@/utils/useSound";
+import { ContextMenu }         from "./ContextMenu/ContextMenu";
+import { useContextMenu }      from "./ContextMenu/hooks/useContextMenu";
+import { getDesktopMenuGroups } from "./ContextMenu/configs/desktopMenu";
+import { getTaskbarMenuGroups } from "./ContextMenu/configs/taskbarMenu";
+import { getIconMenuGroups }   from "./ContextMenu/configs/iconMenu";
+import type { ContextMenuGroupDef } from "./ContextMenu/ContextMenuGroup";
+import type { WindowId }       from "@/types";
 
 
 const APP_CONTENT: Record<string, React.ReactNode> = {
@@ -55,6 +70,7 @@ const APP_CONTENT: Record<string, React.ReactNode> = {
   disk_cleanup:     <DiskCleanupApp />,
   desktop_pet:      <DesktopPetApp />,
   password_cracker: <PasswordCrackerApp />,
+  app_gallery:      <AppGalleryApp />,
 };
 
 export default function Desktop() {
@@ -85,10 +101,100 @@ export default function Desktop() {
     isWidgetBoardOpen,
     toggleWidgetBoard,
     closeWidgetBoard,
+    isQuickSettingsOpen,
+    toggleQuickSettings,
+    closeQuickSettings,
+    isNotificationCenterOpen,
+    toggleNotificationCenter,
+    closeNotificationCenter,
   } = useOS();
   const { wallpaper, videoWallpaper, performanceMode, unlockMission } = useOSSettings();
   const [booting, setBooting] = React.useState(true);
   const [showBsod, setShowBsod] = React.useState(false);
+  const { playClick } = useSound();
+
+  const {
+    isOpen: isContextMenuOpen,
+    position: contextMenuPos,
+    openMenu: triggerContextMenu,
+    closeMenu: closeContextMenu,
+  } = useContextMenu();
+  const [contextMenuGroups, setContextMenuGroups] = React.useState<ContextMenuGroupDef[]>([]);
+
+  const handleDesktopContextMenu = React.useCallback(
+    (e: React.MouseEvent) => {
+      // Don't intercept right clicks if target is a window or interactive control
+      const target = e.target as HTMLElement;
+      if (target.closest(".os-window") || target.closest(".os-taskbar") || target.closest(".desktop-icon")) {
+        return;
+      }
+      e.preventDefault();
+      setContextMenuGroups(
+        getDesktopMenuGroups({
+          refresh: () => {
+            playClick();
+          },
+          openTerminal: () => openWindow("terminal"),
+          openSettings: () => openWindow("settings"),
+        })
+      );
+      triggerContextMenu(e);
+    },
+    [playClick, openWindow, triggerContextMenu]
+  );
+
+  const handleIconContextMenu = React.useCallback(
+    (e: React.MouseEvent, id: WindowId, label: string, fluentIcon?: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setContextMenuGroups(
+        getIconMenuGroups({
+          id,
+          label,
+          fluentIcon,
+          onOpen: (appId) => openWindow(appId),
+          onMinimize: (appId) => {
+            const win = windows.find((w) => w.id === appId && w.isOpen);
+            if (win) minimizeWindow(win.instanceId);
+          },
+          onMaximize: (appId) => {
+            const win = windows.find((w) => w.id === appId && w.isOpen);
+            if (win) maximizeWindow(win.instanceId);
+          },
+          onRestore: (appId) => {
+            const win = windows.find((w) => w.id === appId && w.isOpen);
+            if (win) restoreWindow(win.instanceId);
+          },
+          onCloseWindow: (appId) => {
+            const win = windows.find((w) => w.id === appId && w.isOpen);
+            if (win) closeWindow(win.instanceId);
+          },
+        })
+      );
+      triggerContextMenu(e);
+    },
+    [windows, openWindow, minimizeWindow, maximizeWindow, restoreWindow, closeWindow, triggerContextMenu]
+  );
+
+  const handleTaskbarContextMenu = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setContextMenuGroups(
+        getTaskbarMenuGroups({
+          openSettings: () => openWindow("settings"),
+          openTaskManager: () => openWindow("terminal"),
+          showDesktop: () => {
+            windows.forEach((w) => {
+              if (w.isOpen && !w.isMinimized) minimizeWindow(w.instanceId);
+            });
+          },
+        })
+      );
+      triggerContextMenu(e);
+    },
+    [windows, openWindow, minimizeWindow, triggerContextMenu]
+  );
 
   // Listen for BSOD trigger events
   React.useEffect(() => {
@@ -156,15 +262,30 @@ export default function Desktop() {
       allowInInput: false,
     },
     {
+      keys: [["Alt", "a"], ["Meta", "a"]],
+      description: "Toggle Quick Settings (Alt+A)",
+      handler: () => toggleQuickSettings(),
+      allowInInput: false,
+    },
+    {
+      keys: [["Alt", "n"], ["Meta", "n"]],
+      description: "Toggle Notification Center (Alt+N)",
+      handler: () => toggleNotificationCenter(),
+      allowInInput: false,
+    },
+    {
       keys: ["Escape"],
       description: "Close modals / Cancel (Esc)",
       handler: () => {
+        if (isContextMenuOpen) closeContextMenu();
         if (isExposéOpen) closeExposé();
         if (isCommandPaletteOpen) closeCommandPalette();
         if (isTerminalDrawerOpen) closeTerminalDrawer();
         if (isWidgetBoardOpen) closeWidgetBoard();
+        if (isQuickSettingsOpen) closeQuickSettings();
+        if (isNotificationCenterOpen) closeNotificationCenter();
       },
-      allowInInput: true,
+      allowInInput: false,
     },
     // Instant workspace jumps (Alt + 1, Alt + 2, Alt + 3, Alt + 4)
     {
@@ -277,6 +398,7 @@ export default function Desktop() {
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "contact"),
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "terminal"),
     WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "settings"),
+    WINDOW_CONFIGS.find((c: WindowConfig) => c.id === "app_gallery"),
   ].filter(Boolean) as typeof WINDOW_CONFIGS;
 
 
@@ -284,6 +406,7 @@ export default function Desktop() {
   return (
     <div
       id="os-desktop"
+      onContextMenu={handleDesktopContextMenu}
       style={{
         position: "relative",
         width: "100%",
@@ -312,6 +435,9 @@ export default function Desktop() {
             paused={performanceMode}
           />
 
+          {/* Desktop Widgets */}
+          <DesktopWidgets />
+
           <div
             id="desktop-icons"
             style={{
@@ -332,13 +458,14 @@ export default function Desktop() {
                 icon={cfg.icon}
                 fluentIcon={cfg.fluentIcon}
                 label={cfg.title}
+                onContextMenu={handleIconContextMenu}
               />
 
             ))}
           </div>
 
           {windows.map((win) => {
-            const cfg = WINDOW_CONFIGS.find((c: WindowConfig) => c.id === win.id);
+            const cfg = WINDOW_CONFIGS.find((c: WindowConfig) => c.id === win.id) || appRegistry.getApp(win.id);
             if (!cfg) return null;
             if (
               win.desktopId !== undefined &&
@@ -347,19 +474,10 @@ export default function Desktop() {
             ) {
               return null;
             }
-            return (
-              <Window
-                key={win.instanceId}
-                id={win.id}
-                instanceId={win.instanceId}
-                title={win.title || cfg.title}
-                icon={cfg.icon}
-                fluentIcon={cfg.fluentIcon}
-                defaultW={cfg.defaultW}
-                defaultH={cfg.defaultH}
-                noPadding={win.id === "terminal" || win.id === "notepad"}
-              >
-                {win.id === "terminal" ? (
+            
+            const AppContent = (cfg as any).componentPath 
+              ? <DynamicAppLoader appId={win.id} key={win.instanceId} instanceId={win.instanceId} />
+              : win.id === "terminal" ? (
                   <TerminalApp key={win.instanceId} instanceId={win.instanceId} />
                 ) : win.id === "notepad" ? (
                   <NotepadApp
@@ -371,14 +489,37 @@ export default function Desktop() {
                   />
                 ) : (
                   APP_CONTENT[win.id]
-                )}
+                );
+
+            return (
+              <Window
+                key={win.instanceId}
+                id={win.id}
+                instanceId={win.instanceId}
+                title={win.title || (cfg as any).title || (cfg as any).name}
+                icon={cfg.icon}
+                fluentIcon={cfg.fluentIcon}
+                defaultW={(cfg as any).defaultConfig?.width ?? (cfg as any).defaultW}
+                defaultH={(cfg as any).defaultConfig?.height ?? (cfg as any).defaultH}
+                noPadding={win.id === "terminal" || win.id === "notepad"}
+              >
+                {AppContent}
               </Window>
             );
           })}
 
           <WidgetBoard />
+          <CommandPalette />
           <TaskView />
-          <Taskbar />
+          <Taskbar onContextMenu={handleTaskbarContextMenu} />
+          <QuickSettings isOpen={isQuickSettingsOpen} onClose={closeQuickSettings} />
+          <NotificationCenter />
+          <ContextMenu
+            isOpen={isContextMenuOpen}
+            position={contextMenuPos}
+            groups={contextMenuGroups}
+            onClose={closeContextMenu}
+          />
           <OnboardingTip />
           <Win11ToastContainer />
           <Announcer />

@@ -27,6 +27,13 @@ import { systemMissions } from "@/data/systemMissions";
 /* ── Types ──────────────────────────────────────────────────────────── */
 export type VideoWallpaperId = "none" | "dawn" | "lake" | "rayquaza" | "yuji-sleepy";
 
+export interface WidgetConfig {
+  id: string;
+  name: string;
+  visibleOnBoard: boolean;
+  visibleOnDesktop: boolean;
+}
+
 interface OSSettingsState {
   wallpaper:        string;
   videoWallpaper:   VideoWallpaperId;
@@ -37,6 +44,7 @@ interface OSSettingsState {
   highContrast:     boolean;
   notifications:    OSNotification[];
   unlockedMissions: string[];
+  widgets:          WidgetConfig[];
 }
 
 type OSSettingsAction =
@@ -49,8 +57,12 @@ type OSSettingsAction =
   | { type: "SET_HIGH_CONTRAST";   enabled: boolean }
   | { type: "ADD_NOTIFICATION";    notification: OSNotification }
   | { type: "DISMISS_NOTIFICATION"; notificationId: string }
+  | { type: "CLEAR_NOTIFICATIONS" }
   | { type: "UNLOCK_MISSION";      missionId: string }
-  | { type: "SET_MISSIONS";        missionIds: string[] };
+  | { type: "SET_MISSIONS";        missionIds: string[] }
+  | { type: "TOGGLE_WIDGET_BOARD"; widgetId: string }
+  | { type: "TOGGLE_WIDGET_DESKTOP"; widgetId: string }
+  | { type: "SET_WIDGETS";         widgets: WidgetConfig[] };
 
 /* ── Storage keys ───────────────────────────────────────────────────── */
 const KEYS = {
@@ -63,6 +75,7 @@ const KEYS = {
   brightness:     "vstr_brightness",
   theme:          "vstr_theme",
   highContrast:   "vstr_high_contrast",
+  widgets:        "vstr_widgets",
 } as const;
 
 const VALID_VIDEOS: VideoWallpaperId[] = ["dawn", "lake", "rayquaza", "yuji-sleepy", "none"];
@@ -79,6 +92,12 @@ function buildInitial(): OSSettingsState {
     highContrast:     false,
     notifications:    [],
     unlockedMissions: [],
+    widgets: [
+      { id: "weather", name: "Weather", visibleOnBoard: true, visibleOnDesktop: false },
+      { id: "telemetry", name: "System Telemetry", visibleOnBoard: true, visibleOnDesktop: false },
+      { id: "github", name: "GitHub Activity", visibleOnBoard: true, visibleOnDesktop: false },
+      { id: "leetcode", name: "LeetCode Stats", visibleOnBoard: true, visibleOnDesktop: false },
+    ],
   };
 }
 
@@ -122,6 +141,9 @@ function reducer(state: OSSettingsState, action: OSSettingsAction): OSSettingsSt
         notifications: state.notifications.filter((n) => n.id !== action.notificationId),
       };
 
+    case "CLEAR_NOTIFICATIONS":
+      return { ...state, notifications: [] };
+
     case "UNLOCK_MISSION": {
       if (state.unlockedMissions.includes(action.missionId)) return state;
       const next = [...state.unlockedMissions, action.missionId];
@@ -151,6 +173,33 @@ function reducer(state: OSSettingsState, action: OSSettingsAction): OSSettingsSt
       return { ...state, highContrast: action.enabled, theme };
     }
 
+    case "TOGGLE_WIDGET_BOARD": {
+      const nextWidgets = state.widgets.map(w => 
+        w.id === action.widgetId ? { ...w, visibleOnBoard: !w.visibleOnBoard } : w
+      );
+      if (typeof window !== "undefined") {
+        localStorage.setItem(KEYS.widgets, JSON.stringify(nextWidgets));
+      }
+      return { ...state, widgets: nextWidgets };
+    }
+
+    case "TOGGLE_WIDGET_DESKTOP": {
+      const nextWidgets = state.widgets.map(w => 
+        w.id === action.widgetId ? { ...w, visibleOnDesktop: !w.visibleOnDesktop } : w
+      );
+      if (typeof window !== "undefined") {
+        localStorage.setItem(KEYS.widgets, JSON.stringify(nextWidgets));
+      }
+      return { ...state, widgets: nextWidgets };
+    }
+
+    case "SET_WIDGETS": {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(KEYS.widgets, JSON.stringify(action.widgets));
+      }
+      return { ...state, widgets: action.widgets };
+    }
+
     default:
       return state;
   }
@@ -168,6 +217,7 @@ interface OSSettingsContextValue {
   highContrast:     boolean;
   notifications:    OSNotification[];
   unlockedMissions: string[];
+  widgets:          WidgetConfig[];
 
   // Actions
   setWallpaper:         (wallpaper: string) => void;
@@ -179,7 +229,11 @@ interface OSSettingsContextValue {
   setHighContrast:      (enabled: boolean) => void;
   addNotification:      (title: string, description: string, icon: string) => void;
   dismissNotification:  (id: string) => void;
+  clearNotifications:    () => void;
   unlockMission:        (id: string) => void;
+  toggleWidgetBoard:    (widgetId: string) => void;
+  toggleWidgetDesktop:  (widgetId: string) => void;
+  setWidgets:           (widgets: WidgetConfig[]) => void;
 }
 
 const OSSettingsContext = createContext<OSSettingsContextValue | null>(null);
@@ -198,6 +252,10 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
 
   const dismissNotification = useCallback((notificationId: string) => {
     dispatch({ type: "DISMISS_NOTIFICATION", notificationId });
+  }, []);
+
+  const clearNotifications = useCallback(() => {
+    dispatch({ type: "CLEAR_NOTIFICATIONS" });
   }, []);
 
   const unlockMission = useCallback((missionId: string) => {
@@ -246,6 +304,18 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     dispatch({ type: "SET_HIGH_CONTRAST", enabled });
   }, []);
 
+  const toggleWidgetBoard = useCallback((widgetId: string) => {
+    dispatch({ type: "TOGGLE_WIDGET_BOARD", widgetId });
+  }, []);
+
+  const toggleWidgetDesktop = useCallback((widgetId: string) => {
+    dispatch({ type: "TOGGLE_WIDGET_DESKTOP", widgetId });
+  }, []);
+
+  const setWidgets = useCallback((widgets: WidgetConfig[]) => {
+    dispatch({ type: "SET_WIDGETS", widgets });
+  }, []);
+
   /* — Hydrate from localStorage on mount — */
   useEffect(() => {
     // Wallpaper
@@ -256,6 +326,15 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     const savedVideo = localStorage.getItem(KEYS.videoWallpaper) as VideoWallpaperId | null;
     if (savedVideo && VALID_VIDEOS.includes(savedVideo)) {
       dispatch({ type: "SET_VIDEO_WALLPAPER", videoWallpaper: savedVideo });
+    }
+
+    // Widgets
+    const savedWidgets = localStorage.getItem(KEYS.widgets);
+    if (savedWidgets) {
+      try {
+        const parsed = JSON.parse(savedWidgets);
+        if (Array.isArray(parsed)) dispatch({ type: "SET_WIDGETS", widgets: parsed });
+      } catch {}
     }
 
     // Performance mode
@@ -330,9 +409,11 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
       highContrast:      state.highContrast,
       notifications:     state.notifications,
       unlockedMissions:  state.unlockedMissions,
+      widgets:           state.widgets,
       setWallpaper, setVideoWallpaper, setPerformanceMode, setVolume, setBrightness,
       setTheme, setHighContrast,
-      addNotification, dismissNotification, unlockMission,
+      addNotification, dismissNotification, clearNotifications, unlockMission,
+      toggleWidgetBoard, toggleWidgetDesktop, setWidgets,
     }}>
       {children}
     </OSSettingsContext.Provider>

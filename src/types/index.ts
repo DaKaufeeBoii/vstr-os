@@ -62,7 +62,8 @@ export type WindowId =
   | "desktop_pet"
   | "password_cracker"
   | "notepad"
-  | "guestbook";
+  | "guestbook"
+  | "app_gallery";
 
 export interface WindowConfig {
   id: WindowId;

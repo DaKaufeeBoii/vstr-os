@@ -1,12 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { projects } from "@/data/projects";
+import { projects as staticProjects } from "@/data/projects";
+import { useVFS } from "@/lib/vfs/useVFS";
 import type { Project } from "@/types";
 
 export default function ProjectsApp() {
   const [selected, setSelected] = useState<Project | null>(null);
+  const [projects, setProjects] = useState<Project[]>(staticProjects);
+  const vfs = useVFS();
+
+  useEffect(() => {
+    async function loadProjects() {
+      if (vfs.isReady) {
+        try {
+          const content = await vfs.readFile("/home/saitarun/portfolio/projects.json");
+          if (content) {
+            setProjects(JSON.parse(content));
+          }
+        } catch (e) {
+          console.error("Failed to load projects from VFS, using static fallback:", e);
+          setProjects(staticProjects);
+        }
+      }
+    }
+    loadProjects();
+  }, [vfs.isReady]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

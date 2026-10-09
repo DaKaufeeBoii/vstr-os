@@ -37,8 +37,10 @@ export interface AppManifest {
     minHeight?: number;
     allowMultipleInstances?: boolean;
   };
-  entrypoint?: string;
+  /** Path to dynamic component for lazy loading */
+  componentPath?: string;
 }
+
 
 export interface SDKContext {
   manifest: AppManifest;

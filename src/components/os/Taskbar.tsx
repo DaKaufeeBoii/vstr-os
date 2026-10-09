@@ -10,7 +10,11 @@ import { OsIcon } from "@/components/icons/OsIcon";
 import { VolumeIcon, WifiIcon, BatteryIcon, VstrIcon } from "@/components/icons";
 import { useSound } from "@/utils/useSound";
 
-export default function Taskbar() {
+interface TaskbarProps {
+  onContextMenu?: (e: React.MouseEvent) => void;
+}
+
+export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
 
   const {
     windows,
@@ -23,6 +27,10 @@ export default function Taskbar() {
     isExposéOpen,
     toggleWidgetBoard,
     isWidgetBoardOpen,
+    isQuickSettingsOpen,
+    toggleQuickSettings,
+    isNotificationCenterOpen,
+    toggleNotificationCenter,
   } = useOS();
   const { playClick } = useSound();
   const { unlockedMissions } = useOSSettings();
@@ -172,7 +180,17 @@ export default function Taskbar() {
         )}
       </AnimatePresence>
 
-      <div className="os-taskbar" id="os-taskbar">
+      <div
+        className="os-taskbar"
+        id="os-taskbar"
+        onContextMenu={(e) => {
+          if (onContextMenu) {
+            e.preventDefault();
+            e.stopPropagation();
+            onContextMenu(e);
+          }
+        }}
+      >
         {/* Start Button */}
         <button
           id="taskbar-start-btn"
@@ -366,9 +384,16 @@ export default function Taskbar() {
 
           <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
 
-          {/* Language & Network Icons */}
-          <div
+          {/* Language & Network Icons (Quick Settings trigger) */}
+          <button
+            onClick={() => { playClick(); toggleQuickSettings(); }}
+            title="Quick Settings (Win + A)"
+            aria-label="Quick Settings"
+            aria-expanded={isQuickSettingsOpen}
             style={{
+              background: isQuickSettingsOpen ? "rgba(255, 255, 255, 0.12)" : "transparent",
+              border: "1px solid " + (isQuickSettingsOpen ? "rgba(255, 255, 255, 0.15)" : "transparent"),
+              cursor: "pointer",
               display: "flex",
               alignItems: "center",
               gap: 10,
@@ -378,6 +403,13 @@ export default function Taskbar() {
               userSelect: "none",
               padding: "4px 8px",
               borderRadius: 6,
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (!isQuickSettingsOpen) e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+            }}
+            onMouseLeave={(e) => {
+              if (!isQuickSettingsOpen) e.currentTarget.style.background = "transparent";
             }}
           >
             <span>ENG</span>
@@ -386,25 +418,43 @@ export default function Taskbar() {
               <VolumeIcon size="sm" color="var(--os-text-muted)" />
               <BatteryIcon size="sm" color="var(--os-text-muted)" />
             </div>
-          </div>
+          </button>
 
           <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
 
-          {/* Windows 11 Stacked Date/Time */}
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            justifyContent: "center",
-            fontSize: 11,
-            fontFamily: "'JetBrains Mono', monospace",
-            color: "var(--os-text)",
-            lineHeight: 1.25,
-            userSelect: "none",
-          }}>
+          {/* Windows 11 Stacked Date/Time (Notification Center trigger) */}
+          <button
+            onClick={() => { playClick(); toggleNotificationCenter(); }}
+            title="Notification Center (Win + N)"
+            aria-label="Notification Center"
+            aria-expanded={isNotificationCenterOpen}
+            style={{
+              background: isNotificationCenterOpen ? "rgba(255, 255, 255, 0.12)" : "transparent",
+              border: "1px solid " + (isNotificationCenterOpen ? "rgba(255, 255, 255, 0.15)" : "transparent"),
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              justifyContent: "center",
+              fontSize: 11,
+              fontFamily: "'JetBrains Mono', monospace",
+              color: "var(--os-text)",
+              lineHeight: 1.25,
+              userSelect: "none",
+              padding: "4px 8px",
+              borderRadius: 6,
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (!isNotificationCenterOpen) e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+            }}
+            onMouseLeave={(e) => {
+              if (!isNotificationCenterOpen) e.currentTarget.style.background = "transparent";
+            }}
+          >
             <span style={{ fontWeight: 500 }}>{timeStr}</span>
             <span style={{ color: "var(--os-text-muted)", fontSize: 10 }}>{dateStr}</span>
-          </div>
+          </button>
         </div>
       </div>
     </>
