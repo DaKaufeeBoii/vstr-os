@@ -174,12 +174,12 @@ export function getDesktopMenuGroups(
           onClick: actions.nextWallpaper,
         },
         {
-          label: "Command Palette (Ctrl+K)",
+          label: "Command Palette (Alt+K)",
           icon: "search",
           onClick: actions.openCommandPalette,
         },
         {
-          label: "Quick Settings (Win+A)",
+          label: "Quick Settings (Alt+Q)",
           icon: "settings",
           onClick: actions.openQuickSettings,
         },
@@ -189,9 +189,14 @@ export function getDesktopMenuGroups(
           onClick: actions.openWidgetBoard,
         },
         {
-          label: "Task View (Alt+T)",
+          label: "Task View (Alt+V)",
           icon: "windows",
           onClick: actions.openTaskView,
+        },
+        {
+          label: "Keyboard Shortcuts (Alt+/)",
+          icon: "keyboard",
+          onClick: () => window.dispatchEvent(new CustomEvent("toggle-shortcuts-guide")),
         },
         {
           label: "Desktop Properties",

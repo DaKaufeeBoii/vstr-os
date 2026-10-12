@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import DesktopIcon from "./DesktopIcon";
 import Taskbar from "./Taskbar";
 import Window from "./Window";
@@ -624,116 +624,170 @@ export default function Desktop() {
     return () => window.removeEventListener("trigger-bsod", handleBsodEvent);
   }, []);
 
-  // Global hotkeys
-  useGlobalHotkeys([
-    {
-      keys: [["Control", "Space"], ["Alt", "s"], ["Meta"]],
-      description: "Open Start Menu (Ctrl+Space / Alt+S)",
-      handler: () => {
-        const startBtn = document.getElementById("taskbar-start-btn") as HTMLButtonElement;
-        startBtn?.click();
-      },
-      allowInInput: false,
-    },
-    {
-      keys: [["Alt", "w"], ["Meta", "w"]],
-      description: "Toggle Widgets Board (Alt+W)",
-      handler: () => toggleWidgetBoard(),
-      allowInInput: false,
-    },
-    {
-      keys: [["Alt", "t"], ["Alt", "ArrowUp"], ["Meta", "Tab"]],
-      description: "Open Task View / Window Overview (Alt+T)",
-      handler: () => toggleExposé(),
-      allowInInput: false,
-    },
-    {
-      keys: [["Alt", "Tab"], ["Alt", "["], ["Alt", "]"], ["Control", "Alt", "Tab"]],
-      description: "Switch windows (Alt+[ / Alt+])",
-      handler: (e) => {
-        const openWindows = windows.filter(
-          (w) =>
-            w.isOpen &&
-            !w.isMinimized &&
-            (w.desktopId === undefined || w.desktopId === activeWorkspaceId || w.isSticky)
-        );
-        if (openWindows.length < 2) return;
+  // Stable refs for hotkey handler to avoid rebuilding actions on every window drag
+  const windowsRef = useRef(windows);
+  windowsRef.current = windows;
+  const activeWorkspaceIdRef = useRef(activeWorkspaceId);
+  activeWorkspaceIdRef.current = activeWorkspaceId;
 
-        const focused = openWindows.reduce((max, w) => (w.zIndex > max.zIndex ? w : max));
-        const currentIndex = openWindows.findIndex((w) => w.instanceId === focused.instanceId);
-        const nextIndex = e.shiftKey || e.key === "["
-          ? (currentIndex - 1 + openWindows.length) % openWindows.length
-          : (currentIndex + 1) % openWindows.length;
+  // Global hotkeys (configured to avoid any collisions with Windows OS or browser shortcuts)
+  const desktopHotkeys = useMemo(
+    () => [
+      {
+        keys: [["Alt", "s"], ["Alt", "m"]],
+        description: "Open Start Menu (Alt+S / Alt+M)",
+        handler: () => {
+          const startBtn = document.getElementById("taskbar-start-btn") as HTMLButtonElement;
+          startBtn?.click();
+        },
+        allowInInput: false,
+      },
+      {
+        keys: ["Alt", "w"],
+        description: "Toggle Widgets Board (Alt+W)",
+        handler: () => toggleWidgetBoard(),
+        allowInInput: false,
+      },
+      {
+        keys: [["Alt", "v"], ["Alt", "o"]],
+        description: "Open Task View / Window Overview (Alt+V / Alt+O)",
+        handler: () => toggleExposé(),
+        allowInInput: false,
+      },
+      {
+        keys: [["Alt", "["], ["Alt", "]"]],
+        description: "Switch windows (Alt+[ / Alt+])",
+        handler: (e: KeyboardEvent) => {
+          const currentWindows = windowsRef.current;
+          const currentWorkspaceId = activeWorkspaceIdRef.current;
+          const openWindows = currentWindows.filter(
+            (w) =>
+              w.isOpen &&
+              !w.isMinimized &&
+              (w.desktopId === undefined || w.desktopId === currentWorkspaceId || w.isSticky)
+          );
+          if (openWindows.length < 2) return;
 
-        focusWindow(openWindows[nextIndex].instanceId);
-      },
-      allowInInput: false,
-    },
-    {
-      keys: [["Control", "k"], ["Alt", "k"], ["Meta", "s"]],
-      description: "Open Command Palette / Search (Ctrl+K)",
-      handler: () => toggleCommandPalette(),
-      allowInInput: false,
-    },
-    {
-      keys: [["Control", "`"], ["Alt", "`"], ["Meta", "`"]],
-      description: "Toggle Terminal Drawer (Ctrl+`)",
-      handler: () => toggleTerminalDrawer(),
-      allowInInput: false,
-    },
-    {
-      keys: [["Alt", "a"], ["Meta", "a"]],
-      description: "Toggle Quick Settings (Alt+A)",
-      handler: () => toggleQuickSettings(),
-      allowInInput: false,
-    },
-    {
-      keys: [["Alt", "n"], ["Meta", "n"]],
-      description: "Toggle Notification Center (Alt+N)",
-      handler: () => toggleNotificationCenter(),
-      allowInInput: false,
-    },
-    {
-      keys: ["Escape"],
-      description: "Close modals / Cancel (Esc)",
-      handler: () => {
-        if (isContextMenuOpen) closeContextMenu();
-        if (isExposéOpen) closeExposé();
-        if (isCommandPaletteOpen) closeCommandPalette();
-        if (isTerminalDrawerOpen) closeTerminalDrawer();
-        if (isWidgetBoardOpen) closeWidgetBoard();
-        if (isQuickSettingsOpen) closeQuickSettings();
-        if (isNotificationCenterOpen) closeNotificationCenter();
-        if (propertiesModalItem) setPropertiesModalItem(null);
-      },
-      allowInInput: false,
-    },
-    {
-      keys: ["Alt", "1"],
-      description: "Switch to Desktop 1 (Alt+1)",
-      handler: () => switchWorkspace(0),
-      allowInInput: false,
-    },
-    {
-      keys: ["Alt", "2"],
-      description: "Switch to Desktop 2 (Alt+2)",
-      handler: () => {
-        if (workspaces.length > 1) {
-          switchWorkspace(1);
-        } else {
-          addWorkspace();
-        }
-      },
-      allowInInput: false,
-    },
-  ]);
+          const focused = openWindows.reduce((max, w) => (w.zIndex > max.zIndex ? w : max));
+          const currentIndex = openWindows.findIndex((w) => w.instanceId === focused.instanceId);
+          const nextIndex = e.shiftKey || e.key === "["
+            ? (currentIndex - 1 + openWindows.length) % openWindows.length
+            : (currentIndex + 1) % openWindows.length;
 
-  // Trigger "First Boot" mission once boot finishes
+          focusWindow(openWindows[nextIndex].instanceId);
+        },
+        allowInInput: false,
+      },
+      {
+        keys: ["Alt", "k"],
+        description: "Open Command Palette / Search (Alt+K)",
+        handler: () => toggleCommandPalette(),
+        allowInInput: false,
+      },
+      {
+        keys: [["Control", "`"], ["Alt", "`"]],
+        description: "Toggle Terminal Drawer (Ctrl+` / Alt+`)",
+        handler: () => toggleTerminalDrawer(),
+        allowInInput: false,
+      },
+      {
+        keys: [["Alt", "q"], ["Alt", "a"]],
+        description: "Toggle Quick Settings (Alt+Q)",
+        handler: () => toggleQuickSettings(),
+        allowInInput: false,
+      },
+      {
+        keys: ["Alt", "n"],
+        description: "Toggle Notification Center (Alt+N)",
+        handler: () => toggleNotificationCenter(),
+        allowInInput: false,
+      },
+      {
+        keys: ["Escape"],
+        description: "Close modals / Cancel (Esc)",
+        handler: () => {
+          if (isContextMenuOpen) closeContextMenu();
+          if (isExposéOpen) closeExposé();
+          if (isCommandPaletteOpen) closeCommandPalette();
+          if (isTerminalDrawerOpen) closeTerminalDrawer();
+          if (isWidgetBoardOpen) closeWidgetBoard();
+          if (isQuickSettingsOpen) closeQuickSettings();
+          if (isNotificationCenterOpen) closeNotificationCenter();
+          if (propertiesModalItem) setPropertiesModalItem(null);
+        },
+        allowInInput: false,
+      },
+      {
+        keys: ["Alt", "1"],
+        description: "Switch to Desktop 1 (Alt+1)",
+        handler: () => switchWorkspace(0),
+        allowInInput: false,
+      },
+      {
+        keys: ["Alt", "2"],
+        description: "Switch to Desktop 2 (Alt+2)",
+        handler: () => {
+          if (workspaces.length > 1) {
+            switchWorkspace(1);
+          } else {
+            addWorkspace();
+          }
+        },
+        allowInInput: false,
+      },
+      {
+        keys: [["Alt", "/"], ["?"]],
+        description: "Toggle Keyboard Shortcuts (Alt+/ or ?)",
+        handler: () => {
+          window.dispatchEvent(new CustomEvent("toggle-shortcuts-guide"));
+        },
+        allowInInput: false,
+      },
+    ],
+    [
+      toggleWidgetBoard,
+      toggleExposé,
+      focusWindow,
+      toggleCommandPalette,
+      toggleTerminalDrawer,
+      toggleQuickSettings,
+      toggleNotificationCenter,
+      isContextMenuOpen,
+      closeContextMenu,
+      isExposéOpen,
+      closeExposé,
+      isCommandPaletteOpen,
+      closeCommandPalette,
+      isTerminalDrawerOpen,
+      closeTerminalDrawer,
+      isWidgetBoardOpen,
+      closeWidgetBoard,
+      isQuickSettingsOpen,
+      closeQuickSettings,
+      isNotificationCenterOpen,
+      closeNotificationCenter,
+      propertiesModalItem,
+      switchWorkspace,
+      workspaces,
+      addWorkspace,
+    ]
+  );
+  useGlobalHotkeys(desktopHotkeys);
+
+  // Trigger "First Boot" mission once boot finishes and notify user of keyboard shortcuts
   useEffect(() => {
     if (!booting) {
       unlockMission("first-boot");
+      const notifTimer = setTimeout(() => {
+        addNotification(
+          "System Shortcuts Ready",
+          "Alt+S: Start | Alt+K: Search | Alt+V: Task View | Alt+/: All Shortcuts",
+          "keyboard"
+        );
+      }, 1600);
+      return () => clearTimeout(notifTimer);
     }
-  }, [booting, unlockMission]);
+  }, [booting, unlockMission, addNotification]);
 
   // Unified list of all desktop items (Base System Apps + Custom User Items)
   const allDesktopItems = [

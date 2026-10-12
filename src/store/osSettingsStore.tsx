@@ -266,7 +266,7 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     let parsed: string[] = [];
     try { const p = JSON.parse(savedMissions ?? "[]"); if (Array.isArray(p)) parsed = p; } catch {}
     const nextMissions = parsed.includes(missionId) ? parsed : [...parsed, missionId];
-    localStorage.setItem(KEYS.notified, JSON.stringify(nextMissions));
+    localStorage.setItem(KEYS.missions, JSON.stringify(nextMissions));
 
     const mission = systemMissions.find((m) => m.id === missionId);
     if (mission) addNotification(mission.title, mission.description, mission.icon);

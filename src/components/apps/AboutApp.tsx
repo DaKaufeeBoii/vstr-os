@@ -28,6 +28,15 @@ export default function AboutApp() {
             }}
             whileHover={{ scale: 1.04, boxShadow: "0 0 28px rgba(0,212,255,0.35)" }}
             onClick={() => openWindow("photo_viewer")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openWindow("photo_viewer");
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="Click to reveal real photo"
             title="Click to reveal real photo"
           >
             <Image

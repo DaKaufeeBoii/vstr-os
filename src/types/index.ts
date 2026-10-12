@@ -98,6 +98,7 @@ export interface WindowState {
   zIndex: number;
   hasBeenOpened: boolean;
   snapZone?: SnapZone;
+  previousRect?: { x: number; y: number; width: number; height: number };
   desktopId?: number;
   isSticky?: boolean;
   customData?: Record<string, any>;

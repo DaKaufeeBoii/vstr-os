@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { Coins, Scroll } from "lucide-react";
 

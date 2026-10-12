@@ -31,8 +31,14 @@ const musicReducer = (state: MusicState, action: MusicAction): MusicState => {
   switch (action.type) {
     case "PLAY": return { ...state, isPlaying: true };
     case "PAUSE": return { ...state, isPlaying: false };
-    case "NEXT": return { ...state, currentTrackIndex: (state.currentTrackIndex + 1) % state.playlist.length, isPlaying: true };
-    case "PREV": return { ...state, currentTrackIndex: (state.currentTrackIndex - 1 + state.playlist.length) % state.playlist.length, isPlaying: true };
+    case "NEXT":
+      return state.playlist.length === 0
+        ? state
+        : { ...state, currentTrackIndex: (state.currentTrackIndex + 1) % state.playlist.length, isPlaying: true };
+    case "PREV":
+      return state.playlist.length === 0
+        ? state
+        : { ...state, currentTrackIndex: (state.currentTrackIndex - 1 + state.playlist.length) % state.playlist.length, isPlaying: true };
     case "SET_TRACK": return { ...state, currentTrackIndex: action.index, isPlaying: true };
     case "SET_VOLUME": return { ...state, volume: action.volume };
     case "ADD_TRACK": return { ...state, playlist: [...state.playlist, action.track] };

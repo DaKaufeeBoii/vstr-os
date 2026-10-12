@@ -290,16 +290,14 @@ function reducer(state: OSState, action: OSAction): OSState {
       return {
         ...state,
         stack: state.stack.filter((id) => id !== targetId),
-        windows: state.windows.filter((w) => {
+        windows: state.windows.flatMap((w) => {
           if (w.instanceId === targetId || w.id === targetId) {
             if (w.instanceId !== w.id) {
-              return false; // dynamic multi-instance is pruned
+              return []; // dynamic multi-instance is pruned
             }
-            w.isOpen = false;
-            w.isMinimized = false;
-            return true;
+            return [{ ...w, isOpen: false, isMinimized: false, snapZone: null }];
           }
-          return true;
+          return [w];
         }),
       };
     }
@@ -322,13 +320,16 @@ function reducer(state: OSState, action: OSAction): OSState {
       const vh = typeof window !== "undefined" ? window.innerHeight - 48 : 800;
       const newZ = state.topZ + 1;
       const actualInstanceId = win.instanceId;
+      const prevRect = win.snapZone === "maximize"
+        ? win.previousRect
+        : { x: win.x, y: win.y, width: win.width, height: win.height };
       return {
         ...state,
         topZ: newZ,
         stack: bringToFront(state.stack, actualInstanceId),
         windows: state.windows.map((w) =>
           w.instanceId === actualInstanceId
-            ? { ...w, isMinimized: false, x: 0, y: 0, width: vw, height: vh, zIndex: newZ, snapZone: "maximize" }
+            ? { ...w, isMinimized: false, x: 0, y: 0, width: vw, height: vh, zIndex: newZ, snapZone: "maximize", previousRect: prevRect }
             : w
         ),
       };
@@ -340,12 +341,17 @@ function reducer(state: OSState, action: OSAction): OSState {
       if (!win) return state;
       const newZ = state.topZ + 1;
       const actualInstanceId = win.instanceId;
+      const restoredBounds = win.previousRect
+        ? { x: win.previousRect.x, y: win.previousRect.y, width: win.previousRect.width, height: win.previousRect.height, snapZone: null }
+        : {};
       return {
         ...state,
         topZ: newZ,
         stack: bringToFront(state.stack, actualInstanceId),
         windows: state.windows.map((w) =>
-          w.instanceId === actualInstanceId ? { ...w, isMinimized: false, zIndex: newZ } : w
+          w.instanceId === actualInstanceId
+            ? { ...w, isMinimized: false, zIndex: newZ, ...restoredBounds }
+            : w
         ),
       };
     }
@@ -392,16 +398,20 @@ function reducer(state: OSState, action: OSAction): OSState {
         case "top-right":    x = vw / 2; y = 0; width = vw / 2; height = vh / 2; break;
         case "bottom-left":  x = 0; y = vh / 2; width = vw / 2; height = vh / 2; break;
         case "bottom-right": x = vw / 2; y = vh / 2; width = vw / 2; height = vh / 2; break;
+        case "maximize":     x = 0; y = 0; width = vw; height = vh; break;
       }
       const newZ = state.topZ + 1;
       const actualInstanceId = win.instanceId;
+      const prevRect = win.snapZone
+        ? win.previousRect
+        : { x: win.x, y: win.y, width: win.width, height: win.height };
       return {
         ...state,
         topZ: newZ,
         stack: bringToFront(state.stack, actualInstanceId),
         windows: state.windows.map((w) =>
           w.instanceId === actualInstanceId
-            ? { ...w, x, y, width, height, zIndex: newZ, snapZone: zone }
+            ? { ...w, x, y, width, height, zIndex: newZ, snapZone: zone, previousRect: prevRect }
             : w
         ),
       };

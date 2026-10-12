@@ -37,7 +37,7 @@ export const projects: Project[] = [
     description:
       "A fully offline Android app for translating between Indian languages using Google's ML Kit. Supports English, Hindi, Telugu, Tamil, Marathi, and more with voice input/output capabilities.",
     highlights: [
-      "A modern, beatiful and responsive Kotlin Jetpack Compose UI",
+      "A modern, beautiful and responsive Kotlin Jetpack Compose UI",
       "Offline translation using ML Kit",
       "Voice input/output",
       "Supports STT and TTS using Vosk"
@@ -114,15 +114,15 @@ export const projects: Project[] = [
     title: "HeartFund",
     subtitle: "Fundraising Platform",
     description:
-      "A fundraising website.",
+      "Full-stack community fundraising platform enabling users to create and manage charitable campaigns.",
     highlights: [
-      "Uses stock images for the fundraisers",
-      "Responsive interfaces built with Next.js",
-      "Can create accounts and fundraising posts freely",
+      "Dynamic campaign creation and contribution tracking",
+      "Responsive user interface built with Next.js and Tailwind CSS",
+      "Secure authentication and data persistence backed by Supabase",
     ],
     stack: ["Next.js", "React", "Tailwind CSS", "Supabase", "Shadcn UI"],
     github: "https://github.com/DaKaufeeBoii/heartfund-fundraising",
-    demo: "heartfund-fundraising.vercel.app",
+    demo: "https://heartfund-fundraising.vercel.app",
     icon: "💕",
   },
   {
@@ -141,16 +141,17 @@ export const projects: Project[] = [
   },
   {
     title: "Disease-Inc",
-    subtitle: "An AI generated clone of the game Plague Inc.",
+    subtitle: "Interactive Pandemic Strategy Simulation",
     description:
-      "A web based clone of the game Plague Inc. with decent UI and animations.",
+      "A web-based simulation inspired by Plague Inc. featuring animated infection dynamics and state visualization.",
     highlights: [
-      "Built in under 5 hours using ChatGPT.",
-      "Deployed on Vercel",
+      "Interactive browser simulation exploring disease propagation mechanics using Canvas and ES6",
+      "Dynamic transmission algorithms with configurable mutation and virulence traits",
+      "Deployed on Vercel with responsive mobile-ready layout",
     ],
     stack: ["HTML", "CSS", "JavaScript", "Vercel"],
     github: "https://github.com/DaKaufeeBoii/disease-inc",
-    demo: "disease-inc.vercel.app",
+    demo: "https://disease-inc.vercel.app",
     icon: "🦠",
   },
   {

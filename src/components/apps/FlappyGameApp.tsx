@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
+
+const DEFAULT_GAME_SPEED = 3.5;
+const DEFAULT_GRAVITY = 0.55;
+const DEFAULT_JUMP = -8.5;
 
 export default function FlappyGameApp() {
   const { unlockMission } = useOSSettings();
@@ -26,9 +29,9 @@ export default function FlappyGameApp() {
     pipes: [] as { x: number; topHeight: number; passed?: boolean }[],
     score: 0,
     frames: 0,
-    gameSpeed: 7,
-    gravity: 0.6,
-    jump: -11,
+    gameSpeed: DEFAULT_GAME_SPEED,
+    gravity: DEFAULT_GRAVITY,
+    jump: DEFAULT_JUMP,
   });
 
   const BIRD_SIZE = 24;
@@ -42,9 +45,9 @@ export default function FlappyGameApp() {
       pipes: [],
       score: 0,
       frames: 0,
-      gameSpeed: 3,
-      gravity: 0.6,
-      jump: -8,
+      gameSpeed: DEFAULT_GAME_SPEED,
+      gravity: DEFAULT_GRAVITY,
+      jump: DEFAULT_JUMP,
     };
     setScore(0);
     setGameOver(false);

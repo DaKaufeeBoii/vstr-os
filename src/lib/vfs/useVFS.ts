@@ -10,9 +10,15 @@ export function useVFS() {
 
   useEffect(() => {
     // Initial stat of root triggers IndexedDB initialization & seeding
-    vfs.stat("/").then(() => {
-      setIsReady(true);
-    });
+    vfs
+      .stat("/")
+      .then(() => {
+        setIsReady(true);
+      })
+      .catch((err) => {
+        console.warn("VFS failed to initialize IndexedDB:", err);
+        setIsReady(true); // Fallback to avoid permanently blocking consumer components
+      });
 
     const unsubscribe = vfs.onVFSChange(() => {
       setVersion((v) => v + 1);

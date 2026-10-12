@@ -13,13 +13,29 @@ export default function CommandPalette() {
 
   // Command definitions
   const commands = useMemo(() => [
+    {
+      name: "View Resume / Recruiter Quick View",
+      action: () => {
+        window.open("/resume", "_blank");
+        closeCommandPalette();
+      },
+      icon: "document",
+    },
+    {
+      name: "View Keyboard Shortcuts (Alt+/)",
+      action: () => {
+        window.dispatchEvent(new CustomEvent("toggle-shortcuts-guide"));
+        closeCommandPalette();
+      },
+      icon: "keyboard",
+    },
     ...WINDOW_CONFIGS.map(cfg => ({
       name: `Open ${cfg.title}`,
       action: () => openWindow(cfg.id),
       icon: cfg.fluentIcon || cfg.icon
     })),
     { name: "Toggle Terminal", action: () => openWindow("terminal"), icon: "terminal" },
-  ], [openWindow]);
+  ], [openWindow, closeCommandPalette]);
 
   const filteredCommands = useMemo(() => {
     return commands.filter(cmd => 

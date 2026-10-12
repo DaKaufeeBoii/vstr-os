@@ -80,7 +80,7 @@ export default function TaskView() {
                   borderRadius: "4px",
                 }}
               >
-                Alt + T
+                Alt + V
               </span>
             </div>
             <button

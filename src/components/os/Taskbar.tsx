@@ -8,7 +8,7 @@ import { systemMissions } from "@/data/systemMissions";
 import StartMenu from "./StartMenu";
 import { OsIcon } from "@/components/icons/OsIcon";
 import { VolumeIcon, WifiIcon, BatteryIcon, VstrIcon } from "@/components/icons";
-import { X, Lock, Check, LayoutGrid, Trophy } from "lucide-react";
+import { X, Lock, Check, LayoutGrid, Trophy, Keyboard } from "lucide-react";
 import { useSound } from "@/utils/useSound";
 import type { WindowId } from "@/types";
 
@@ -214,7 +214,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           id="taskbar-task-view-btn"
           className="taskbar-task-view-btn"
           onClick={() => { playClick(); toggleExposé(); }}
-          title="Task View / Desktops (Alt + T)"
+          title="Task View / Desktops (Alt + V)"
           aria-label="Task View"
           aria-pressed={isExposéOpen}
           style={{
@@ -280,7 +280,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           id="taskbar-search-pill"
           className="taskbar-search-pill"
           onClick={() => { playClick(); setShowStart(true); }}
-          title="Search / Command Palette (Ctrl + K)"
+          title="Search / Command Palette (Alt + K)"
           style={{
             display: "flex",
             alignItems: "center",
@@ -303,6 +303,48 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           <OsIcon name="search" size="sm" color="var(--os-text-muted)" />
           <span className="taskbar-search-text">Search</span>
         </div>
+
+        {/* Recruiter Quick View / Resume Link */}
+        <a
+          href="/resume"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="taskbar-recruiter-btn"
+          title="Recruiter Quick View (Opens full resume in new tab)"
+          aria-label="View Resume"
+          onClick={() => playClick()}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "rgba(245, 158, 11, 0.12)",
+            border: "1px solid rgba(245, 158, 11, 0.35)",
+            borderRadius: 18,
+            padding: "4px 12px",
+            height: 32,
+            color: "var(--os-amber)",
+            fontSize: 12,
+            fontWeight: 600,
+            textDecoration: "none",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            fontFamily: "var(--font-mono)",
+            whiteSpace: "nowrap",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(245, 158, 11, 0.22)";
+            e.currentTarget.style.borderColor = "var(--os-amber)";
+            e.currentTarget.style.boxShadow = "0 0 10px rgba(245, 158, 11, 0.25)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(245, 158, 11, 0.12)";
+            e.currentTarget.style.borderColor = "rgba(245, 158, 11, 0.35)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          <span style={{ fontSize: 13 }}>📄</span>
+          <span>Resume</span>
+        </a>
 
         <div className="taskbar-divider" />
 
@@ -382,6 +424,38 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           paddingRight: 8,
           flexShrink: 0,
         }}>
+          {/* Keyboard Shortcuts Trigger */}
+          <button
+            className="taskbar-shortcuts-btn"
+            onClick={() => {
+              playClick();
+              window.dispatchEvent(new CustomEvent("toggle-shortcuts-guide"));
+            }}
+            title="Keyboard Shortcuts (Alt + /)"
+            aria-label="Keyboard Shortcuts"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 16,
+              color: "var(--os-text-muted)",
+              padding: "4px 8px",
+              borderRadius: 6,
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "var(--os-amber)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "var(--os-text-muted)";
+            }}
+          >
+            <Keyboard size={16} />
+          </button>
+
           {/* Missions Quick View Icon */}
           <button
             className="taskbar-missions-btn"
@@ -418,7 +492,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           <button
             className="taskbar-tray-btn"
             onClick={() => { playClick(); toggleQuickSettings(); }}
-            title="Quick Settings (Win + A)"
+            title="Quick Settings (Alt + Q)"
             aria-label="Quick Settings"
             aria-expanded={isQuickSettingsOpen}
             style={{

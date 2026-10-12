@@ -40,3 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /Music
+
+# audit
+issues.md
+
+# kilo
+.kilo/

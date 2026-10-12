@@ -152,17 +152,20 @@ export function useGlobalHotkeys(actions: HotkeyAction[]) {
   actionsRef.current = actions;
 
   useEffect(() => {
-    // Register actions
-    const entries = actions.map((action, index) => ({
-      action,
-      id: `hotkey-${index}-${Math.random().toString(36).slice(2)}`,
-    }));
+    // Register actions with stable IDs for this hook instance
+    const ids = actions.map((action, index) => {
+      const id = `hotkey-${index}-${Math.random().toString(36).slice(2)}`;
+      globalRegistry.push({ action, id });
+      return id;
+    });
 
-    globalRegistry = entries;
     attachGlobalListener();
 
     return () => {
-      detachGlobalListener();
+      globalRegistry = globalRegistry.filter((entry) => !ids.includes(entry.id));
+      if (globalRegistry.length === 0) {
+        detachGlobalListener();
+      }
     };
   }, [actions]);
 

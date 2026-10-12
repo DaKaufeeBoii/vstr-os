@@ -41,11 +41,13 @@ export function getIndexedDB(): Promise<IDBDatabase> {
         await seedDefaultFileSystem(dbInstance);
         resolve(dbInstance);
       } catch (err) {
+        initPromise = null;
         reject(err);
       }
     };
 
     request.onerror = () => {
+      initPromise = null;
       reject(request.error || new Error("Failed to open IndexedDB"));
     };
   });
