@@ -1,6 +1,9 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { OsIcon } from "@/components/icons/OsIcon";
+import { useContextMenuSubmenu, ContextMenuSubmenuContext } from "./ContextMenuContext";
 
 export interface ContextMenuAction {
   label?: string;
@@ -17,6 +20,8 @@ interface ContextMenuItemProps extends ContextMenuAction {
   isFocused?: boolean;
 }
 
+const SUBMENU_WIDTH = 200;
+
 export function ContextMenuItem({
   label,
   icon,
@@ -28,21 +33,69 @@ export function ContextMenuItem({
   isFocused = false,
 }: ContextMenuItemProps) {
   const ref = useRef<HTMLButtonElement>(null);
-  const [showSubMenu, setShowSubMenu] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [submenuSide, setSubmenuSide] = useState<"right" | "left">("right");
-  const [submenuAlign, setSubmenuAlign] = useState<"top" | "bottom">("top");
-  const [isMobileScreen, setIsMobileScreen] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { activeSubmenuId, setActiveSubmenuId } = useContextMenuSubmenu();
+  const itemId = label || "";
+
+  const [isHovered, setIsHovered] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [menuPos, setMenuPos] = useState<{
+    top: number;
+    left: number;
+    side: "right" | "left";
+  }>({ top: 0, left: 0, side: "right" });
+
   useEffect(() => {
-    const checkScreen = () => {
-      setIsMobileScreen(window.innerWidth < 640);
+    setMounted(true);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
-    checkScreen();
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
   }, []);
+
+  const hasSubMenu = Boolean(items && items.length > 0);
+  const isSubmenuOpen = hasSubMenu && activeSubmenuId === itemId;
+
+  const calculatePosition = useCallback(() => {
+    if (!ref.current || typeof window === "undefined") return;
+    const rect = ref.current.getBoundingClientRect();
+
+    const approxHeight = (items || []).reduce(
+      (acc, it) => acc + (it.label?.toLowerCase() === "divider" ? 9 : 38),
+      8
+    );
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Horizontal placement
+    let side: "right" | "left" = "right";
+    let left = rect.right + 2;
+
+    if (rect.right + 2 + SUBMENU_WIDTH > vw - 8) {
+      if (rect.left - 2 - SUBMENU_WIDTH >= 8) {
+        side = "left";
+        left = rect.left - 2 - SUBMENU_WIDTH;
+      } else {
+        left = Math.max(8, vw - SUBMENU_WIDTH - 8);
+      }
+    }
+
+    // Vertical placement
+    let top = rect.top - 4;
+    if (top + approxHeight > vh - 8) {
+      top = Math.max(8, vh - approxHeight - 8);
+    }
+    top = Math.max(8, top);
+
+    setMenuPos({ top, left, side });
+  }, [items]);
+
+  useEffect(() => {
+    if (isSubmenuOpen) {
+      calculatePosition();
+    }
+  }, [isSubmenuOpen, calculatePosition]);
 
   // Scroll into view when keyboard-focused
   useEffect(() => {
@@ -51,45 +104,76 @@ export function ContextMenuItem({
     }
   }, [isFocused]);
 
-  const hasSubMenu = Boolean(items && items.length > 0);
+  // Render horizontal separator line if item is a divider
+  if (label?.toLowerCase() === "divider") {
+    return (
+      <div
+        role="separator"
+        style={{
+          margin: "4px 8px",
+          height: 1,
+          background: "rgba(255, 255, 255, 0.08)",
+        }}
+      />
+    );
+  }
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (disabled) return;
     if (hasSubMenu) {
-      setShowSubMenu((prev) => !prev);
+      calculatePosition();
+      setActiveSubmenuId(isSubmenuOpen ? null : itemId);
       return;
     }
     onClick?.();
     onClose();
   };
 
-  const hoveredBg = danger ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.08)";
-
   const handleMouseEnter = () => {
     setIsHovered(true);
-    if (hasSubMenu && !isMobileScreen && ref.current) {
-      if (timerRef.current) clearTimeout(timerRef.current);
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    if (hasSubMenu) {
+      calculatePosition();
       timerRef.current = setTimeout(() => {
-        const rect = ref.current!.getBoundingClientRect();
-        const SUBMENU_WIDTH = 200;
-        const SUBMENU_HEIGHT = (items?.length || 1) * 38 + 12;
-        setSubmenuSide(rect.right + SUBMENU_WIDTH > window.innerWidth - 8 ? "left" : "right");
-        setSubmenuAlign(rect.top + SUBMENU_HEIGHT > window.innerHeight - 8 ? "bottom" : "top");
-        setShowSubMenu(true);
-      }, 150);
+        calculatePosition();
+        setActiveSubmenuId(itemId);
+      }, 70);
+    } else {
+      timerRef.current = setTimeout(() => {
+        if (activeSubmenuId !== null) {
+          setActiveSubmenuId(null);
+        }
+      }, 100);
     }
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (!isMobileScreen) {
-      if (timerRef.current) clearTimeout(timerRef.current);
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    if (hasSubMenu && isSubmenuOpen) {
       timerRef.current = setTimeout(() => {
-        setShowSubMenu(false);
+        setActiveSubmenuId(null);
       }, 200);
     }
   };
+
+  const handleSubMenuMouseEnter = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setIsHovered(true);
+  };
+
+  const handleSubMenuMouseLeave = () => {
+    setIsHovered(false);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setActiveSubmenuId(null);
+    }, 200);
+  };
+
+  const hoveredBg = danger ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.08)";
 
   return (
     <div
@@ -102,9 +186,12 @@ export function ContextMenuItem({
         role="menuitem"
         aria-disabled={disabled}
         aria-haspopup={hasSubMenu ? "true" : undefined}
-        aria-expanded={hasSubMenu ? showSubMenu : undefined}
+        aria-expanded={hasSubMenu ? isSubmenuOpen : undefined}
         tabIndex={-1}
         onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onPointerEnter={handleMouseEnter}
         disabled={disabled}
         className={isFocused ? "ctx-item-focused" : undefined}
         style={{
@@ -113,7 +200,7 @@ export function ContextMenuItem({
           gap: 12,
           padding: "8px 12px",
           height: 38,
-          background: isFocused || isHovered || showSubMenu ? hoveredBg : "transparent",
+          background: isFocused || isHovered || isSubmenuOpen ? hoveredBg : "transparent",
           border: "none",
           cursor: disabled ? "default" : "pointer",
           textAlign: "left",
@@ -155,9 +242,10 @@ export function ContextMenuItem({
             style={{
               fontSize: 10,
               opacity: 0.5,
-              marginLeft: 8,
-              transform: isMobileScreen && showSubMenu ? "rotate(90deg)" : submenuSide === "left" ? "scaleX(-1)" : undefined,
+              marginLeft: "auto",
+              transform: menuPos.side === "left" ? "scaleX(-1)" : undefined,
               display: "inline-flex",
+              alignItems: "center",
               transition: "transform 0.15s ease",
             }}
           >
@@ -166,36 +254,34 @@ export function ContextMenuItem({
         )}
       </button>
 
-      {/* SubMenu Rendering: Accordion on mobile, Floating on Desktop */}
-      {hasSubMenu && showSubMenu && items && (
-        isMobileScreen ? (
-          <div
-            style={{
-              paddingLeft: 24,
-              borderLeft: "2px solid rgba(255, 255, 255, 0.1)",
-              margin: "4px 8px 4px 16px",
-              background: "rgba(0, 0, 0, 0.2)",
-              borderRadius: 6,
-            }}
-          >
-            {items.map((subItem, i) => (
-              <ContextMenuItem key={i} {...subItem} onClose={onClose} />
-            ))}
-          </div>
-        ) : (
-          <div
-            style={{
-              position: "absolute",
-              ...(submenuAlign === "bottom" ? { bottom: -4 } : { top: -4 }),
-              ...(submenuSide === "left"
-                ? { right: "100%", paddingRight: 4 }
-                : { left: "100%", paddingLeft: 4 }),
-              zIndex: 100,
-            }}
-          >
-            <SubMenu items={items} onClose={onClose} />
-          </div>
-        )
+      {/* Pop-out floating submenu rendered via Portal */}
+      {mounted && hasSubMenu && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isSubmenuOpen && items && (
+            <motion.div
+              key={`submenu-${itemId}`}
+              initial={{ opacity: 0, scale: 0.96, x: menuPos.side === "right" ? -4 : 4 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.1, ease: [0.2, 0, 0, 1] }}
+              style={{
+                position: "fixed",
+                top: menuPos.top,
+                left: menuPos.side === "right" ? menuPos.left - 4 : menuPos.left,
+                paddingLeft: menuPos.side === "right" ? 4 : 0,
+                paddingRight: menuPos.side === "left" ? 4 : 0,
+                zIndex: 100000,
+                pointerEvents: "auto",
+              }}
+              onMouseEnter={handleSubMenuMouseEnter}
+              onMouseLeave={handleSubMenuMouseLeave}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <SubMenu items={items} onClose={onClose} />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
     </div>
   );
@@ -205,21 +291,34 @@ export function ContextMenuItem({
  * SubMenu internal component for cascading logic
  */
 function SubMenu({ items, onClose }: { items: ContextMenuAction[]; onClose: () => void }) {
+  const [nestedSubmenuId, setNestedSubmenuId] = useState<string | null>(null);
+
   return (
-    <div
-      style={{
-        minWidth: 190,
-        background: "rgba(22, 32, 28, 0.95)", // Win11 Dark Green Acrylic
-        backdropFilter: "blur(24px) saturate(140%)",
-        border: "1px solid rgba(255, 255, 255, 0.08)",
-        borderRadius: 12,
-        boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-        padding: "4px 0",
+    <ContextMenuSubmenuContext.Provider
+      value={{
+        activeSubmenuId: nestedSubmenuId,
+        setActiveSubmenuId: setNestedSubmenuId,
       }}
     >
-      {items.map((item, i) => (
-        <ContextMenuItem key={i} {...item} onClose={onClose} />
-      ))}
-    </div>
+      <div
+        role="menu"
+        aria-label="Submenu"
+        style={{
+          width: SUBMENU_WIDTH,
+          background: "rgba(22, 32, 28, 0.95)", // Win11 Dark Green Acrylic
+          backdropFilter: "blur(24px) saturate(140%)",
+          WebkitBackdropFilter: "blur(24px) saturate(140%)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: 12,
+          boxShadow: "0 10px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
+          padding: "4px 0",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {items.map((item, i) => (
+          <ContextMenuItem key={i} {...item} onClose={onClose} />
+        ))}
+      </div>
+    </ContextMenuSubmenuContext.Provider>
   );
 }

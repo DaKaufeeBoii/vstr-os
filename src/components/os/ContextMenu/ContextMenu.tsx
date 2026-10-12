@@ -5,6 +5,8 @@ import { ContextMenuGroup } from "./ContextMenuGroup";
 import type { ContextMenuGroupDef } from "./ContextMenuGroup";
 import type { ContextMenuAction } from "./ContextMenuItem";
 
+import { ContextMenuSubmenuContext } from "./ContextMenuContext";
+
 interface ContextMenuProps {
   isOpen: boolean;
   position: { x: number; y: number };
@@ -25,6 +27,7 @@ function flattenItems(groups: ContextMenuGroupDef[]): ContextMenuAction[] {
 export function ContextMenu({ isOpen, position, groups, onClose }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [activeSubmenuId, setActiveSubmenuId] = useState<string | null>(null);
 
   const allItems = flattenItems(groups);
 
@@ -91,9 +94,12 @@ export function ContextMenu({ isOpen, position, groups, onClose }: ContextMenuPr
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Reset focused index when menu opens/closes
+  // Reset focused index and active submenu when menu opens/closes
   useEffect(() => {
-    if (!isOpen) setFocusedIndex(-1);
+    if (!isOpen) {
+      setFocusedIndex(-1);
+      setActiveSubmenuId(null);
+    }
   }, [isOpen]);
 
   // Map group items to their flat index for the focused-item highlight
@@ -138,16 +144,18 @@ export function ContextMenu({ isOpen, position, groups, onClose }: ContextMenuPr
             padding: "4px 0",
           }}
         >
-          {groupsWithIndex.map(({ group, startIdx }, i) => (
-            <ContextMenuGroup
-              key={i}
-              {...group}
-              onClose={onClose}
-              first={i === 0}
-              focusedIndex={focusedIndex}
-              groupStartIndex={startIdx}
-            />
-          ))}
+          <ContextMenuSubmenuContext.Provider value={{ activeSubmenuId, setActiveSubmenuId }}>
+            {groupsWithIndex.map(({ group, startIdx }, i) => (
+              <ContextMenuGroup
+                key={i}
+                {...group}
+                onClose={onClose}
+                first={i === 0}
+                focusedIndex={focusedIndex}
+                groupStartIndex={startIdx}
+              />
+            ))}
+          </ContextMenuSubmenuContext.Provider>
         </motion.div>
       )}
     </AnimatePresence>

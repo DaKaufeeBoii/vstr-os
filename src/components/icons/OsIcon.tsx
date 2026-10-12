@@ -22,6 +22,11 @@ import {
   PawIcon,
   NotepadIcon,
   GuestbookIcon,
+  WebsiteIcon,
+  BirdIcon,
+  CatIcon,
+  SleepingCatIcon,
+  PackageStoreIcon,
 } from "./categories/Application";
 
 import {
@@ -98,6 +103,12 @@ const ICON_COLORS: Record<string, string> = {
   image:         "#fb923c",
   disk:          "#a78bfa", // violet-400
   paw:           "#f87171", // red-400
+  cat:           "#fbbf24", // amber-400
+  bird:          "#38bdf8", // sky-400
+  flappy:        "#fbbf24", // amber-400
+  website:       "#38bdf8", // sky-400
+  globe:         "#38bdf8",
+  store:         "#a855f7", // purple-500
   shield:        "#ef4444", // red-500
   trash:         "#94a3b8", // slate-400
   refresh:       "#34d399", // emerald-400
@@ -141,7 +152,90 @@ const ICON_COLORS: Record<string, string> = {
   key:           "#60a5fa",
   check:         "#34d399",
   link:          "#60a5fa",
+  music:         "#ec4899", // pink-500
+  award:         "#fbbf24", // amber-400
+  package:       "#38bdf8", // sky-400
+  phone:         "#34d399", // emerald-400
+  briefcase:     "#a78bfa", // violet-400
+  sun:           "#fbbf24", // amber-400
+  video:         "#fb923c", // orange-400
+  wrench:        "#94a3b8", // slate-400
+  star:          "#fbbf24", // amber-400
+  zap:           "#a78bfa", // violet-400
+  headphones:    "#38bdf8", // sky-400
+  coffee:        "#fb923c", // orange-400
+  sparkles:      "#ec4899", // pink-500
+  eye:           "#60a5fa", // blue-400
+  mapPin:        "#f87171", // red-400
+  graduationCap: "#a78bfa", // violet-400
+  calendar:      "#34d399", // emerald-400
+  fileText:      "#38bdf8", // sky-400
+  send:          "#60a5fa", // blue-400
+  scroll:        "#fbbf24", // amber-400
+  gamepad:       "#f472b6", // pink-400
 };
+
+import {
+  Music as LucideMusic,
+  Award as LucideAward,
+  Package as LucidePackage,
+  Phone as LucidePhone,
+  Briefcase as LucideBriefcase,
+  Sun as LucideSun,
+  Video as LucideVideo,
+  Wrench as LucideWrench,
+  Star as LucideStar,
+  Zap as LucideZap,
+  Headphones as LucideHeadphones,
+  Coffee as LucideCoffee,
+  Sparkles as LucideSparkles,
+  Eye as LucideEye,
+  MapPin as LucideMapPin,
+  GraduationCap as LucideGraduationCap,
+  Calendar as LucideCalendar,
+  FileText as LucideFileText,
+  Send as LucideSend,
+  Scroll as LucideScroll,
+  Gamepad2 as LucideGamepad2,
+} from "lucide-react";
+
+function createLucideWrapper(Component: React.ComponentType<{ size?: number; color?: string; className?: string }>) {
+  return function LucideIconWrapper({
+    size = "md",
+    color = "currentColor",
+    className,
+  }: {
+    size?: IconSize;
+    color?: string;
+    className?: string;
+    badge?: IconBadge;
+  }) {
+    const px = size === "sm" ? 16 : size === "lg" ? 28 : 20;
+    return <Component size={px} color={color} className={className} />;
+  };
+}
+
+const MusicIcon = createLucideWrapper(LucideMusic);
+const AwardIcon = createLucideWrapper(LucideAward);
+const PackageIcon = createLucideWrapper(LucidePackage);
+const PhoneIcon = createLucideWrapper(LucidePhone);
+const BriefcaseIcon = createLucideWrapper(LucideBriefcase);
+const SunIcon = createLucideWrapper(LucideSun);
+const VideoIcon = createLucideWrapper(LucideVideo);
+const WrenchIcon = createLucideWrapper(LucideWrench);
+const StarIcon = createLucideWrapper(LucideStar);
+const ZapIcon = createLucideWrapper(LucideZap);
+const HeadphonesIcon = createLucideWrapper(LucideHeadphones);
+const CoffeeIcon = createLucideWrapper(LucideCoffee);
+const SparklesIcon = createLucideWrapper(LucideSparkles);
+const EyeIcon = createLucideWrapper(LucideEye);
+const MapPinIcon = createLucideWrapper(LucideMapPin);
+const GraduationCapIcon = createLucideWrapper(LucideGraduationCap);
+const CalendarIcon = createLucideWrapper(LucideCalendar);
+const FileTextIcon = createLucideWrapper(LucideFileText);
+const SendIcon = createLucideWrapper(LucideSend);
+const ScrollIcon = createLucideWrapper(LucideScroll);
+const GamepadIcon = createLucideWrapper(LucideGamepad2);
 
 type IconComponentType = React.ComponentType<{
   size?: IconSize;
@@ -212,6 +306,35 @@ const FLUENT_MAP: Record<string, IconComponentType> = {
   key:           KeyIcon,
   check:         CheckIcon,
   link:          LinkIcon,
+  website:       WebsiteIcon,
+  globe:         WebsiteIcon,
+  bird:          BirdIcon,
+  flappy:        BirdIcon,
+  cat:           CatIcon,
+  sleepingCat:   SleepingCatIcon,
+  store:         PackageStoreIcon,
+  music:         MusicIcon,
+  award:         AwardIcon,
+  package:       PackageIcon,
+  phone:         PhoneIcon,
+  briefcase:     BriefcaseIcon,
+  sun:           SunIcon,
+  video:         VideoIcon,
+  wrench:        WrenchIcon,
+  star:          StarIcon,
+  zap:           ZapIcon,
+  headphones:    HeadphonesIcon,
+  coffee:        CoffeeIcon,
+  sparkles:      SparklesIcon,
+  eye:           EyeIcon,
+  mapPin:        MapPinIcon,
+  graduationCap: GraduationCapIcon,
+  calendar:      CalendarIcon,
+  fileText:      FileTextIcon,
+  file:          FileIcon,
+  send:          SendIcon,
+  scroll:        ScrollIcon,
+  gamepad:       GamepadIcon,
 };
 
 interface OsIconProps {
@@ -223,10 +346,9 @@ interface OsIconProps {
 }
 
 export function OsIcon({ name, size = "md", color, className, badge }: OsIconProps) {
-  const Component = FLUENT_MAP[name];
-  if (!Component) return null;
+  const Component = FLUENT_MAP[name] || FLUENT_MAP[name?.toLowerCase()] || InfoIcon;
 
-  const resolvedColor = color ?? ICON_COLORS[name] ?? "currentColor";
+  const resolvedColor = color ?? ICON_COLORS[name] ?? ICON_COLORS[name?.toLowerCase()] ?? "currentColor";
 
   return <Component size={size} color={resolvedColor} className={className} badge={badge} />;
 }
@@ -293,6 +415,32 @@ export {
   FrownIcon,
   CloverIcon,
   KeyIcon,
+  MusicIcon,
+  AwardIcon,
+  PackageIcon,
+  PhoneIcon,
+  BriefcaseIcon,
+  SunIcon,
+  VideoIcon,
+  WrenchIcon,
+  StarIcon,
+  ZapIcon,
+  HeadphonesIcon,
+  CoffeeIcon,
+  SparklesIcon,
+  EyeIcon,
+  MapPinIcon,
+  GraduationCapIcon,
+  CalendarIcon,
+  FileTextIcon,
+  SendIcon,
+  ScrollIcon,
+  GamepadIcon,
+  WebsiteIcon,
+  BirdIcon,
+  CatIcon,
+  SleepingCatIcon,
+  PackageStoreIcon,
 };
 
 

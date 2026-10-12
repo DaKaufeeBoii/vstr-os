@@ -156,11 +156,7 @@ export default function DesktopIcon({
           height: iconPixelSize,
         }}
       >
-        {fluentIcon ? (
-          <OsIcon name={fluentIcon} size={osIconSize} />
-        ) : (
-          <span style={{ fontSize: iconPixelSize }}>{icon}</span>
-        )}
+        <OsIcon name={fluentIcon || icon || "notepad"} size={osIconSize} />
       </motion.div>
       <span
         className="desktop-icon-label"

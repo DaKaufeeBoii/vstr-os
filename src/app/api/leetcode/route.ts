@@ -1,19 +1,6 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const fallbackStats = {
-    username: "DaKaufeeBoii",
-    totalSolved: 142,
-    easySolved: 68,
-    mediumSolved: 64,
-    hardSolved: 10,
-    acceptanceRate: 64.2,
-    ranking: 184200,
-    contributionPoints: 420,
-    reputation: 85,
-    streak: 18,
-  };
-
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -29,21 +16,20 @@ export async function GET() {
       if (data && data.status === "success") {
         return NextResponse.json({
           username: "DaKaufeeBoii",
-          totalSolved: data.totalSolved || fallbackStats.totalSolved,
-          easySolved: data.easySolved || fallbackStats.easySolved,
-          mediumSolved: data.mediumSolved || fallbackStats.mediumSolved,
-          hardSolved: data.hardSolved || fallbackStats.hardSolved,
-          acceptanceRate: data.acceptanceRate || fallbackStats.acceptanceRate,
-          ranking: data.ranking || fallbackStats.ranking,
-          contributionPoints: data.contributionPoints || fallbackStats.contributionPoints,
-          reputation: data.reputation || fallbackStats.reputation,
-          streak: fallbackStats.streak,
+          totalSolved: data.totalSolved,
+          easySolved: data.easySolved,
+          mediumSolved: data.mediumSolved,
+          hardSolved: data.hardSolved,
+          acceptanceRate: data.acceptanceRate,
+          ranking: data.ranking,
+          contributionPoints: data.contributionPoints,
+          reputation: data.reputation,
         });
       }
     }
   } catch {
-    // Graceful fallback to static verified metrics
+    // API failed, return null to reflect failure rather than mocked data
   }
 
-  return NextResponse.json(fallbackStats);
+  return NextResponse.json(null, { status: 500 });
 }

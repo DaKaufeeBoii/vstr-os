@@ -116,11 +116,11 @@ export default function BsodScreen({ onClose, errorInfo }: BsodScreenProps) {
       unlockMission("kernel-surgeon");
     } else if (cmd === "reboot" || cmd === "restart" || cmd === "exit") {
       newLogs.push("Restarting VSTR-OS...");
-      addNotification("System Recovered", "Kernel debugger repaired crash state.", "🩺");
+      addNotification("System Recovered", "Kernel debugger repaired crash state.", "shield");
       setTimeout(onClose, 800);
     } else if (cmd === "reboot -safe") {
       newLogs.push("Restarting in Safe Mode (Minimal drivers)...");
-      addNotification("Safe Mode Boot", "OS restarted with minimal diagnostics.", "🛡️");
+      addNotification("Safe Mode Boot", "OS restarted with minimal diagnostics.", "shield");
       setTimeout(onClose, 800);
     } else {
       newLogs.push(

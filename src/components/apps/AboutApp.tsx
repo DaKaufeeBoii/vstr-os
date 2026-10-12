@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useOS } from "@/store/windowStore";
+import { Eye, MapPin, GraduationCap, Calendar, Award, Mail, FileText } from "lucide-react";
 
 export default function AboutApp() {
   const { openWindow } = useOS();
@@ -52,7 +53,7 @@ export default function AboutApp() {
                 gap: 4,
               }}
             >
-              <span style={{ fontSize: 22 }}>👁️</span>
+              <Eye size={22} color="var(--os-amber)" />
               <span style={{ fontSize: 10, color: "var(--os-amber)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>
                 REVEAL
               </span>
@@ -74,13 +75,13 @@ export default function AboutApp() {
 
           <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
             {[
-              { icon: "📍", text: "Hyderabad, Telangana" },
-              { icon: "🎓", text: "KG Reddy College of Engineering & Technology" },
-              { icon: "📅", text: "Expected Graduation: 2027" },
-              { icon: "⭐", text: "CGPA: 8.41 · B.Tech CSE" },
+              { icon: <MapPin size={14} color="var(--os-amber)" />, text: "Hyderabad, Telangana" },
+              { icon: <GraduationCap size={14} color="var(--os-amber)" />, text: "KG Reddy College of Engineering & Technology" },
+              { icon: <Calendar size={14} color="var(--os-amber)" />, text: "Expected Graduation: 2027" },
+              { icon: <Award size={14} color="var(--os-amber)" />, text: "CGPA: 8.41 · B.Tech CSE" },
             ].map((item) => (
               <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 13 }}>{item.icon}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 16 }}>{item.icon}</span>
                 <span style={{ fontSize: 12, color: "var(--os-text-muted)" }}>{item.text}</span>
               </div>
             ))}
@@ -107,7 +108,7 @@ export default function AboutApp() {
           id="about-email-link"
           style={linkStyle}
         >
-          <span>📧</span> saitarunrdy@gmail.com
+          <Mail size={16} color="var(--os-amber)" /> saitarunrdy@gmail.com
         </a>
         <a
           href="https://linkedin.com/in/sai-tarun-reddy-velagala-24135229b/"
@@ -130,7 +131,7 @@ export default function AboutApp() {
           id="about-resume-link"
           style={{ ...linkStyle, background: "var(--os-amber-dim)", borderColor: "rgba(245,158,11,0.3)", color: "var(--os-amber)" }}
         >
-          <span>📄</span> View Resume
+          <FileText size={16} color="var(--os-amber)" /> View Resume
         </a>
       </div>
     </div>

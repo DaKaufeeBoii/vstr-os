@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useSound } from "@/utils/useSound";
+import { Send } from "lucide-react";
 import type { GuestbookEntry } from "@/app/api/guestbook/route";
 
 export default function GuestbookApp() {
@@ -75,7 +76,7 @@ export default function GuestbookApp() {
       addNotification(
         "Guestbook Note Posted",
         `Thanks ${data.entry.name}! Your message is live on VSTR-OS.`,
-        "💬"
+        "guestbook"
       );
     } catch (err: any) {
       setErrorMsg(err.message || "Network error");
@@ -369,7 +370,11 @@ export default function GuestbookApp() {
                 transition: "opacity 0.15s",
               }}
             >
-              {submitting ? "Posting..." : "Post Message 🚀"}
+              {submitting ? "Posting..." : (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Send size={13} /> Post Message
+                </span>
+              )}
             </button>
           </div>
         </form>

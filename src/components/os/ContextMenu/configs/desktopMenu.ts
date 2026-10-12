@@ -127,7 +127,7 @@ export function getDesktopMenuGroups(
           icon: "new",
           items: [
             { label: "Folder", icon: "folder", onClick: actions.newFolder },
-            { label: "Shortcut", icon: "link", onClick: actions.newShortcut },
+            { label: "Shortcut", icon: "website", onClick: actions.newShortcut },
             { label: "Divider", disabled: true },
             { label: "Text Document", icon: "notepad", onClick: actions.newTextDocument },
           ],

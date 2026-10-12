@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS, WINDOW_CONFIGS } from "@/store/windowStore";
 import { OsIcon } from "@/components/icons/OsIcon";
+import { X, LayoutGrid } from "lucide-react";
 import { useSound } from "@/utils/useSound";
 
 export default function TaskView() {
@@ -175,7 +176,7 @@ export default function TaskView() {
                           borderRadius: "4px",
                         }}
                       >
-                        ✕
+                        <X size={12} />
                       </button>
                     )}
                   </div>
@@ -246,7 +247,7 @@ export default function TaskView() {
                 color: "var(--os-text-muted)",
               }}
             >
-              <span style={{ fontSize: "40px" }}>🪟</span>
+              <LayoutGrid size={40} color="var(--os-text-muted)" style={{ opacity: 0.6 }} />
               <span style={{ fontSize: "15px" }}>No open windows on this desktop</span>
               <span style={{ fontSize: "12px" }}>Open apps from the taskbar or desktop shortcuts</span>
             </div>
@@ -298,11 +299,7 @@ export default function TaskView() {
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        {cfg?.fluentIcon ? (
-                          <OsIcon name={cfg.fluentIcon} size="sm" />
-                        ) : (
-                          <span>{cfg?.icon}</span>
-                        )}
+                        <OsIcon name={cfg?.fluentIcon || cfg?.icon || "notepad"} size="sm" />
                         <span
                           style={{
                             fontSize: "12px",
@@ -336,7 +333,7 @@ export default function TaskView() {
                           (e.currentTarget.style.color = "rgba(255, 255, 255, 0.6)")
                         }
                       >
-                        ✕
+                        <X size={12} />
                       </button>
                     </div>
 
@@ -352,12 +349,8 @@ export default function TaskView() {
                         gap: "8px",
                       }}
                     >
-                      <span style={{ fontSize: "32px", opacity: 0.75 }}>
-                        {cfg?.fluentIcon ? (
-                          <OsIcon name={cfg.fluentIcon} size="lg" />
-                        ) : (
-                          cfg?.icon || "🪟"
-                        )}
+                      <span style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <OsIcon name={cfg?.fluentIcon || cfg?.icon || "windows"} size="lg" />
                       </span>
                       <span style={{ fontSize: "11px", color: "var(--os-text-muted)" }}>
                         {win.width} × {win.height} px

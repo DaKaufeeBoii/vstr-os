@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
 import type { WindowId } from "@/types";
 import { OsIcon } from "@/components/icons/OsIcon";
+import { AlertTriangle, Search, Power } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface StartMenuProps {
@@ -133,7 +134,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                 color: "var(--os-text)",
               }}
             >
-              <span style={{ fontSize: 48, filter: "drop-shadow(0 0 12px var(--os-red))" }}>⚠️</span>
+              <AlertTriangle size={48} color="var(--os-red)" style={{ filter: "drop-shadow(0 0 12px var(--os-red))" }} />
               <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, fontFamily: "'JetBrains Mono', monospace", color: "var(--os-red)" }}>
                 Clear all progress?
               </h3>
@@ -210,7 +211,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
             boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5)",
             transition: "border-color 0.2s",
           }}>
-            <span style={{ fontSize: 16, color: "var(--os-amber)" }}>⌕</span>
+            <Search size={16} color="var(--os-amber)" />
             <input
               type="text"
               placeholder="Search apps…"
@@ -286,11 +287,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                     justifyContent: "center",
                     filter: "drop-shadow(0 2px 6px rgba(245,158,11,0.2))",
                   }}>
-                    {cfg.fluentIcon ? (
-                      <OsIcon name={cfg.fluentIcon} size="md" />
-                    ) : (
-                      <span style={{ fontSize: 26 }}>{cfg.icon}</span>
-                    )}
+                    <OsIcon name={cfg.fluentIcon || cfg.icon || "notepad"} size="md" />
                   </div>
                   <span style={{
                     fontSize: 11,
@@ -352,7 +349,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                     <div style={{ width: 28, height: 28, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {app.img
                         ? <img src={app.img} alt={app.title} style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 4 }} />
-                        : <span style={{ fontSize: 22 }}>⌨️</span>
+                        : <OsIcon name="terminal" size="sm" />
                       }
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -435,7 +432,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               e.currentTarget.style.color = "var(--os-text-muted)";
             }}
           >
-            ⏻
+            <Power size={18} />
           </button>
         </div>
       </motion.div>

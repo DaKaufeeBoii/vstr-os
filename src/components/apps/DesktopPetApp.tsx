@@ -3,19 +3,20 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
-import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
+import { PawIcon, CatIcon, SleepingCatIcon } from "@/components/icons";
+import { Sparkles } from "lucide-react";
 
 type PetMood = "walk" | "sleep" | "chase" | "idle";
 
 const PET_SIZE = 32;
 const MESSAGES = [
-  "You found me! 🎉",
+  "You found me!",
   "I left a hint in the terminal...",
-  "Try 'crack password' sometime 👀",
+  "Try 'crack password' sometime",
   "I know where the secrets are hidden.",
   "Pet me! (just kidding, I'm pixels)",
-  "Check /games/secret 🤫",
+  "Check /games/secret",
   "I've been watching you explore.",
   "*yawns* ...still here?",
   "The HintMaster and I are friends.",
@@ -114,11 +115,6 @@ function PetOverlay() {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  const petEmoji =
-    mood === "sleep" ? "😴" :
-    mood === "chase" ? "🐱" :
-    mood === "idle"  ? "🐾" : "🐱";
-
   return createPortal(
     <div style={{ position: "fixed", inset: 0, zIndex: 8000, pointerEvents: "none" }}>
       <motion.div
@@ -165,7 +161,10 @@ function PetOverlay() {
                 pointerEvents: "none",
               }}
             >
-              {message}
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                <Sparkles size={11} color="var(--os-amber)" />
+                {message}
+              </span>
               <div style={{
                 position: "absolute",
                 top: "100%",
@@ -182,9 +181,13 @@ function PetOverlay() {
         <motion.span
           animate={mood === "sleep" ? { rotate: [0, -5, 5, 0] } : mood === "walk" ? { y: [0, -2, 0] } : {}}
           transition={{ repeat: Infinity, duration: mood === "sleep" ? 3 : 0.4 }}
-          style={{ display: "block" }}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         >
-          {petEmoji}
+          {mood === "sleep" ? (
+            <SleepingCatIcon size="md" color="var(--os-amber)" />
+          ) : (
+            <CatIcon size="md" color="var(--os-amber)" />
+          )}
         </motion.span>
       </motion.div>
     </div>,
@@ -214,7 +217,7 @@ export default function DesktopPetApp() {
       "Extracting companion data...",
       "Calibrating pixel personality...",
       "Installing to /System/Desktop...",
-      "Companion ready! 🐾",
+      "Companion ready!",
     ];
     let i = 0;
     const iv = setInterval(() => {
@@ -263,7 +266,9 @@ export default function DesktopPetApp() {
         </div>
 
         <div style={{ background: "rgba(10,14,20,0.5)", border: "1px solid var(--os-border)", borderRadius: 8, padding: 16, display: "flex", gap: 16, alignItems: "center" }}>
-          <span style={{ fontSize: 36 }}>🐱</span>
+          <div style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(245, 158, 11, 0.1)", borderRadius: 8 }}>
+            <CatIcon size="lg" color="var(--os-amber)" />
+          </div>
           <div>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Desktop Pet v1.0</div>
             <div style={{ fontSize: 11, color: "var(--os-text-muted)" }}>

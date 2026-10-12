@@ -8,6 +8,7 @@ import { systemMissions } from "@/data/systemMissions";
 import StartMenu from "./StartMenu";
 import { OsIcon } from "@/components/icons/OsIcon";
 import { VolumeIcon, WifiIcon, BatteryIcon, VstrIcon } from "@/components/icons";
+import { X, Lock, Check, LayoutGrid, Trophy } from "lucide-react";
 import { useSound } from "@/utils/useSound";
 import type { WindowId } from "@/types";
 
@@ -124,7 +125,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
                 onMouseOver={(e) => e.currentTarget.style.color = "#fff"}
                 onMouseOut={(e) => e.currentTarget.style.color = "var(--os-text-muted)"}
               >
-                ✕
+                <X size={12} />
               </button>
             </div>
 
@@ -169,11 +170,11 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
                     }}
                   >
                     <span style={{ fontSize: "16px", lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "20px" }}>
-                      {completed ? m.icon : "🔒"}
+                      {completed ? <OsIcon name={m.icon} size="sm" color="var(--os-jade)" /> : <Lock size={13} color="var(--os-text-dim)" />}
                     </span>
                     <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
-                    <span style={{ color: completed ? "var(--os-jade)" : "var(--os-text-dim)" }}>
-                      {completed ? "✓" : "—"}
+                    <span style={{ color: completed ? "var(--os-jade)" : "var(--os-text-dim)", display: "flex", alignItems: "center" }}>
+                      {completed ? <Check size={12} /> : "—"}
                     </span>
                   </div>
                 );
@@ -237,7 +238,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
             if (!isExposéOpen) e.currentTarget.style.background = "transparent";
           }}
         >
-          🗔
+          <LayoutGrid size={16} />
         </button>
 
         {/* Widgets Board Button */}
@@ -269,7 +270,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
             if (!isWidgetBoardOpen) e.currentTarget.style.background = "transparent";
           }}
         >
-          🗂️
+          <OsIcon name="widgets" size="sm" />
         </button>
 
         <div className="taskbar-divider" />
@@ -323,7 +324,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
                   title={cfg.title}
                   style={{ position: 'relative' }}
                 >
-                  <span style={{ fontSize: 20 }}>{cfg.icon}</span>
+                  <OsIcon name={cfg.fluentIcon || cfg.icon} size="md" />
                   {isRunning && <div style={{ position: 'absolute', bottom: 2, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: '50%', background: 'var(--os-amber)' }} />}
                 </button>
               );
@@ -408,7 +409,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
               if (!showMissionsWidget) e.currentTarget.style.color = "var(--os-text-muted)";
             }}
           >
-            💬
+            <Trophy size={16} />
           </button>
 
           <div className="taskbar-divider" style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />

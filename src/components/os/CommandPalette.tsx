@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import { WINDOW_CONFIGS } from "@/store/windowStore";
+import { OsIcon } from "@/components/icons/OsIcon";
 
 export default function CommandPalette() {
   const { isCommandPaletteOpen, closeCommandPalette, openWindow } = useOS();
@@ -15,9 +16,9 @@ export default function CommandPalette() {
     ...WINDOW_CONFIGS.map(cfg => ({
       name: `Open ${cfg.title}`,
       action: () => openWindow(cfg.id),
-      icon: cfg.icon
+      icon: cfg.fluentIcon || cfg.icon
     })),
-    { name: "Toggle Terminal", action: () => openWindow("terminal"), icon: "⌨️" },
+    { name: "Toggle Terminal", action: () => openWindow("terminal"), icon: "terminal" },
   ], [openWindow]);
 
   const filteredCommands = useMemo(() => {
@@ -107,7 +108,7 @@ export default function CommandPalette() {
                 onMouseEnter={(e) => e.currentTarget.style.background = "var(--os-border)"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
               >
-                <span>{cmd.icon}</span>
+                <OsIcon name={cmd.icon} size="sm" />
                 {cmd.name}
               </div>
             ))}

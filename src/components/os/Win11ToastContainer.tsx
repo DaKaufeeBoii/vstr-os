@@ -3,6 +3,8 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOSSettings } from "@/store/osSettingsStore";
+import { OsIcon } from "@/components/icons/OsIcon";
+import { Trophy, X } from "lucide-react";
 
 export default function Win11ToastContainer() {
   const { notifications, dismissNotification } = useOSSettings();
@@ -58,7 +60,7 @@ export default function Win11ToastContainer() {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ fontSize: "13px" }}>🏆</span>
+                <Trophy size={13} color="var(--os-amber)" />
                 <span style={{ letterSpacing: "0.05em" }}>MISSION ACCOMPLISHED</span>
               </div>
               <button
@@ -83,7 +85,7 @@ export default function Win11ToastContainer() {
                   e.currentTarget.style.color = "var(--os-text-muted)";
                 }}
               >
-                ✕
+                <X size={12} />
               </button>
             </div>
 
@@ -106,7 +108,7 @@ export default function Win11ToastContainer() {
                   userSelect: "none",
                 }}
               >
-                {notif.icon}
+                <OsIcon name={notif.icon || "trophy"} size="md" color="var(--os-amber)" />
               </div>
               <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
                 <h4

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useSound } from "@/utils/useSound";
+import { OsIcon } from "@/components/icons/OsIcon";
+import { X, Settings, Activity, GitBranch, Code2 } from "lucide-react";
 import type { WidgetConfig } from "@/store/osSettingsStore";
 
 interface GitHubEvent {
@@ -25,23 +27,7 @@ export default function WidgetBoard() {
   // ── GitHub Activity State ──────────────────────────────────────────
   const [gitEvents, setGitEvents] = useState<
     { repo: string; message: string; date: string }[]
-  >([
-    {
-      repo: "DaKaufeeBoii/vstr-os",
-      message: "feat(vfs): implement persistent indexeddb virtual file system",
-      date: "Just now",
-    },
-    {
-      repo: "DaKaufeeBoii/vstr-os",
-      message: "feat(wm): add multi-instance window manager & workspaces",
-      date: "1 hour ago",
-    },
-    {
-      repo: "DaKaufeeBoii/EventOS",
-      message: "refactor: optimize attendee check-in state synchronization",
-      date: "Yesterday",
-    },
-  ]);
+  >([]);
 
   useEffect(() => {
     if (!isWidgetBoardOpen) return;
@@ -69,14 +55,14 @@ export default function WidgetBoard() {
   }, [isWidgetBoardOpen]);
 
   // ── LeetCode Stats State ───────────────────────────────────────────
-  const [leetcodeStats, setLeetcodeStats] = useState({
-    totalSolved: 142,
-    easySolved: 68,
-    mediumSolved: 64,
-    hardSolved: 10,
-    acceptanceRate: 64.2,
-    ranking: 184200,
-  });
+  const [leetcodeStats, setLeetcodeStats] = useState<{
+    totalSolved: number;
+    easySolved: number;
+    mediumSolved: number;
+    hardSolved: number;
+    acceptanceRate: number;
+    ranking: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!isWidgetBoardOpen) return;
@@ -90,7 +76,7 @@ export default function WidgetBoard() {
 
   // ── Real-Time Telemetry State ──────────────────────────────────────
   const [fps, setFps] = useState(60);
-  const [memoryMB, setMemoryMB] = useState(48.5);
+  const [memoryMB, setMemoryMB] = useState<number | null>(null);
   const frameCountRef = useRef(0);
   const lastTimeRef = useRef(performance.now());
 
@@ -109,7 +95,7 @@ export default function WidgetBoard() {
           const used = (performance as any).memory.usedJSHeapSize;
           setMemoryMB(parseFloat((used / (1024 * 1024)).toFixed(1)));
         } else {
-          setMemoryMB(parseFloat((45 + Math.random() * 8).toFixed(1)));
+          setMemoryMB(null);
         }
       }
       animId = requestAnimationFrame(measureFps);
@@ -163,17 +149,17 @@ export default function WidgetBoard() {
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span style={{ fontSize: "20px" }}>🗂️</span>
+              <OsIcon name="widgets" size="md" />
               <div>
                 <div style={{ fontSize: "15px", fontWeight: 600 }}>Widgets & Telemetry</div>
               </div>
             </div>
-            <button onClick={() => { playClick(); closeWidgetBoard(); }} style={{ background: "rgba(255, 255, 255, 0.08)", border: "none", color: "#fff", borderRadius: "6px", width: "28px", height: "28px", cursor: "pointer" }}>✕</button>
+            <button onClick={() => { playClick(); closeWidgetBoard(); }} style={{ background: "rgba(255, 255, 255, 0.08)", border: "none", color: "#fff", borderRadius: "6px", width: "28px", height: "28px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={14} /></button>
           </div>
 
           {/* Widget Manager */}
           <div style={cardStyle}>
-            <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px" }}>⚙️ Customize Widgets</span></div>
+            <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px", display: "inline-flex", alignItems: "center", gap: 6 }}><Settings size={14} color="var(--os-amber)" /> Customize Widgets</span></div>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {widgets.map(w => (
                 <div key={w.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px" }}>
@@ -192,10 +178,10 @@ export default function WidgetBoard() {
           {/* Card: Telemetry */}
           {isVisible("telemetry") && (
             <div style={cardStyle}>
-              <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px" }}>⚡ Tab Telemetry</span></div>
+              <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px", display: "inline-flex", alignItems: "center", gap: 6 }}><Activity size={14} color="var(--os-amber)" /> Tab Telemetry</span></div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                 <div style={statBoxStyle}><div style={statLabelStyle}>FPS</div><div style={{ fontSize: "16px", fontWeight: 700 }}>{fps}</div></div>
-                <div style={statBoxStyle}><div style={statLabelStyle}>HEAP</div><div style={{ fontSize: "16px", fontWeight: 700 }}>{memoryMB} MB</div></div>
+                <div style={statBoxStyle}><div style={statLabelStyle}>HEAP</div><div style={{ fontSize: "16px", fontWeight: 700 }}>{memoryMB !== null ? `${memoryMB} MB` : "N/A"}</div></div>
               </div>
             </div>
           )}
@@ -203,13 +189,13 @@ export default function WidgetBoard() {
           {/* Card: GitHub */}
           {isVisible("github") && (
             <div style={cardStyle}>
-              <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px" }}>🐙 GitHub</span></div>
+              <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px", display: "inline-flex", alignItems: "center", gap: 6 }}><GitBranch size={14} color="var(--os-amber)" /> GitHub</span></div>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                {gitEvents.map((evt, idx) => (
+                {gitEvents.length > 0 ? gitEvents.map((evt, idx) => (
                   <div key={idx} style={{ fontSize: "11px", padding: "4px", background: "rgba(0,0,0,0.2)", borderRadius: "4px" }}>
                     {evt.repo.split("/")[1]} : {evt.message}
                   </div>
-                ))}
+                )) : <div style={{ fontSize: "11px", color: "var(--os-text-muted)" }}>Loading events...</div>}
               </div>
             </div>
           )}
@@ -217,8 +203,8 @@ export default function WidgetBoard() {
           {/* Card: LeetCode */}
           {isVisible("leetcode") && (
             <div style={cardStyle}>
-              <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px" }}>🧩 LeetCode</span></div>
-              <div style={{ fontSize: "14px" }}>{leetcodeStats.totalSolved} Solved</div>
+              <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px", display: "inline-flex", alignItems: "center", gap: 6 }}><Code2 size={14} color="var(--os-amber)" /> LeetCode</span></div>
+              <div style={{ fontSize: "14px" }}>{leetcodeStats ? `${leetcodeStats.totalSolved} Solved` : "Loading..."}</div>
             </div>
           )}
         </motion.div>

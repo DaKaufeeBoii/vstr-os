@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
+import { Coins, Scroll } from "lucide-react";
 
 const HINTS = [
   "Try typing 'play flappy' in the terminal. Your highscore awaits.",
@@ -77,7 +78,7 @@ export default function HintMasterApp() {
           setMessage(`You win! Coin: ${outcome}.\n\nMy task here is fulfilled, but you are still a worthy opponent!`);
         } else {
           const hint = HINTS[(newWins - 1) % HINTS.length];
-          setMessage(`You win! Coin: ${outcome}.\n\n🔍 Hint #${newWins}:\n"${hint}"`);
+          setMessage(`You win! Coin: ${outcome}.\n\nHint #${newWins}:\n"${hint}"`);
         }
 
         // Mission 3: Winning from HintMaster 5 times in a row
@@ -129,13 +130,15 @@ export default function HintMasterApp() {
     }}>
       {/* Coin */}
       <div style={{
-        fontSize: "4rem",
         lineHeight: 1,
         animation: flipping ? "coinFlip 0.3s linear infinite" : "none",
-        filter: flipping ? "drop-shadow(0 0 12px var(--os-amber))" : "drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
+        filter: flipping ? "drop-shadow(0 0 16px var(--os-amber))" : "drop-shadow(0 4px 10px rgba(245,158,11,0.4))",
         transition: "filter 0.3s",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}>
-        🪙
+        <Coins size={64} color="var(--os-amber)" />
       </div>
 
       {/* Wins & Streaks Counter */}
@@ -260,7 +263,11 @@ export default function HintMasterApp() {
               justifyContent: "space-between",
               alignItems: "center"
             }}>
-              <span>📜 UNLOCKED HINTS</span>
+              <span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <Scroll size={12} color="var(--os-amber)" /> UNLOCKED HINTS
+                </span>
+              </span>
               <span style={{ color: "var(--os-jade)" }}>5/5</span>
             </div>
 
@@ -323,7 +330,7 @@ export default function HintMasterApp() {
             if (!showHintsWidget) e.currentTarget.style.color = "var(--os-text-muted)";
           }}
         >
-          📜
+          <Scroll size={16} />
         </button>
       )}
 

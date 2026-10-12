@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
+import { UnlockIcon } from "@/components/icons";
 
 type Phase = "connect" | "crack" | "granted" | "locked";
 
@@ -319,11 +320,11 @@ export default function PasswordCrackerApp() {
             style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 24 }}
           >
             <motion.div
-              animate={{ scale: [1, 1.05, 1] }}
+              animate={{ scale: [1, 1.08, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              style={{ fontSize: 48 }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
             >
-              🔓
+              <UnlockIcon size="lg" color="var(--os-jade)" />
             </motion.div>
             <div style={{ fontSize: 18, fontWeight: 700, color: "var(--os-jade)", letterSpacing: "0.08em" }}>
               ACCESS GRANTED

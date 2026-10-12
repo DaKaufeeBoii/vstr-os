@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { achievements } from "@/data/achievements";
+import { OsIcon } from "@/components/icons/OsIcon";
 
 export default function AchievementsApp() {
   return (
@@ -25,13 +26,16 @@ export default function AchievementsApp() {
           <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
             <div
               style={{
-                fontSize: 36,
-                lineHeight: 1,
+                width: 40,
+                height: 40,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 filter: "drop-shadow(0 2px 12px rgba(245,158,11,0.4))",
                 flexShrink: 0,
               }}
             >
-              {ach.icon}
+              <OsIcon name={ach.icon} size="lg" color="var(--os-yellow)" />
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6 }}>

@@ -258,7 +258,7 @@ export default function Desktop() {
     playClick();
     setIsRefreshing(true);
     setTimeout(() => setIsRefreshing(false), 300);
-    addNotification?.("Desktop Refreshed", "Icons and cache synchronized.", "🔄");
+    addNotification?.("Desktop Refreshed", "Icons and cache synchronized.", "refresh");
   }, [playClick, addNotification]);
 
   const handleNextWallpaper = useCallback(() => {
@@ -268,7 +268,7 @@ export default function Desktop() {
     const next = WALLPAPER_PRESETS[nextIdx];
     setWallpaper(next.path);
     setVideoWallpaper("none");
-    addNotification?.("Wallpaper Changed", `Active background: ${next.name}`, "🖼️");
+    addNotification?.("Wallpaper Changed", `Active background: ${next.name}`, "photo");
   }, [wallpaper, setWallpaper, setVideoWallpaper, playClick, addNotification]);
 
   const handleNewFolder = useCallback(() => {
@@ -280,7 +280,7 @@ export default function Desktop() {
       id,
       title,
       type: "folder",
-      icon: "📁",
+      icon: "folder",
       fluentIcon: "folder",
       createdAt: Date.now(),
       size: "0 KB",
@@ -290,7 +290,7 @@ export default function Desktop() {
     if (vfs.isReady) {
       vfs.mkdir(`/home/saitarun/Desktop/${title}`, "guest", true);
     }
-    addNotification?.("Folder Created", `Created "${title}" on Desktop`, "📁");
+    addNotification?.("Folder Created", `Created "${title}" on Desktop`, "folder");
   }, [customItems, saveCustomItems, playClick, vfs, addNotification]);
 
   const handleNewTextDocument = useCallback(() => {
@@ -303,7 +303,7 @@ export default function Desktop() {
       id,
       title,
       type: "text",
-      icon: "📝",
+      icon: "notepad",
       fluentIcon: "notepad",
       filePath,
       createdAt: Date.now(),
@@ -314,7 +314,7 @@ export default function Desktop() {
     if (vfs.isReady) {
       vfs.writeFile(filePath, `// ${title}\nCreated on VSTR-OS Desktop.\n`, "guest");
     }
-    addNotification?.("Text Document Created", `Created "${title}" on Desktop`, "📝");
+    addNotification?.("Text Document Created", `Created "${title}" on Desktop`, "notepad");
   }, [customItems, saveCustomItems, playClick, vfs, addNotification]);
 
   const handleNewShortcut = useCallback(() => {
@@ -325,15 +325,15 @@ export default function Desktop() {
       id,
       title,
       type: "shortcut",
-      icon: "🔗",
-      fluentIcon: "link",
+      icon: "website",
+      fluentIcon: "website",
       url: "https://github.com/DaKaufeeBoii",
       createdAt: Date.now(),
       size: "1 KB",
       kb: 1,
     };
     saveCustomItems([...customItems, newItem]);
-    addNotification?.("Shortcut Created", `Added shortcut to GitHub`, "🔗");
+    addNotification?.("Shortcut Created", `Added shortcut to GitHub`, "website");
   }, [customItems, saveCustomItems, playClick, addNotification]);
 
   const handleDeleteCustomItem = useCallback(
@@ -345,7 +345,7 @@ export default function Desktop() {
           vfs.remove(itemToDelete.filePath, "guest", true);
         }
         saveCustomItems(customItems.filter((i) => i.id !== id));
-        addNotification?.("Item Deleted", `Moved "${itemToDelete.title}" to Recycle Bin`, "🗑️");
+        addNotification?.("Item Deleted", `Moved "${itemToDelete.title}" to Recycle Bin`, "trash");
       }
     },
     [customItems, saveCustomItems, playClick, vfs, addNotification]
@@ -901,7 +901,7 @@ export default function Desktop() {
                 fluentIcon={cfg.fluentIcon}
                 defaultW={(cfg as any).defaultConfig?.width ?? (cfg as any).defaultW}
                 defaultH={(cfg as any).defaultConfig?.height ?? (cfg as any).defaultH}
-                noPadding={win.id === "terminal" || win.id === "notepad"}
+                noPadding={win.id === "terminal" || win.id === "notepad" || win.id === "music_player"}
               >
                 {AppContent}
               </Window>

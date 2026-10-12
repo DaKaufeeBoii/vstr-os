@@ -24,7 +24,7 @@ export function useAppSDK(appId: string): SDKContext {
         description: "Unregistered or dynamic guest application",
         author: "Unknown",
         category: "utilities" as const,
-        icon: "📦",
+        icon: "package",
         permissions: [] as AppPermission[],
         defaultConfig: { width: 600, height: 400 },
       }
@@ -63,7 +63,7 @@ export function useAppSDK(appId: string): SDKContext {
   );
 
   const notify = useCallback(
-    (title: string, message: string, icon: string = "🔔") => {
+    (title: string, message: string, icon: string = "notif") => {
       if (!hasPermission("notifications")) {
         console.warn(`[SDK Warning] App '${manifest.name}' attempted to dispatch notification without 'notifications' permission.`);
         return;

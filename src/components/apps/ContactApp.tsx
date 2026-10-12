@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { Phone, MessageSquare, FileText } from "lucide-react";
 
 const CONTACTS = [
   {
@@ -14,7 +15,7 @@ const CONTACTS = [
     border: "rgba(0,212,255,0.25)",
   },
   {
-    icon: "📞",
+    icon: "phone",
     label: "Phone",
     value: "+91 7043692980",
     href: "tel:+917043692980",
@@ -46,8 +47,10 @@ export default function ContactApp() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Header */}
-      <div className="glass-card" style={{ textAlign: "center", background: "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(0,212,255,0.08))" }}>
-        <div style={{ fontSize: 40, marginBottom: 8 }}>👋</div>
+      <div className="glass-card" style={{ textAlign: "center", background: "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(0,212,255,0.08))", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ marginBottom: 8, display: "flex", justifyContent: "center" }}>
+          <MessageSquare size={36} color="var(--os-cyan)" />
+        </div>
         <p style={{ fontSize: 15, fontWeight: 600, color: "var(--os-text)" }}>
           Let&apos;s Connect
         </p>
@@ -85,7 +88,9 @@ export default function ContactApp() {
             {c.icon.includes('.') ? (
               <img src={c.icon} alt={c.label} style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} />
             ) : (
-              <span style={{ fontSize: 22 }}>{c.icon}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 24, height: 24 }}>
+                <Phone size={22} color="var(--os-jade)" />
+              </span>
             )}
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 10, color: "var(--os-text-dim)", fontFamily: "var(--font-mono)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -123,7 +128,7 @@ export default function ContactApp() {
           cursor: "pointer",
         }}
       >
-        <span>📄</span> View Resume (Print to PDF)
+        <FileText size={16} color="var(--os-cyan)" /> View Resume (Print to PDF)
       </motion.a>
     </div>
   );

@@ -16,7 +16,7 @@ export default function AppGalleryApp() {
   "description": "A demonstration plugin added to the registry.",
   "author": "System",
   "category": "utilities",
-  "icon": "🧩",
+  "icon": "package",
   "permissions": [],
   "defaultConfig": {
     "width": 400,
@@ -40,7 +40,7 @@ export default function AppGalleryApp() {
       }
       appRegistry.registerApp(parsed);
       setStatus(`Successfully registered "${parsed.name}" v${parsed.version}!`);
-      sdk.notify("Plugin Registered", `Loaded "${parsed.name}" manifest successfully`, "📦");
+      sdk.notify("Plugin Registered", `Loaded "${parsed.name}" manifest successfully`, "package");
     } catch (e: any) {
       setStatus(`JSON Error: ${e.message}`);
     }
@@ -48,7 +48,9 @@ export default function AppGalleryApp() {
 
   return (
     <div style={{ padding: 20, fontFamily: "var(--font-mono)", color: "var(--os-text)", height: "100%", overflowY: "auto" }}>
-      <h2 style={{ color: "var(--os-amber)", marginBottom: 16 }}>📦 App Gallery</h2>
+      <h2 style={{ color: "var(--os-amber)", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+        <OsIcon name="store" size="md" color="var(--os-amber)" /> App Gallery
+      </h2>
       
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <section>
@@ -57,7 +59,7 @@ export default function AppGalleryApp() {
             {apps.map((app) => (
               <div key={app.id} style={{ background: "rgba(255,255,255,0.05)", padding: 12, borderRadius: 8, border: "1px solid var(--os-border)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  {app.fluentIcon ? <OsIcon name={app.fluentIcon} size="sm" /> : <span>{app.icon}</span>}
+                  <OsIcon name={app.fluentIcon || app.icon || "package"} size="sm" />
                   <strong>{app.name}</strong> <span style={{ fontSize: 10, color: "var(--os-text-muted)" }}>v{app.version}</span>
                 </div>
                 <p style={{ fontSize: 11, color: "var(--os-text-muted)", marginTop: 4 }}>{app.description}</p>

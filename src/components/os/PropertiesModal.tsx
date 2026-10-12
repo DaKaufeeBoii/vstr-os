@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { OsIcon } from "@/components/icons/OsIcon";
+import { X } from "lucide-react";
 import { useSound } from "@/utils/useSound";
 
 export interface PropertiesItemInfo {
@@ -124,7 +125,7 @@ export default function PropertiesModal({ item, onClose }: PropertiesModalProps)
               title="Close"
               aria-label="Close"
             >
-              ✕
+              <X size={14} />
             </button>
           </div>
 
@@ -181,11 +182,7 @@ export default function PropertiesModal({ item, onClose }: PropertiesModalProps)
                       border: "1px solid rgba(255, 255, 255, 0.1)",
                     }}
                   >
-                    {item.fluentIcon ? (
-                      <OsIcon name={item.fluentIcon} size="md" />
-                    ) : (
-                      <span style={{ fontSize: 24 }}>{item.icon || "📄"}</span>
-                    )}
+                    <OsIcon name={item.fluentIcon || item.icon || "notepad"} size="md" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <input

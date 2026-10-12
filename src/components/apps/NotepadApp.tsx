@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useVFS } from "@/lib/vfs/useVFS";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useOS } from "@/store/windowStore";
+import { FolderIcon, FileIcon, CloseIcon } from "@/components/icons";
 
 interface NotepadAppProps {
   instanceId?: string;
@@ -100,9 +101,9 @@ export default function NotepadApp({
     try {
       await writeFile(currentPath, content);
       setSavedContent(content);
-      addNotification("File Saved", `Successfully saved to ${currentPath}`, "💾");
+      addNotification("File Saved", `Successfully saved to ${currentPath}`, "notepad");
     } catch (err: any) {
-      addNotification("Save Failed", err.message || "Failed to save file", "⚠️");
+      addNotification("Save Failed", err.message || "Failed to save file", "shield");
     } finally {
       setIsSaving(false);
     }
@@ -122,9 +123,9 @@ export default function NotepadApp({
       setCurrentPath(fullPath);
       setSavedContent(content);
       setShowSaveAsDialog(false);
-      addNotification("File Created", `Created and saved ${fullPath}`, "💾");
+      addNotification("File Created", `Created and saved ${fullPath}`, "notepad");
     } catch (err: any) {
-      addNotification("Save Failed", err.message || "Failed to save file", "⚠️");
+      addNotification("Save Failed", err.message || "Failed to save file", "shield");
     }
   };
 
@@ -300,9 +301,9 @@ export default function NotepadApp({
               <span style={{ fontWeight: 600 }}>Open File from VFS</span>
               <button
                 onClick={() => setShowOpenDialog(false)}
-                style={{ background: "transparent", border: "none", color: "#fff", cursor: "pointer" }}
+                style={{ background: "transparent", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center" }}
               >
-                ✕
+                <CloseIcon size="sm" />
               </button>
             </div>
 
@@ -328,7 +329,9 @@ export default function NotepadApp({
                   }}
                   style={fileItemStyle}
                 >
-                  📁 .. (Up one level)
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <FolderIcon size="sm" /> .. (Up one level)
+                  </span>
                 </div>
               )}
               {dialogItems.map((item) => (
@@ -344,7 +347,10 @@ export default function NotepadApp({
                   }}
                   style={fileItemStyle}
                 >
-                  {item.type === "dir" ? "📁" : "📄"} {item.name}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    {item.type === "dir" ? <FolderIcon size="sm" /> : <FileIcon size="sm" />}
+                    <span>{item.name}</span>
+                  </span>
                 </div>
               ))}
             </div>

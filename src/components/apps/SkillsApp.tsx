@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { skills } from "@/data/skills";
+import { OsIcon } from "@/components/icons/OsIcon";
 
 export default function SkillsApp() {
   const [mounted, setMounted] = useState(false);
@@ -27,8 +28,9 @@ export default function SkillsApp() {
     <div ref={ref} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {skills.map((cat, ci) => (
         <div key={cat.title}>
-          <p className="section-heading">
-            {cat.icon} {cat.title}
+          <p className="section-heading" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <OsIcon name={cat.icon} size="sm" color="var(--os-amber)" />
+            <span>{cat.title}</span>
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {cat.skills.map((skill, si) => (

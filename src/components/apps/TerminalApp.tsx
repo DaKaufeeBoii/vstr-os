@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useOS, WINDOW_CONFIGS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
+import { systemMissions } from "@/data/systemMissions";
 import * as vfs from "@/lib/vfs/vfsEngine";
 
 interface TerminalLine {
@@ -508,7 +509,7 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
         setMatrixMode((v) => !v);
         push({
           type: "success",
-          text: matrixMode ? "Matrix rain disabled." : "Matrix rain enabled. 🟩 Wake up, Neo...",
+          text: matrixMode ? "Matrix rain disabled." : "Matrix rain enabled. Wake up, Neo...",
         });
 
       // ── COLOR ───────────────────────────────────────────────────────
@@ -536,7 +537,7 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
   \\__/__/     Uptime: ${Math.floor(performance.now() / 1000)}s
               Storage: IndexedDB Persistent Mount
               User Ring: ${currentUser === "root" ? "Ring 0 (Root)" : "Ring 3 (Guest)"}
-              Missions: ${unlockedMissions.length} unlocked 🏆
+              Missions: ${unlockedMissions.length}/${systemMissions.length} unlocked (${Math.round((unlockedMissions.length / systemMissions.length) * 100)}% complete)
         `.trim();
         push({ type: "success", text: logo });
         unlockMission("terminal-hacker");

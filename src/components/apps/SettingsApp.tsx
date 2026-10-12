@@ -6,6 +6,7 @@ import type { VideoWallpaperId } from "@/store/osSettingsStore";
 import { appRegistry } from "@/lib/sdk/appRegistry";
 import type { AppManifest } from "@/lib/sdk/appManifest";
 import { OsIcon } from "@/components/icons/OsIcon";
+import { Settings, Monitor, Volume2, Sun, Eye, Image as ImageIcon, Video, Film, Package, Wrench, Pause, Play } from "lucide-react";
 
 interface LiveWallpaperOption {
   id: Exclude<VideoWallpaperId, "none">;
@@ -86,7 +87,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
   "description": "Digital green rain animation simulator with falling glyph speed controls.",
   "author": "Community Contributor",
   "category": "utilities",
-  "icon": "🟢",
+  "icon": "terminal",
   "permissions": ["system:telemetry", "notifications"],
   "defaultConfig": {
     "width": 640,
@@ -110,7 +111,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
       }
       appRegistry.registerApp(parsed);
       setPluginStatus(`Successfully registered "${parsed.name}" v${parsed.version}!`);
-      addNotification?.("Plugin Registered", `Loaded "${parsed.name}" manifest successfully`, "📦");
+      addNotification?.("Plugin Registered", `Loaded "${parsed.name}" manifest successfully`, "package");
     } catch (e: any) {
       setPluginStatus(`JSON Error: ${e.message}`);
     }
@@ -167,7 +168,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
     setVideoWallpaper(url as VideoWallpaperId);
   };
 
-  const sectionLabel = (text: string) => (
+  const sectionLabel = (text: string, icon?: React.ReactNode) => (
     <div style={{
       fontSize: 12,
       fontWeight: 700,
@@ -180,7 +181,8 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
       alignItems: "center",
       gap: 6,
     }}>
-      {text}
+      {icon}
+      <span>{text}</span>
     </div>
   );
 
@@ -201,8 +203,11 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
           margin: "0 0 4px",
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 18,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
         }}>
-          ⚙️ System Settings
+          <Settings size={18} /> System Settings
         </h2>
         <p style={{ margin: 0, fontSize: 12, color: "var(--os-text-muted)" }}>
           Personalise your VSTR-OS experience.
@@ -214,7 +219,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
       {/* ── a. Display and Audio ───────────────────────────────────── */}
       <div id="settings-section-display" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <div>
-          {sectionLabel("🖥️ Display & 🔊 Audio")}
+          {sectionLabel("Display & Audio", <Monitor size={14} />)}
           <p style={{ margin: "0 0 14px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
             Adjust display brightness and system audio output levels.
           </p>
@@ -228,7 +233,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
           padding: "14px 16px",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <span style={{ fontSize: 24 }}>🔆</span>
+            <Sun size={22} color="var(--os-amber)" />
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "var(--os-text)" }}>Brightness</span>
@@ -258,7 +263,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
           padding: "14px 16px",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <span style={{ fontSize: 24 }}>🔊</span>
+            <Volume2 size={22} color="var(--os-amber)" />
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "var(--os-text)" }}>Volume</span>
@@ -286,7 +291,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
       {/* ── Accessibility & Contrast ──────────────────────────────── */}
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div>
-          {sectionLabel("♿ Accessibility & Contrast")}
+          {sectionLabel("Accessibility & Contrast", <Eye size={14} />)}
           <p style={{ margin: "0 0 14px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
             Configure high-contrast themes conforming to WCAG 2.1 AAA contrast guidelines (≥ 7:1 ratio) with enhanced keyboard focus indicators.
           </p>
@@ -336,7 +341,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
 
       {/* ── b. Static Wallpaper ────────────────────────────────────── */}
       <div id="settings-section-personalize">
-        {sectionLabel("🖼️ Static Wallpaper")}
+        {sectionLabel("Static Wallpaper", <ImageIcon size={14} />)}
         <p style={{ margin: "0 0 12px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
           Choose a desktop background image or upload your own high-resolution image.
         </p>
@@ -435,7 +440,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
             </>
           ) : (
             <>
-              <span>🖼️</span>
+              <ImageIcon size={16} />
               <span>Upload Custom Picture (Max 2.5MB)</span>
             </>
           )}
@@ -452,7 +457,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
 
       {/* ── c. Live Wallpaper ──────────────────────────────────────── */}
       <div>
-        {sectionLabel("🎬 Live Video Wallpapers")}
+        {sectionLabel("Live Video Wallpapers", <Video size={14} />)}
         <p style={{ margin: "0 0 12px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
           Looping high-definition video wallpapers rendered seamlessly across the desktop.
         </p>
@@ -617,7 +622,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
             transition: "all 0.15s",
           }}
         >
-          <span>🎞️</span>
+          <Film size={16} />
           <span>Upload Custom Video (Max 50MB, MP4/WebM)</span>
         </button>
 
@@ -639,7 +644,15 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
             transition: "all 0.15s",
           }}
         >
-          {performanceMode ? "⏸ Video Paused (Performance Mode ON)" : "▶ Pause Video (Performance Mode)"}
+          {performanceMode ? (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Pause size={12} /> Video Paused (Performance Mode ON)
+            </span>
+          ) : (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Play size={12} /> Pause Video (Performance Mode)
+            </span>
+          )}
         </button>
       </div>
 
@@ -647,7 +660,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
 
       {/* ── d. Application SDK & Plugins ───────────────────────────── */}
       <div>
-        {sectionLabel("📦 Application SDK & Plugin Registry")}
+        {sectionLabel("Application SDK & Plugin Registry", <Package size={14} />)}
         <p style={{ margin: "0 0 12px", fontSize: 11, color: "var(--os-text-muted)", lineHeight: 1.5 }}>
           View installed system applications, inspect capability permissions (VFS, Windowing, Notifications), or register external dynamic plugins.
         </p>
@@ -698,7 +711,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                     {app.fluentIcon ? (
                       <OsIcon name={app.fluentIcon} size="sm" />
                     ) : (
-                      <span style={{ fontSize: 18 }}>{app.icon}</span>
+                      <OsIcon name={app.icon || "package"} size="sm" />
                     )}
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: "var(--os-text)" }}>
@@ -763,8 +776,9 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
           borderRadius: 8,
           padding: "12px",
         }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--os-text)", marginBottom: 6 }}>
-            ⚙️ Register Dynamic Plugin Manifest (JSON)
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--os-text)", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+            <Wrench size={13} color="var(--os-amber)" />
+            <span>Register Dynamic Plugin Manifest (JSON)</span>
           </div>
           <p style={{ margin: "0 0 8px", fontSize: 10, color: "var(--os-text-muted)" }}>
             Extend VSTR-OS at runtime by registering a sandboxed Application SDK manifest.

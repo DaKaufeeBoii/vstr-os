@@ -11,6 +11,7 @@ import { useOS } from "@/store/windowStore";
 import { useSound } from "@/utils/useSound";
 import type { WindowId } from "@/types";
 import { OsIcon } from "@/components/icons/OsIcon";
+import { X } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface WindowProps {
@@ -213,8 +214,9 @@ export default function Window({
                 onClick={() => { playClick(); closeWindow(targetId); }}
                 title="Close"
                 aria-label="Close window"
+                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
               >
-                ✕
+                <X size={9} strokeWidth={2.5} />
               </button>
               <button
                 id={`${targetId}-minimize`}
@@ -239,11 +241,7 @@ export default function Window({
             </div>
 
             <div className="os-titlebar-icon" aria-hidden="true">
-              {fluentIcon ? (
-                <OsIcon name={fluentIcon} size="sm" color="var(--os-text)" />
-              ) : (
-                icon
-              )}
+              <OsIcon name={fluentIcon || icon || "notepad"} size="sm" color="var(--os-text)" />
             </div>
             <div className="os-titlebar-title">{title}</div>
             {/* spacer for symmetry */}

@@ -9,33 +9,8 @@ export interface GuestbookEntry {
   avatarColor: string;
 }
 
-// In-memory backing store seeded with authentic showcase greetings
-let guestbookEntries: GuestbookEntry[] = [
-  {
-    id: "seed-1",
-    name: "Alex Vance",
-    role: "Recruiter",
-    message: "Incredible OS interface! The attention to detail in window management and terminal commands is top tier.",
-    timestamp: "2 hours ago",
-    avatarColor: "#e94560",
-  },
-  {
-    id: "seed-2",
-    name: "Devon Chen",
-    role: "Engineer",
-    message: "Checked out your IKARUS hackathon project. Great architecture and TypeScript typing across the board.",
-    timestamp: "Yesterday",
-    avatarColor: "#a855f7",
-  },
-  {
-    id: "seed-3",
-    name: "Sarah Lin",
-    role: "Designer",
-    message: "The Win11 mica acrylic styling and animated video wallpapers feel so smooth. Love this portfolio!",
-    timestamp: "3 days ago",
-    avatarColor: "#06b6d4",
-  },
-];
+// In-memory backing store (starts empty, real persistence needs a true database)
+let guestbookEntries: GuestbookEntry[] = [];
 
 export async function GET() {
   return NextResponse.json(guestbookEntries);

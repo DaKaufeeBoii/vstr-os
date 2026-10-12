@@ -7,6 +7,7 @@ import { useOSSettings } from "@/store/osSettingsStore";
 import { systemMissions } from "@/data/systemMissions";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { OsIcon } from "@/components/icons/OsIcon";
+import { Bell, BellOff, Mail, Check, X } from "lucide-react";
 import { useSound } from "@/utils/useSound";
 
 export default function NotificationCenter() {
@@ -171,7 +172,7 @@ export default function NotificationCenter() {
                   transition: "all 0.15s",
                 }}
               >
-                <span>{dndEnabled ? "🔕 Focus ON" : "🔔 Focus"}</span>
+                <span>{dndEnabled ? <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><BellOff size={11} /> Focus ON</span> : <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Bell size={11} /> Focus</span>}</span>
               </button>
 
               {(notifications.length > 0 || missionNotifications.length > 0) && (
@@ -210,7 +211,9 @@ export default function NotificationCenter() {
                   fontSize: "12px",
                 }}
               >
-                <div style={{ fontSize: "24px", marginBottom: "6px", opacity: 0.6 }}>📭</div>
+                <div style={{ marginBottom: "6px", opacity: 0.6, display: "flex", justifyContent: "center" }}>
+                  <Mail size={24} />
+                </div>
                 No new notifications
               </div>
             ) : (
@@ -229,7 +232,7 @@ export default function NotificationCenter() {
                       position: "relative",
                     }}
                   >
-                    <span style={{ fontSize: "18px" }}>{notif.icon || "🔔"}</span>
+                    <OsIcon name={notif.icon || "notif"} size="sm" />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--os-text)" }}>{notif.title}</div>
                       <div style={{ fontSize: "11px", color: "var(--os-text-muted)", marginTop: "2px", lineHeight: 1.3 }}>
@@ -248,7 +251,7 @@ export default function NotificationCenter() {
                       }}
                       title="Dismiss"
                     >
-                      ✕
+                      <X size={12} />
                     </button>
                   </div>
                 ))}
@@ -266,7 +269,7 @@ export default function NotificationCenter() {
                       alignItems: "flex-start",
                     }}
                   >
-                    <span style={{ fontSize: "18px" }}>{mission.icon}</span>
+                    <OsIcon name={mission.icon} size="sm" color="var(--os-amber)" />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--os-amber)" }}>
                         {mission.title}
@@ -274,8 +277,8 @@ export default function NotificationCenter() {
                       <div style={{ fontSize: "11px", color: "var(--os-text-muted)", marginTop: "2px", lineHeight: 1.3 }}>
                         {mission.description}
                       </div>
-                      <div style={{ fontSize: "10px", color: "var(--os-jade)", marginTop: "4px", fontWeight: 500 }}>
-                        ✓ Unlocked
+                      <div style={{ fontSize: "10px", color: "var(--os-jade)", marginTop: "4px", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                        <Check size={11} /> Unlocked
                       </div>
                     </div>
                   </div>

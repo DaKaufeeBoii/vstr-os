@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
+import { Wrench, Zap, CheckCircle2, AlertTriangle } from "lucide-react";
 
 type Phase = "select" | "scan" | "game" | "win" | "lose";
 type ScanMode = "quick" | "deep" | "full";
@@ -117,7 +118,7 @@ export default function DiskCleanupApp() {
       "Checking filesystem integrity...",
       `${Math.floor(Math.random() * 800 + 100)} orphaned blocks found`,
       "Cross-referencing allocation table...",
-      `${cfg.mines} unstable sectors detected ⚠`,
+      `${cfg.mines} unstable sectors detected`,
       "Preparing repair interface...",
     ];
     let i = 0;
@@ -220,11 +221,14 @@ export default function DiskCleanupApp() {
                 { label: "Capacity", val: "512 GB" },
                 { label: "Used", val: "487 GB (95.1%)" },
                 { label: "Filesystem", val: "APFS (Encrypted)" },
-                { label: "S.M.A.R.T.", val: "⚠ Failing — Reallocated sectors detected" },
+                { label: "S.M.A.R.T.", val: "Failing — Reallocated sectors detected" },
               ].map(r => (
                 <div key={r.label} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
                   <span style={{ color: "var(--os-text-muted)" }}>{r.label}</span>
-                  <span style={{ color: r.label === "S.M.A.R.T." ? "var(--os-red)" : "var(--os-text)" }}>{r.val}</span>
+                  <span style={{ color: r.label === "S.M.A.R.T." ? "var(--os-red)" : "var(--os-text)", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    {r.label === "S.M.A.R.T." && <AlertTriangle size={12} color="var(--os-red)" />}
+                    {r.val}
+                  </span>
                 </div>
               ))}
             </div>
@@ -284,9 +288,11 @@ export default function DiskCleanupApp() {
                   key={i}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  style={{ fontSize: 12, color: issue.includes("⚠") ? "var(--os-red)" : "var(--os-text-muted)" }}
+                  style={{ fontSize: 12, color: issue.includes("unstable") || issue.includes("Failing") ? "var(--os-red)" : "var(--os-text-muted)", display: "flex", alignItems: "center", gap: 6 }}
                 >
-                  <span style={{ color: "var(--os-jade)", marginRight: 8 }}>›</span>{issue}
+                  <span style={{ color: "var(--os-jade)" }}>›</span>
+                  <span>{issue}</span>
+                  {issue.includes("unstable") && <AlertTriangle size={12} color="var(--os-red)" />}
                 </motion.div>
               ))}
             </div>
@@ -301,10 +307,12 @@ export default function DiskCleanupApp() {
             style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, height: "100%", overflow: "hidden" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 11, color: "var(--os-red)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                ⚠ {cfg.mines - flagCount} corrupted sectors remaining
+              <div style={{ fontSize: 11, color: "var(--os-red)", letterSpacing: "0.08em", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                <AlertTriangle size={12} color="var(--os-red)" /> {cfg.mines - flagCount} corrupted sectors remaining
               </div>
-              <div style={{ fontSize: 11, color: "var(--os-text-muted)" }}>🔧 right-click = repair marker</div>
+              <div style={{ fontSize: 11, color: "var(--os-text-muted)", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                <Wrench size={12} /> right-click = repair marker
+              </div>
             </div>
             <div style={{
               overflowY: "auto",
@@ -348,8 +356,8 @@ export default function DiskCleanupApp() {
                         userSelect: "none",
                       }}
                     >
-                      {cell.state === "flagged" && "🔧"}
-                      {cell.state === "revealed" && cell.isMine && "💥"}
+                      {cell.state === "flagged" && <Wrench size={cellSize <= 22 ? 10 : 13} color="var(--os-amber)" />}
+                      {cell.state === "revealed" && cell.isMine && <Zap size={cellSize <= 22 ? 10 : 13} color="var(--os-red)" />}
                       {cell.state === "revealed" && !cell.isMine && cell.neighborCount > 0 && cell.neighborCount}
                     </div>
                   ))
@@ -366,7 +374,7 @@ export default function DiskCleanupApp() {
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
             style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 24 }}
           >
-            <div style={{ fontSize: 48 }}>✅</div>
+            <CheckCircle2 size={48} color="var(--os-jade)" />
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--os-jade)" }}>Disk Repaired Successfully</div>
             <div style={{ fontSize: 12, color: "var(--os-text-muted)", textAlign: "center", lineHeight: 1.6 }}>
               All {cfg.mines} corrupted sectors have been flagged and repaired.<br />
@@ -385,7 +393,7 @@ export default function DiskCleanupApp() {
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
             style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 24 }}
           >
-            <div style={{ fontSize: 48 }}>💾</div>
+            <AlertTriangle size={48} color="var(--os-red)" />
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--os-red)" }}>Disk Corruption Detected</div>
             <div style={{ fontSize: 12, color: "var(--os-text-muted)", textAlign: "center", lineHeight: 1.6 }}>
               A corrupted sector triggered a cascade failure.<br />

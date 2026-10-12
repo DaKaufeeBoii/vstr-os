@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { OsIcon } from "@/components/icons/OsIcon";
 import { VolumeIcon, WifiIcon, BatteryIcon, NotifIcon, ShieldIcon, DisplayIcon, ChevronRightIcon, RotationLockIcon, HotspotIcon, NearbyShareIcon, CastIcon, AccessibilityIcon } from "@/components/icons";
+import { Zap, BatteryWarning } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useSound } from "@/utils/useSound";
@@ -78,8 +79,8 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
   }, [setBrightness]);
 
   const getBatteryIcon = () => {
-    if (batteryLevel <= 20) return "🪫";
-    return "🔋";
+    if (batteryLevel <= 20) return <BatteryWarning size={14} color="#ef4444" />;
+    return <BatteryIcon size="sm" />;
   };
 
   return (
@@ -144,9 +145,12 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
                 padding: "2px 8px",
                 borderRadius: "4px",
                 border: `1px solid ${batteryLevel <= 15 ? "rgba(239,68,68,0.4)" : "rgba(255,255,255,0.1)"}`,
-                color: batteryLevel <= 15 ? "#ef4444" : "var(--os-text-muted)"
+                color: batteryLevel <= 15 ? "#ef4444" : "var(--os-text-muted)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
               }}>
-                {isCharging ? "⚡" : getBatteryIcon()} {Math.round(batteryLevel)}%
+                {isCharging ? <Zap size={13} color="var(--os-amber)" /> : getBatteryIcon()} {Math.round(batteryLevel)}%
               </span>
             </div>
           </div>
@@ -311,7 +315,10 @@ export default function QuickSettings({ isOpen, onClose }: QuickSettingsProps) {
                 }
               }}
             >
-              {isCharging ? "⚡" : "🔋"} {isCharging ? "Charging" : "Battery Saver"}
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                {isCharging ? <Zap size={13} color="var(--os-amber)" /> : <BatteryIcon size="sm" />}
+                {isCharging ? "Charging" : "Battery Saver"}
+              </span>
             </button>
           </div>
         </motion.div>

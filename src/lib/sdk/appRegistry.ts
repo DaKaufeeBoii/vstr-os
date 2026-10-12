@@ -14,7 +14,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Multi-instance POSIX terminal with bash/zsh shell, real IndexedDB VFS, and sudo elevation.",
     author: "Sai Tarun",
     category: "developer",
-    icon: "💻",
+    icon: "terminal",
     fluentIcon: "terminal",
     permissions: ["vfs:read", "vfs:write", "window:manage", "system:telemetry"],
     defaultConfig: {
@@ -32,7 +32,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Windows 11 inspired text editor with persistent VFS file I/O and auto-save capabilities.",
     author: "Sai Tarun",
     category: "productivity",
-    icon: "📝",
+    icon: "notepad",
     fluentIcon: "notepad",
     permissions: ["vfs:read", "vfs:write", "notifications"],
     defaultConfig: {
@@ -50,7 +50,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Decentralised visitor bulletin board with real-time greetings and role tagging.",
     author: "Sai Tarun",
     category: "network",
-    icon: "📖",
+    icon: "guestbook",
     fluentIcon: "guestbook",
     permissions: ["notifications", "window:manage"],
     defaultConfig: {
@@ -68,7 +68,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Interactive portfolio showcase featuring full-stack, AI, and systems engineering projects.",
     author: "Sai Tarun",
     category: "productivity",
-    icon: "🚀",
+    icon: "folder",
     fluentIcon: "folder",
     permissions: ["window:manage"],
     defaultConfig: {
@@ -86,7 +86,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Categorised radar and directory of languages, frameworks, cloud, and systems skills.",
     author: "Sai Tarun",
     category: "productivity",
-    icon: "⚡",
+    icon: "skills",
     fluentIcon: "skills",
     permissions: ["window:manage"],
     defaultConfig: {
@@ -104,7 +104,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "OS-wide configuration hub for wallpapers, themes, audio, accessibility, and plugins.",
     author: "Sai Tarun",
     category: "system",
-    icon: "⚙️",
+    icon: "settings",
     fluentIcon: "settings",
     permissions: ["notifications", "window:manage", "system:telemetry"],
     defaultConfig: {
@@ -122,7 +122,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Developer profile, bio, engineering philosophy, and background summary.",
     author: "Sai Tarun",
     category: "system",
-    icon: "👤",
+    icon: "user",
     fluentIcon: "user",
     permissions: ["system:telemetry"],
     defaultConfig: {
@@ -140,7 +140,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Chronological professional career roadmap, internships, and milestones.",
     author: "Sai Tarun",
     category: "productivity",
-    icon: "💼",
+    icon: "briefcase",
     fluentIcon: "briefcase",
     permissions: ["window:manage"],
     defaultConfig: {
@@ -158,7 +158,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Instant message transmitter, social handles, and PGP encryption credentials.",
     author: "Sai Tarun",
     category: "network",
-    icon: "📫",
+    icon: "mail",
     fluentIcon: "mail",
     permissions: ["notifications"],
     defaultConfig: {
@@ -176,7 +176,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Trophy showcase of hackathon championships, competitive programming rankings, and awards.",
     author: "Sai Tarun",
     category: "productivity",
-    icon: "🏆",
+    icon: "trophy",
     fluentIcon: "trophy",
     permissions: ["window:manage"],
     defaultConfig: {
@@ -194,8 +194,8 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Canvas physics mini-game with dynamic collision detection and score tracking.",
     author: "Sai Tarun",
     category: "utilities",
-    icon: "🐦",
-    fluentIcon: "game",
+    icon: "bird",
+    fluentIcon: "bird",
     permissions: ["notifications"],
     defaultConfig: {
       width: 450,
@@ -212,8 +212,8 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Interactive coin toss mini-game tracking win/loss streaks and unlocking system secrets.",
     author: "Sai Tarun",
     category: "utilities",
-    icon: "🪙",
-    fluentIcon: "info",
+    icon: "coins",
+    fluentIcon: "coins",
     permissions: ["notifications", "system:telemetry"],
     defaultConfig: {
       width: 480,
@@ -230,7 +230,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "High-resolution photograph inspection and image viewing utility.",
     author: "Sai Tarun",
     category: "utilities",
-    icon: "🖼️",
+    icon: "photo",
     fluentIcon: "photo",
     permissions: ["vfs:read"],
     defaultConfig: {
@@ -248,7 +248,7 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Multi-phase disk repair utility featuring Quick, Deep, and Full sector diagnostics.",
     author: "Sai Tarun",
     category: "system",
-    icon: "💾",
+    icon: "disk",
     fluentIcon: "disk",
     permissions: ["vfs:read", "vfs:write", "system:telemetry"],
     defaultConfig: {
@@ -266,8 +266,8 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Animated roaming desktop companion pet reacting to cursor movements and user actions.",
     author: "Sai Tarun",
     category: "utilities",
-    icon: "🐾",
-    fluentIcon: "paw",
+    icon: "cat",
+    fluentIcon: "cat",
     permissions: ["notifications", "window:manage"],
     defaultConfig: {
       width: 460,
@@ -284,8 +284,8 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Cybersecurity speed-typing terminal simulation for penetrating defended network nodes.",
     author: "Sai Tarun",
     category: "developer",
-    icon: "🔓",
-    fluentIcon: "shield",
+    icon: "unlock",
+    fluentIcon: "unlock",
     permissions: ["notifications", "system:telemetry"],
     defaultConfig: {
       width: 600,
@@ -302,8 +302,8 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Application marketplace and manifest installer for custom VSTR-OS apps and extensions.",
     author: "Sai Tarun",
     category: "system",
-    icon: "📦",
-    fluentIcon: "folder",
+    icon: "store",
+    fluentIcon: "store",
     permissions: ["window:manage"],
     defaultConfig: {
       width: 600,
@@ -320,14 +320,14 @@ const BUILT_IN_APPS: AppManifest[] = [
     description: "Personal audio playback for custom playlists.",
     author: "Sai Tarun",
     category: "utilities",
-    icon: "🎵",
+    icon: "music",
     fluentIcon: "music",
     permissions: ["window:manage"],
     defaultConfig: {
-      width: 400,
-      height: 350,
-      minWidth: 300,
-      minHeight: 300,
+      width: 420,
+      height: 520,
+      minWidth: 320,
+      minHeight: 380,
       allowMultipleInstances: false,
     },
   },

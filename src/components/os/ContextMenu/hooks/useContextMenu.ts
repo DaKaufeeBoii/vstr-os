@@ -50,7 +50,16 @@ export function useContextMenu() {
   // Close on any click or touch outside
   useEffect(() => {
     if (!state.isOpen) return;
-    const handle = () => closeMenu();
+    const handle = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.closest?.('[role="menu"]') ||
+        target?.closest?.('[role="menuitem"]')
+      ) {
+        return;
+      }
+      closeMenu();
+    };
     // Slight timeout so the triggering click/tap doesn't immediately close it
     const timer = setTimeout(() => {
       window.addEventListener("click", handle);
