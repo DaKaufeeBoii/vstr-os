@@ -108,7 +108,7 @@ const APP_SIZES: Record<string, { size: string; kb: number }> = {
 interface CustomDesktopItem {
   id: string;
   title: string;
-  type: "folder" | "text" | "shortcut";
+  type: "text" | "shortcut";
   icon: string;
   fluentIcon: string;
   filePath?: string;
@@ -162,6 +162,8 @@ export default function Desktop() {
     performanceMode,
     unlockMission,
     addNotification,
+    widgets,
+    setWidgets,
   } = useOSSettings();
 
   const vfs = useVFS();
@@ -272,28 +274,6 @@ export default function Desktop() {
     addNotification?.("Wallpaper Changed", `Active background: ${next.name}`, "photo");
   }, [wallpaper, setWallpaper, setVideoWallpaper, playClick, addNotification]);
 
-  const handleNewFolder = useCallback(() => {
-    playClick();
-    const folderNum = customItems.filter((i) => i.type === "folder").length;
-    const title = folderNum === 0 ? "New Folder" : `New Folder (${folderNum + 1})`;
-    const id = `folder-${Date.now()}`;
-    const newItem: CustomDesktopItem = {
-      id,
-      title,
-      type: "folder",
-      icon: "folder",
-      fluentIcon: "folder",
-      createdAt: Date.now(),
-      size: "0 KB",
-      kb: 0,
-    };
-    saveCustomItems([...customItems, newItem]);
-    if (vfs.isReady) {
-      vfs.mkdir(`/home/saitarun/Desktop/${title}`, "guest", true);
-    }
-    addNotification?.("Folder Created", `Created "${title}" on Desktop`, "folder");
-  }, [customItems, saveCustomItems, playClick, vfs, addNotification]);
-
   const handleNewTextDocument = useCallback(() => {
     playClick();
     const docNum = customItems.filter((i) => i.type === "text").length;
@@ -375,6 +355,9 @@ export default function Desktop() {
             autoArrange,
             alignToGrid,
             showDesktopIcons,
+            showDesktopWidgets: widgets
+              .filter((w) => ["spotify", "github", "social"].includes(w.id))
+              .some((w) => w.visibleOnDesktop),
             sortBy,
             showMoreOptions,
           },
@@ -404,11 +387,34 @@ export default function Desktop() {
                 return next;
               });
             },
+            toggleShowDesktopWidgets: () => {
+              const coreIds = ["spotify", "github", "social"];
+              const allCoreVisible = coreIds.every(
+                (id) => widgets.find((w) => w.id === id)?.visibleOnDesktop
+              );
+              const updated = widgets.map((w) => {
+                if (coreIds.includes(w.id)) {
+                  return { ...w, visibleOnDesktop: !allCoreVisible };
+                }
+                return w;
+              });
+              setWidgets(updated);
+            },
+            resetWidgetsLayout: () => {
+              const updated = widgets.map((w) => ({
+                ...w,
+                visibleOnDesktop:
+                  w.id === "spotify" || w.id === "github" || w.id === "social"
+                    ? true
+                    : w.visibleOnDesktop,
+              }));
+              setWidgets(updated);
+              window.dispatchEvent(new CustomEvent("reset-desktop-widgets"));
+            },
             setSortBy: (sort) => {
               setSortBy(sort);
             },
             refresh: handleRefresh,
-            newFolder: handleNewFolder,
             newShortcut: handleNewShortcut,
             newTextDocument: handleNewTextDocument,
             openDisplaySettings: () => openWindow({ id: "settings", customData: { section: "display" } }),
@@ -436,7 +442,6 @@ export default function Desktop() {
       showMoreOptions,
       savePreferences,
       handleRefresh,
-      handleNewFolder,
       handleNewShortcut,
       handleNewTextDocument,
       openWindow,
@@ -447,6 +452,8 @@ export default function Desktop() {
       toggleExposé,
       handleOpenDesktopProperties,
       triggerContextMenu,
+      widgets,
+      setWidgets,
     ]
   );
 
@@ -521,8 +528,6 @@ export default function Desktop() {
             if (custom) {
               if (custom.type === "text") {
                 openWindow({ id: "notepad", title: custom.title, customData: { filePath: custom.filePath } });
-              } else if (custom.type === "folder") {
-                openWindow({ id: "projects", title: custom.title });
               } else if (custom.url) {
                 window.open(custom.url, "_blank");
               }
@@ -554,14 +559,14 @@ export default function Desktop() {
               setPropertiesModalItem({
                 id: custom.id,
                 title: custom.title,
-                type: custom.type === "folder" ? "File Folder" : custom.type === "text" ? "Text Document (.txt)" : "Internet Shortcut",
+                type: custom.type === "text" ? "Text Document (.txt)" : "Internet Shortcut",
                 fluentIcon: custom.fluentIcon,
                 location: `C:\\Users\\saitarun\\Desktop\\${custom.title}`,
                 size: custom.size || "1 KB",
                 sizeOnDisk: "4 KB",
                 created: new Date(custom.createdAt).toLocaleString(),
                 modified: new Date(custom.createdAt).toLocaleString(),
-                description: custom.type === "folder" ? "Local Directory" : custom.type === "text" ? "Plain Text Document" : "Web Shortcut",
+                description: custom.type === "text" ? "Plain Text Document" : "Web Shortcut",
               });
             } else {
               const cfg = WINDOW_CONFIGS.find((c) => c.id === appId);
@@ -815,12 +820,6 @@ export default function Desktop() {
       onCustomOpen: () => {
         if (item.type === "text") {
           openWindow({ id: "notepad", title: item.title, customData: { filePath: item.filePath } });
-        } else if (item.type === "folder") {
-          openWindow({
-            id: "terminal",
-            title: `Terminal — ${item.title}`,
-            customData: { initialCwd: item.filePath || `/home/saitarun/Desktop/${item.title}` },
-          });
         } else if (item.url) {
           window.open(item.url, "_blank");
         }

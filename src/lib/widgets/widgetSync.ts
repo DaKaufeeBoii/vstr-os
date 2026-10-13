@@ -35,6 +35,8 @@ interface GitHubEvent {
   created_at: string;
   payload?: {
     commits?: { message: string; sha: string }[];
+    ref_type?: string;
+    ref?: string;
   };
 }
 
@@ -53,13 +55,18 @@ async function fetchGitHub(): Promise<WidgetGitHubSnapshot | null> {
     const data = (await res.json()) as GitHubEvent[];
     if (!Array.isArray(data) || data.length === 0) return null;
     const events = data
-      .filter((e) => e.type === "PushEvent" && e.payload?.commits?.length)
-      .slice(0, 3)
+      .filter((e) => e.type === "PushEvent" || e.type === "CreateEvent")
+      .slice(0, 5)
       .map((e) => {
         const commit = e.payload?.commits?.[0];
+        const msg =
+          commit?.message ||
+          (e.type === "PushEvent"
+            ? "Pushed changes to repository"
+            : `Created ${e.payload?.ref_type || "repository"}`);
         return {
           repo: e.repo.name,
-          message: commit?.message || "Updated repository",
+          message: msg,
           date: formatGitHubDate(e.created_at),
         };
       });

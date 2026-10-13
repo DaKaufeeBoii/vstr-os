@@ -28,12 +28,12 @@ Welcome to VSTR-OS, an interactive desktop environment portal based on a persist
 
 ## 📁 System Management
 *   **Desktop Icons**: Right-click any icon to manipulate its instance state (Minimize/Maximize, Close, Pin to Taskbar) or get app properties.
-*   **File Management**: Use the folder explorer app to navigate the VFS. You can create new folders and manage `.txt` documents dynamically.
+*   **File Management**: You can create and manage custom `.txt` documents and shortcuts directly on the Desktop.
 *   **Desktop Widgets**: Pinned widgets display live system telemetry (FPS, memory, developer stats) synced with background processes.
 *   **Window Management**: Windows are fully draggable and resizable. Fixed window spawning logic: maximizing or opening an already running app now correctly brings the existing instance to the foreground instead of spawning a new, resized window.
 
 ## 📟 Command Line & Power User
-*   **Terminal (Terminal.app)**: A fully functional virtual terminal supporting `ls`, `cd`, `cat`, `rm`, `touch`, `mkdir`, and sudo operations on the sandboxed VFS.
+*   **Terminal (Terminal.app)**: A fully functional virtual terminal supporting `ls`, `cd`, `cat`, `rm`, `touch`, and sudo operations on the sandboxed VFS.
 *   **Hotkeys** (conflict-free — safe on Windows and all browsers):
     *   `Alt + S` / `Alt + M` — Start Menu
     *   `Alt + K` — Command Palette / Search
@@ -62,4 +62,4 @@ Explore these hidden system interactions and mini-games to unlock achievements a
 | **Avatar Secret** | Photo Reveal | Open **AboutApp** from the Start Menu, click the pixelated avatar image to reveal the full-resolution photo. |
 | **Secret Route** | Browser URL | Navigate to `[your-portfolio-url]/games/secret` directly in your browser. |
 
-*   **Missions**: Interactive app actions (e.g., installing the desktop pet, achieving a score of 10+ in Flappy Bird, completing successful system operations) automatically unlock achievements. These appear as Win11-style system toasts and are logged in your **Notification Center** (`Alt + N`).
+*   **Missions**: Interactive app actions (e.g., installing the desktop pet, achieving a score of 10+ in Flappy Bird, completing successful system operations) automatically unlock achievements once per session. These appear as Win11-style system toasts and are logged in your **Notification Center** (`Alt + N`).

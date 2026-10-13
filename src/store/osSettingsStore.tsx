@@ -20,6 +20,7 @@ import React, {
   useContext,
   useEffect,
   useReducer,
+  useRef,
 } from "react";
 import type { OSNotification } from "@/types";
 import { systemMissions } from "@/data/systemMissions";
@@ -92,14 +93,18 @@ function buildInitial(): OSSettingsState {
     highContrast:     false,
     notifications:    [],
     unlockedMissions: [],
-    widgets: [
-      { id: "weather", name: "Weather", visibleOnBoard: true, visibleOnDesktop: false },
-      { id: "telemetry", name: "System Telemetry", visibleOnBoard: true, visibleOnDesktop: false },
-      { id: "github", name: "GitHub Activity", visibleOnBoard: true, visibleOnDesktop: false },
-      { id: "leetcode", name: "LeetCode Stats", visibleOnBoard: true, visibleOnDesktop: false },
-    ],
+    widgets: DEFAULT_WIDGETS,
   };
 }
+
+export const DEFAULT_WIDGETS: WidgetConfig[] = [
+  { id: "spotify", name: "Spotify / Music", visibleOnBoard: true, visibleOnDesktop: true },
+  { id: "github", name: "GitHub Activity", visibleOnBoard: true, visibleOnDesktop: true },
+  { id: "social", name: "Dev Note / Status", visibleOnBoard: true, visibleOnDesktop: true },
+  { id: "telemetry", name: "System Telemetry", visibleOnBoard: true, visibleOnDesktop: false },
+  { id: "leetcode", name: "LeetCode Stats", visibleOnBoard: true, visibleOnDesktop: false },
+  { id: "weather", name: "Weather", visibleOnBoard: true, visibleOnDesktop: false },
+];
 
 /* ── Reducer ────────────────────────────────────────────────────────── */
 function reducer(state: OSSettingsState, action: OSSettingsAction): OSSettingsState {
@@ -258,15 +263,27 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     dispatch({ type: "CLEAR_NOTIFICATIONS" });
   }, []);
 
+  // Ref guard: a double-invocation of unlockMission for the same id (e.g.
+  // React StrictMode double-effects, racing intervals) must fire exactly one
+  // toast. State + localStorage lag one render behind, so they can't dedupe
+  // synchronous repeats — the ref can.
+  const notifiedRef = useRef<Set<string>>(new Set());
+
   const unlockMission = useCallback((missionId: string) => {
     if (state.unlockedMissions.includes(missionId)) return;
+    if (notifiedRef.current.has(missionId)) return;
+    notifiedRef.current.add(missionId);
+
     dispatch({ type: "UNLOCK_MISSION", missionId });
 
-    const savedMissions = localStorage.getItem(KEYS.missions);
-    let parsed: string[] = [];
-    try { const p = JSON.parse(savedMissions ?? "[]"); if (Array.isArray(p)) parsed = p; } catch {}
-    const nextMissions = parsed.includes(missionId) ? parsed : [...parsed, missionId];
-    localStorage.setItem(KEYS.missions, JSON.stringify(nextMissions));
+    try {
+      const savedMissions = localStorage.getItem(KEYS.missions);
+      let parsed: string[] = [];
+      try { const p = JSON.parse(savedMissions ?? "[]"); if (Array.isArray(p)) parsed = p; } catch {}
+      const nextMissions = parsed.includes(missionId) ? parsed : [...parsed, missionId];
+      localStorage.setItem(KEYS.missions, JSON.stringify(nextMissions));
+      localStorage.setItem(KEYS.notified, JSON.stringify(nextMissions));
+    } catch {}
 
     const mission = systemMissions.find((m) => m.id === missionId);
     if (mission) addNotification(mission.title, mission.description, mission.icon);
@@ -330,11 +347,45 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
 
     // Widgets
     const savedWidgets = localStorage.getItem(KEYS.widgets);
+    const MIGRATION_KEY = "vstr_widgets_v2_migrated";
+    const hasMigrated = localStorage.getItem(MIGRATION_KEY);
+
     if (savedWidgets) {
       try {
         const parsed = JSON.parse(savedWidgets);
-        if (Array.isArray(parsed)) dispatch({ type: "SET_WIDGETS", widgets: parsed });
+        if (Array.isArray(parsed)) {
+          const merged = DEFAULT_WIDGETS.map((def) => {
+            const existing = parsed.find((p: WidgetConfig) => p.id === def.id);
+            if (!existing) return def;
+            // If user hasn't undergone v2 migration yet, force-enable core widgets (spotify, github, social)
+            if (!hasMigrated && (def.id === "spotify" || def.id === "github" || def.id === "social")) {
+              return { ...def, ...existing, visibleOnDesktop: true };
+            }
+            return { ...def, ...existing };
+          });
+
+          // Fallback: if no widget is visible on desktop, enable the 3 core ones
+          const hasAnyDesktop = merged.some((w) => w.visibleOnDesktop);
+          if (!hasAnyDesktop) {
+            merged.forEach((w) => {
+              if (w.id === "spotify" || w.id === "github" || w.id === "social") {
+                w.visibleOnDesktop = true;
+              }
+            });
+          }
+
+          if (!hasMigrated) {
+            localStorage.setItem(MIGRATION_KEY, "true");
+            localStorage.setItem(KEYS.widgets, JSON.stringify(merged));
+          }
+
+          dispatch({ type: "SET_WIDGETS", widgets: merged });
+        }
       } catch {}
+    } else {
+      localStorage.setItem(MIGRATION_KEY, "true");
+      localStorage.setItem(KEYS.widgets, JSON.stringify(DEFAULT_WIDGETS));
+      dispatch({ type: "SET_WIDGETS", widgets: DEFAULT_WIDGETS });
     }
 
     // Performance mode

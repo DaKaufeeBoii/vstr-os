@@ -20,9 +20,8 @@ Available commands:
   pwd               — print current working directory
   cat <file>        — print file contents
   notepad [file]    — open GUI editor (alias: nano)
-  mkdir <name>      — create new directory
   touch <file>      — create empty file
-  rm [-r] <file>    — delete file or directory
+  rm <file>         — delete file
   tree              — display ASCII hierarchy of current path
   echo <txt> > <f>  — redirect text to file (> overwrite, >> append)
   sudo <cmd> / su   — elevate privileges to root
@@ -326,17 +325,7 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
 
       // ── MKDIR ───────────────────────────────────────────────────────
       } else if (mainCmd === "mkdir") {
-        if (!args[0]) {
-          push({ type: "error", text: "Usage: mkdir <directory_name>" });
-        } else {
-          const resolved = vfs.resolvePath(cwd, args[0]);
-          try {
-            await vfs.mkdir(resolved, currentUser);
-            push({ type: "success", text: `Directory created: ${resolved}` });
-          } catch (err: any) {
-            push({ type: "error", text: err.message });
-          }
-        }
+        push({ type: "error", text: "mkdir: command disabled — folder creation is not permitted" });
 
       // ── TOUCH ───────────────────────────────────────────────────────
       } else if (mainCmd === "touch") {
@@ -359,15 +348,19 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
 
       // ── RM / DEL ────────────────────────────────────────────────────
       } else if (mainCmd === "rm" || mainCmd === "del") {
-        const isRec = args.includes("-r") || args.includes("-rf");
         const targetArg = args.find((a) => !a.startsWith("-"));
         if (!targetArg) {
-          push({ type: "error", text: "Usage: rm [-r] <file_or_dir>" });
+          push({ type: "error", text: "Usage: rm <file>" });
         } else {
           const resolved = vfs.resolvePath(cwd, targetArg);
           try {
-            await vfs.remove(resolved, currentUser, isRec);
-            push({ type: "success", text: `Removed: ${resolved}` });
+            const node = await vfs.stat(resolved);
+            if (node && node.type === "dir") {
+              push({ type: "error", text: `rm: cannot remove '${targetArg}': folder deletion is not permitted` });
+            } else {
+              await vfs.remove(resolved, currentUser, false);
+              push({ type: "success", text: `Removed: ${resolved}` });
+            }
           } catch (err: any) {
             push({ type: "error", text: err.message });
           }
@@ -639,7 +632,6 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
         "cd",
         "pwd",
         "notepad",
-        "mkdir",
         "touch",
         "rm",
         "tree",

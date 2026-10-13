@@ -5,6 +5,7 @@ export interface DesktopMenuState {
   autoArrange: boolean;
   alignToGrid: boolean;
   showDesktopIcons: boolean;
+  showDesktopWidgets?: boolean;
   sortBy: "name" | "size" | "type" | "date" | null;
   showMoreOptions: boolean;
 }
@@ -15,6 +16,8 @@ export interface DesktopMenuActions {
   toggleAutoArrange: () => void;
   toggleAlignToGrid: () => void;
   toggleShowDesktopIcons: () => void;
+  toggleShowDesktopWidgets?: () => void;
+  resetWidgetsLayout?: () => void;
 
   // Sort by
   setSortBy: (sort: "name" | "size" | "type" | "date") => void;
@@ -23,7 +26,6 @@ export interface DesktopMenuActions {
   refresh: () => void;
 
   // New
-  newFolder: () => void;
   newShortcut: () => void;
   newTextDocument: () => void;
 
@@ -85,6 +87,23 @@ export function getDesktopMenuGroups(
               icon: state.showDesktopIcons ? "check" : undefined,
               onClick: actions.toggleShowDesktopIcons,
             },
+            ...(actions.toggleShowDesktopWidgets
+              ? [
+                  {
+                    label: "Show desktop widgets",
+                    icon: state.showDesktopWidgets ? "check" : undefined,
+                    onClick: actions.toggleShowDesktopWidgets,
+                  },
+                ]
+              : []),
+            ...(actions.resetWidgetsLayout
+              ? [
+                  {
+                    label: "Reset widgets layout",
+                    onClick: actions.resetWidgetsLayout,
+                  },
+                ]
+              : []),
           ],
         },
         {
@@ -126,7 +145,6 @@ export function getDesktopMenuGroups(
           label: "New",
           icon: "new",
           items: [
-            { label: "Folder", icon: "folder", onClick: actions.newFolder },
             { label: "Shortcut", icon: "website", onClick: actions.newShortcut },
             { label: "Divider", disabled: true },
             { label: "Text Document", icon: "notepad", onClick: actions.newTextDocument },

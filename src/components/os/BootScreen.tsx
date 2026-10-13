@@ -38,14 +38,26 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
         }, 800);
       }
     }, 360);
-    return () => clearInterval(interval);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || e.key === " " || e.key === "Enter") {
+        clearInterval(interval);
+        onComplete();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onComplete]);
 
   return (
     <AnimatePresence>
       {loading && (
         <motion.div
+          onClick={onComplete}
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}

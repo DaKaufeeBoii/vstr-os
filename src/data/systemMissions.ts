@@ -127,11 +127,4 @@ export const systemMissions: SystemMission[] = [
     icon: "shield",
     difficulty: "Hard",
   },
-  {
-    id: "vfs-author",
-    title: "VFS Author",
-    description: "Create and persist a custom file to the IndexedDB filesystem.",
-    icon: "notepad",
-    difficulty: "Easy",
-  },
 ];

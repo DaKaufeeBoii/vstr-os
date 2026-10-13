@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Headphones, Zap, Sparkles, Gamepad2, Coffee, Link2, Star, Info } from "lucide-react";
+import { Headphones, Zap, Sparkles, Gamepad2, Coffee, Link2, Star, Info, Flame } from "lucide-react";
 
 interface PresetPlaylist {
   id: string;
@@ -11,6 +11,12 @@ interface PresetPlaylist {
 }
 
 const PRESET_PLAYLISTS: PresetPlaylist[] = [
+  {
+    id: "damn-good",
+    name: "DAMN GOOD. (Daily)",
+    icon: <Flame size={13} />,
+    embedUrl: "https://open.spotify.com/embed/playlist/2k0uLgndnQEJ440RTFFJ0F?utm_source=generator&theme=0",
+  },
   {
     id: "lofi",
     name: "Lofi Beats",
@@ -87,7 +93,7 @@ function parseSpotifyUrl(input: string): string | null {
 
 export default function MusicPlayerApp() {
   const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>(PRESET_PLAYLISTS[0].embedUrl);
-  const [activePresetId, setActivePresetId] = useState<string>("lofi");
+  const [activePresetId, setActivePresetId] = useState<string>("damn-good");
   const [customInput, setCustomInput] = useState<string>("");
   const [showCustomBar, setShowCustomBar] = useState<boolean>(false);
   const [inputError, setInputError] = useState<string | null>(null);

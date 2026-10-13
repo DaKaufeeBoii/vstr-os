@@ -6,13 +6,13 @@ import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useSound } from "@/utils/useSound";
 import { OsIcon } from "@/components/icons/OsIcon";
-import { X, Settings, Activity, GitBranch, Code2 } from "lucide-react";
+import { X, Settings, Activity, GitBranch, Code2, Music, MessageSquare } from "lucide-react";
 import { useWidgetData } from "@/hooks/useWidgetData";
 import { ensureWidgetSync, refreshWidgetsNow } from "@/lib/widgets/widgetSync";
 
 export default function WidgetBoard() {
   const { isWidgetBoardOpen, closeWidgetBoard, windows } = useOS();
-  const { widgets, toggleWidgetBoard } = useOSSettings();
+  const { widgets, toggleWidgetBoard, toggleWidgetDesktop, setWidgets } = useOSSettings();
   const { playClick } = useSound();
 
   // Shared background sync (singleton): this board only *reads* payloads —
@@ -31,6 +31,18 @@ export default function WidgetBoard() {
   if (!isWidgetBoardOpen) return null;
 
   const isVisible = (id: string) => widgets.find(w => w.id === id)?.visibleOnBoard ?? true;
+
+  const handleRestoreAllDesktop = () => {
+    playClick();
+    const updated = widgets.map((w) => ({
+      ...w,
+      visibleOnDesktop: w.id === "spotify" || w.id === "github" || w.id === "social" ? true : w.visibleOnDesktop,
+    }));
+    setWidgets(updated);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("reset-desktop-widgets"));
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -81,17 +93,63 @@ export default function WidgetBoard() {
 
           {/* Widget Manager */}
           <div style={cardStyle}>
-            <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px", display: "inline-flex", alignItems: "center", gap: 6 }}><Settings size={14} color="var(--os-amber)" /> Customize Widgets</span></div>
+            <div style={cardHeaderStyle}>
+              <span style={{ fontWeight: 600, fontSize: "13px", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Settings size={14} color="var(--os-amber)" /> Customize Widgets
+              </span>
+              <button
+                type="button"
+                onClick={handleRestoreAllDesktop}
+                title="Restore default desktop widgets layout"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "10px",
+                  padding: "3px 7px",
+                  color: "var(--os-amber)",
+                  cursor: "pointer",
+                }}
+              >
+                Restore Defaults
+              </button>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {widgets.map(w => (
                 <div key={w.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px" }}>
                   <span>{w.name}</span>
-                  <button 
-                    onClick={() => toggleWidgetBoard(w.id)}
-                    style={{ background: w.visibleOnBoard ? "var(--os-amber)" : "rgba(255,255,255,0.1)", border: "none", borderRadius: "4px", padding: "2px 8px", cursor: "pointer", color: w.visibleOnBoard ? "black" : "white" }}
-                  >
-                    {w.visibleOnBoard ? "On" : "Off"}
-                  </button>
+                  <div style={{ display: "flex", gap: "5px" }}>
+                    <button 
+                      onClick={() => { playClick(); toggleWidgetDesktop(w.id); }}
+                      title="Toggle visibility on Desktop"
+                      style={{
+                        background: w.visibleOnDesktop ? "#3b82f6" : "rgba(255,255,255,0.08)",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "2px 6px",
+                        cursor: "pointer",
+                        fontSize: "10px",
+                        color: w.visibleOnDesktop ? "white" : "rgba(255,255,255,0.5)",
+                      }}
+                    >
+                      Desktop: {w.visibleOnDesktop ? "On" : "Off"}
+                    </button>
+                    <button 
+                      onClick={() => { playClick(); toggleWidgetBoard(w.id); }}
+                      title="Toggle visibility on Sidebar Board"
+                      style={{
+                        background: w.visibleOnBoard ? "var(--os-amber)" : "rgba(255,255,255,0.08)",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "2px 6px",
+                        cursor: "pointer",
+                        fontSize: "10px",
+                        color: w.visibleOnBoard ? "black" : "rgba(255,255,255,0.5)",
+                      }}
+                    >
+                      Board: {w.visibleOnBoard ? "On" : "Off"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -118,6 +176,26 @@ export default function WidgetBoard() {
                     {evt.repo.split("/")[1]} : {evt.message}
                   </div>
                 )) : <div style={{ fontSize: "11px", color: "var(--os-text-muted)" }}>Loading events...</div>}
+              </div>
+            </div>
+          )}
+
+          {/* Card: Spotify */}
+          {isVisible("spotify") && (
+            <div style={cardStyle}>
+              <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px", display: "inline-flex", alignItems: "center", gap: 6 }}><Music size={14} color="var(--os-amber)" /> Spotify Playlist</span></div>
+              <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.85)" }}>
+                Daily Rotation: <strong>DAMN GOOD.</strong> — by @DaKaufeeBoii
+              </div>
+            </div>
+          )}
+
+          {/* Card: Social */}
+          {isVisible("social") && (
+            <div style={cardStyle}>
+              <div style={cardHeaderStyle}><span style={{ fontWeight: 600, fontSize: "13px", display: "inline-flex", alignItems: "center", gap: 6 }}><MessageSquare size={14} color="var(--os-amber)" /> Dev Status</span></div>
+              <div style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.8)", lineHeight: 1.4 }}>
+                Building interactive OS experiences in the browser with Next.js & Framer Motion.
               </div>
             </div>
           )}

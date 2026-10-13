@@ -204,52 +204,7 @@ export async function mkdir(
   user: "guest" | "root" = "guest",
   recursive = false
 ): Promise<VFSNode> {
-  const normPath = normalizePath(pathStr);
-  if (normPath === "/") return (await dbGetNode("/"))!;
-
-  const existing = await dbGetNode(normPath);
-  if (existing) {
-    if (recursive) return existing;
-    throw new Error(`mkdir: cannot create directory '${pathStr}': File exists`);
-  }
-
-  const parentPath = getParentPath(normPath);
-  let parentNode = await dbGetNode(parentPath);
-
-  if (!parentNode) {
-    if (recursive) {
-      parentNode = await mkdir(parentPath, user, true);
-    } else {
-      throw new Error(`mkdir: cannot create directory '${pathStr}': No such parent directory`);
-    }
-  }
-
-  if (parentNode.type !== "dir") {
-    throw new Error(`mkdir: cannot create directory '${pathStr}': '${parentPath}' is not a directory`);
-  }
-  if (!checkPermission(parentNode, "w", user)) {
-    throw new Error(`mkdir: cannot create directory '${pathStr}': Permission denied in '${parentPath}'`);
-  }
-
-  const now = Date.now();
-  const name = getBasename(normPath);
-  const newNode: VFSNode = {
-    id: normPath,
-    path: normPath,
-    name,
-    parentId: parentPath,
-    type: "dir",
-    size: 4096,
-    mimeType: "inode/directory",
-    createdAt: now,
-    updatedAt: now,
-    owner: user,
-    permissions: 0o755,
-  };
-
-  await dbPutNode(newNode);
-  emitEvent({ type: "create", path: normPath, node: newNode });
-  return newNode;
+  throw new Error(`mkdir: cannot create directory '${pathStr}': folder creation is disabled`);
 }
 
 /**
@@ -320,15 +275,7 @@ export async function remove(
   }
 
   if (node.type === "dir") {
-    const children = await dbGetChildren(normPath);
-    if (children.length > 0) {
-      if (!recursive) {
-        throw new Error(`rm: cannot remove '${pathStr}': Is a non-empty directory. Use -r flag.`);
-      }
-      for (const child of children) {
-        await remove(child.path, user, true);
-      }
-    }
+    throw new Error(`rm: cannot remove '${pathStr}': folder deletion is not permitted`);
   }
 
   await dbDeleteNode(normPath);
