@@ -63,7 +63,23 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
   } = useOSSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const prevWallpaperUrl = useRef<string | null>(videoWallpaper);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (prevWallpaperUrl.current && prevWallpaperUrl.current.startsWith("blob:")) {
+        URL.revokeObjectURL(prevWallpaperUrl.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (prevWallpaperUrl.current && prevWallpaperUrl.current !== videoWallpaper && prevWallpaperUrl.current.startsWith("blob:")) {
+      URL.revokeObjectURL(prevWallpaperUrl.current);
+    }
+    prevWallpaperUrl.current = videoWallpaper;
+  }, [videoWallpaper]);
 
   useEffect(() => {
     if (initialSection) {
@@ -112,8 +128,8 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
       appRegistry.registerApp(parsed);
       setPluginStatus(`Successfully registered "${parsed.name}" v${parsed.version}!`);
       addNotification?.("Plugin Registered", `Loaded "${parsed.name}" manifest successfully`, "package");
-    } catch (e: any) {
-      setPluginStatus(`JSON Error: ${e.message}`);
+    } catch (e) {
+      setPluginStatus(`JSON Error: ${e instanceof Error ? e.message : "Invalid JSON"}`);
     }
   };
 

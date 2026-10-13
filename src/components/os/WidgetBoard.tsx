@@ -1,113 +1,35 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useSound } from "@/utils/useSound";
 import { OsIcon } from "@/components/icons/OsIcon";
 import { X, Settings, Activity, GitBranch, Code2 } from "lucide-react";
-import type { WidgetConfig } from "@/store/osSettingsStore";
-
-interface GitHubEvent {
-  id: string;
-  type: string;
-  repo: { name: string };
-  created_at: string;
-  payload?: {
-    commits?: { message: string; sha: string }[];
-  };
-}
+import { useWidgetData } from "@/hooks/useWidgetData";
+import { ensureWidgetSync, refreshWidgetsNow } from "@/lib/widgets/widgetSync";
 
 export default function WidgetBoard() {
   const { isWidgetBoardOpen, closeWidgetBoard, windows } = useOS();
   const { widgets, toggleWidgetBoard } = useOSSettings();
   const { playClick } = useSound();
 
-  // ── GitHub Activity State ──────────────────────────────────────────
-  const [gitEvents, setGitEvents] = useState<
-    { repo: string; message: string; date: string }[]
-  >([]);
+  // Shared background sync (singleton): this board only *reads* payloads —
+  // GitHub, LeetCode, and FPS telemetry are produced once for the whole OS.
+  const { fps, memory, githubEvents, leetcode } = useWidgetData();
 
   useEffect(() => {
-    if (!isWidgetBoardOpen) return;
-    fetch("https://api.github.com/users/DaKaufeeBoii/events?per_page=5")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data: GitHubEvent[]) => {
-        if (!Array.isArray(data) || data.length === 0) return;
-        const pushEvents = data
-          .filter((e) => e.type === "PushEvent" && e.payload?.commits?.length)
-          .slice(0, 3)
-          .map((e) => {
-            const commit = e.payload?.commits?.[0];
-            return {
-              repo: e.repo.name,
-              message: commit?.message || "Updated repository",
-              date: new Date(e.created_at).toLocaleDateString("en-IN", {
-                month: "short",
-                day: "numeric",
-              }),
-            };
-          });
-        if (pushEvents.length > 0) setGitEvents(pushEvents);
-      })
-      .catch(() => {});
+    ensureWidgetSync();
+    if (isWidgetBoardOpen) refreshWidgetsNow();
   }, [isWidgetBoardOpen]);
 
-  // ── LeetCode Stats State ───────────────────────────────────────────
-  const [leetcodeStats, setLeetcodeStats] = useState<{
-    totalSolved: number;
-    easySolved: number;
-    mediumSolved: number;
-    hardSolved: number;
-    acceptanceRate: number;
-    ranking: number;
-  } | null>(null);
-
-  useEffect(() => {
-    if (!isWidgetBoardOpen) return;
-    fetch("/api/leetcode")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) setLeetcodeStats(data);
-      })
-      .catch(() => {});
-  }, [isWidgetBoardOpen]);
-
-  // ── Real-Time Telemetry State ──────────────────────────────────────
-  const [fps, setFps] = useState(60);
-  const [memoryMB, setMemoryMB] = useState<number | null>(null);
-  const frameCountRef = useRef(0);
-  const lastTimeRef = useRef(performance.now());
-
-  useEffect(() => {
-    if (!isWidgetBoardOpen) return;
-    let animId: number;
-
-    const measureFps = (now: number) => {
-      frameCountRef.current += 1;
-      if (now - lastTimeRef.current >= 1000) {
-        setFps(frameCountRef.current);
-        frameCountRef.current = 0;
-        lastTimeRef.current = now;
-
-        if (typeof window !== "undefined" && (performance as any).memory) {
-          const used = (performance as any).memory.usedJSHeapSize;
-          setMemoryMB(parseFloat((used / (1024 * 1024)).toFixed(1)));
-        } else {
-          setMemoryMB(null);
-        }
-      }
-      animId = requestAnimationFrame(measureFps);
-    };
-
-    animId = requestAnimationFrame(measureFps);
-    return () => cancelAnimationFrame(animId);
-  }, [isWidgetBoardOpen]);
+  const gitEvents = githubEvents;
+  const leetcodeStats = leetcode;
+  const memoryMB = memory === "N/A" ? null : parseFloat(memory);
 
   if (!isWidgetBoardOpen) return null;
 
-  const openCount = windows.filter((w) => w.isOpen).length;
   const isVisible = (id: string) => widgets.find(w => w.id === id)?.visibleOnBoard ?? true;
 
   return (

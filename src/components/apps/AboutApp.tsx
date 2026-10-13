@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useOS } from "@/store/windowStore";
@@ -134,13 +134,13 @@ export default function AboutApp() {
           <span><img src="/assets/resume/icons/logo-GitHub.png" alt="GitHub" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> GitHub
         </a>
         <a
-          href="/resume"
+          href="/assets/resume/Sai_Tarun_Reddy_Velagala_Resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
           id="about-resume-link"
           style={{ ...linkStyle, background: "var(--os-amber-dim)", borderColor: "rgba(245,158,11,0.3)", color: "var(--os-amber)" }}
         >
-          <FileText size={16} color="var(--os-amber)" /> View Resume
+          <FileText size={16} color="var(--os-amber)" /> View Resume (PDF)
         </a>
       </div>
     </div>

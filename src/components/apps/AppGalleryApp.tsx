@@ -41,8 +41,8 @@ export default function AppGalleryApp() {
       appRegistry.registerApp(parsed);
       setStatus(`Successfully registered "${parsed.name}" v${parsed.version}!`);
       sdk.notify("Plugin Registered", `Loaded "${parsed.name}" manifest successfully`, "package");
-    } catch (e: any) {
-      setStatus(`JSON Error: ${e.message}`);
+    } catch (e) {
+      setStatus(`JSON Error: ${e instanceof Error ? e.message : "Invalid JSON"}`);
     }
   };
 

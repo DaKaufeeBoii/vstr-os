@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Link from "next/link";
 
 export default function SecretPage() {
   useEffect(() => {
@@ -32,9 +33,9 @@ export default function SecretPage() {
         <br /><br />
         This portfolio is full of surprises. Keep exploring!
       </p>
-      <a href="/" style={{ marginTop: 40, padding: "10px 20px", border: "1px solid #0f0", color: "#0f0", textDecoration: "none" }}>
+      <Link href="/" style={{ marginTop: 40, padding: "10px 20px", border: "1px solid #0f0", color: "#0f0", textDecoration: "none" }}>
         Return to VSTR-OS
-      </a>
+      </Link>
     </div>
   );
 }

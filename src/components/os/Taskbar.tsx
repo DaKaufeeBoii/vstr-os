@@ -33,6 +33,8 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
     toggleQuickSettings,
     isNotificationCenterOpen,
     toggleNotificationCenter,
+    toggleCommandPalette,
+    isCommandPaletteOpen,
     pinnedApps,
   } = useOS();
   
@@ -275,43 +277,55 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
 
         <div className="taskbar-divider" />
 
-        {/* Search Pill */}
+        {/* Search Pill (toggles Command Palette just like Alt+K) */}
         <div
           id="taskbar-search-pill"
           className="taskbar-search-pill"
-          onClick={() => { playClick(); setShowStart(true); }}
+          onClick={() => {
+            playClick();
+            toggleCommandPalette();
+          }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              playClick();
+              toggleCommandPalette();
+            }
+          }}
           title="Search / Command Palette (Alt + K)"
           style={{
             display: "flex",
             alignItems: "center",
             gap: 8,
-            background: "rgba(255, 255, 255, 0.06)",
-            border: "1px solid rgba(255, 255, 255, 0.05)",
+            background: isCommandPaletteOpen ? "rgba(255, 255, 255, 0.14)" : "rgba(255, 255, 255, 0.06)",
+            border: isCommandPaletteOpen ? "1px solid rgba(245, 158, 11, 0.35)" : "1px solid rgba(255, 255, 255, 0.05)",
             borderRadius: 20,
             padding: "4px 16px",
             height: 36,
             cursor: "pointer",
-            color: "var(--os-text-muted)",
+            color: isCommandPaletteOpen ? "var(--os-amber)" : "var(--os-text-muted)",
             fontSize: 13,
-            transition: "background 0.15s",
+            transition: "background 0.15s, border-color 0.15s, color 0.15s",
             userSelect: "none",
             fontFamily: "'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif",
           }}
           onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)"}
+          onMouseLeave={(e) => e.currentTarget.style.background = isCommandPaletteOpen ? "rgba(255, 255, 255, 0.14)" : "rgba(255, 255, 255, 0.06)"}
         >
-          <OsIcon name="search" size="sm" color="var(--os-text-muted)" />
+          <OsIcon name="search" size="sm" color={isCommandPaletteOpen ? "var(--os-amber)" : "var(--os-text-muted)"} />
           <span className="taskbar-search-text">Search</span>
         </div>
 
-        {/* Recruiter Quick View / Resume Link */}
+        {/* Resume PDF Link */}
         <a
-          href="/resume"
+          href="/assets/resume/Sai_Tarun_Reddy_Velagala_Resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
           className="taskbar-recruiter-btn"
-          title="Recruiter Quick View (Opens full resume in new tab)"
-          aria-label="View Resume"
+          title="Resume (Opens actual PDF in new tab)"
+          aria-label="View Resume PDF"
           onClick={() => playClick()}
           style={{
             display: "flex",
@@ -343,7 +357,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           }}
         >
           <span style={{ fontSize: 13 }}>📄</span>
-          <span>Resume</span>
+          <span>Resume (PDF)</span>
         </a>
 
         <div className="taskbar-divider" />

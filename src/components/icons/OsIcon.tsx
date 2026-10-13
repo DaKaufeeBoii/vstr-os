@@ -204,6 +204,7 @@ function createLucideWrapper(Component: React.ComponentType<{ size?: number; col
     size = "md",
     color = "currentColor",
     className,
+    badge,
   }: {
     size?: IconSize;
     color?: string;
@@ -211,6 +212,9 @@ function createLucideWrapper(Component: React.ComponentType<{ size?: number; col
     badge?: IconBadge;
   }) {
     const px = size === "sm" ? 16 : size === "lg" ? 28 : 20;
+    // Lucide icons do not render badges; unknown `badge` is accepted for
+    // registry compatibility and safely ignored — never forwarded to the DOM.
+    void badge;
     return <Component size={px} color={color} className={className} />;
   };
 }

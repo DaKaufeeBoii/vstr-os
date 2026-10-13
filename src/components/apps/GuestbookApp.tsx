@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useSound } from "@/utils/useSound";
 import { Send } from "lucide-react";
-import type { GuestbookEntry } from "@/app/api/guestbook/route";
+import type { GuestbookEntry } from "@/lib/guestbook/store";
 
 export default function GuestbookApp() {
   const { addNotification } = useOSSettings();
@@ -24,11 +24,10 @@ export default function GuestbookApp() {
   useEffect(() => {
     fetch("/api/guestbook")
       .then((res) => (res.ok ? res.json() : []))
-      .then((data: GuestbookEntry[]) => {
-        if (Array.isArray(data)) {
-          setEntries(data);
-          if (data.length > 0) setSelectedEntry(data[0]);
-        }
+      .then((data: GuestbookEntry[] | { entries?: GuestbookEntry[] }) => {
+        const list = Array.isArray(data) ? data : data?.entries ?? [];
+        setEntries(list);
+        if (list.length > 0) setSelectedEntry(list[0]);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -63,23 +62,23 @@ export default function GuestbookApp() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to post message");
+        throw new Error(data?.error || "Failed to post message");
       }
 
-      if (data.entries) {
+      if (Array.isArray(data?.entries)) {
         setEntries(data.entries);
-        setSelectedEntry(data.entry);
+        setSelectedEntry(data.entry ?? data.entries[0] ?? null);
       }
 
       setName("");
       setMessage("");
       addNotification(
         "Guestbook Note Posted",
-        `Thanks ${data.entry.name}! Your message is live on VSTR-OS.`,
+        `Thanks ${data?.entry?.name ?? name.trim()}! Your message is live on VSTR-OS.`,
         "guestbook"
       );
-    } catch (err: any) {
-      setErrorMsg(err.message || "Network error");
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Network error");
     } finally {
       setSubmitting(false);
     }

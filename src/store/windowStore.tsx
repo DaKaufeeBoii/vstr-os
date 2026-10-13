@@ -246,8 +246,9 @@ function reducer(state: OSState, action: OSAction): OSState {
                   isOpen: true,
                   isMinimized: false,
                   zIndex: newZ,
-                  x: offset,
-                  y: offset,
+                  // Keep position unless it's a completely new open (not existing)
+                  x: w.hasBeenOpened ? w.x : offset,
+                  y: w.hasBeenOpened ? w.y : offset,
                   hasBeenOpened: true,
                   desktopId: currentWorkspace,
                   ...(customTitle ? { title: customTitle } : {}),

@@ -9,7 +9,7 @@ import OnboardingTip from "./OnboardingTip";
 import Win11ToastContainer from "./Win11ToastContainer";
 import PropertiesModal, { type PropertiesItemInfo } from "./PropertiesModal";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
-import { useOSSettings, type VideoWallpaperId } from "@/store/osSettingsStore";
+import { useOSSettings } from "@/store/osSettingsStore";
 import { useVFS } from "@/lib/vfs/useVFS";
 import type { WindowConfig, WindowId } from "@/types";
 
@@ -69,6 +69,7 @@ const APP_CONTENT: Record<string, React.ReactNode> = {
   password_cracker: <PasswordCrackerApp />,
   app_gallery:      <AppGalleryApp />,
   music_player:     <MusicPlayerApp />,
+  guestbook:        <GuestbookApp />,
 };
 
 const WALLPAPER_PRESETS = [
@@ -815,7 +816,11 @@ export default function Desktop() {
         if (item.type === "text") {
           openWindow({ id: "notepad", title: item.title, customData: { filePath: item.filePath } });
         } else if (item.type === "folder") {
-          openWindow({ id: "projects", title: item.title });
+          openWindow({
+            id: "terminal",
+            title: `Terminal — ${item.title}`,
+            customData: { initialCwd: item.filePath || `/home/saitarun/Desktop/${item.title}` },
+          });
         } else if (item.url) {
           window.open(item.url, "_blank");
         }

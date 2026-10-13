@@ -107,7 +107,7 @@ export default function ContactApp() {
 
       {/* Download resume */}
       <motion.a
-        href="/resume"
+        href="/assets/resume/Sai_Tarun_Reddy_Velagala_Resume.pdf"
         target="_blank"
         rel="noopener noreferrer"
         id="contact-resume-download"
@@ -128,7 +128,7 @@ export default function ContactApp() {
           cursor: "pointer",
         }}
       >
-        <FileText size={16} color="var(--os-cyan)" /> View Resume (Print to PDF)
+        <FileText size={16} color="var(--os-cyan)" /> View Resume (PDF)
       </motion.a>
     </div>
   );

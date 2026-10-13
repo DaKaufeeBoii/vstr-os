@@ -103,10 +103,3 @@ export interface WindowState {
   isSticky?: boolean;
   customData?: Record<string, any>;
 }
-
-export interface OSUIState {
-  isExposéOpen: boolean;
-  isCommandPaletteOpen: boolean;
-  isTerminalDrawerOpen: boolean;
-  isWidgetBoardOpen?: boolean;
-}

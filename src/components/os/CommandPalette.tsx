@@ -14,9 +14,9 @@ export default function CommandPalette() {
   // Command definitions
   const commands = useMemo(() => [
     {
-      name: "View Resume / Recruiter Quick View",
+      name: "View Resume (PDF)",
       action: () => {
-        window.open("/resume", "_blank");
+        window.open("/assets/resume/Sai_Tarun_Reddy_Velagala_Resume.pdf", "_blank");
         closeCommandPalette();
       },
       icon: "document",

@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
+import {
+  addEntry,
+  listEntries,
+  GUESTBOOK_ROLES,
+  type GuestbookEntry,
+} from "@/lib/guestbook/store";
 
-export interface GuestbookEntry {
-  id: string;
-  name: string;
-  role: "Recruiter" | "Engineer" | "Designer" | "Visitor";
-  message: string;
-  timestamp: string;
-  avatarColor: string;
-}
+// Filesystem-backed store: never statically cache, always run on the Node runtime.
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-// In-memory backing store (starts empty, capped to prevent unbounded memory growth)
-const MAX_ENTRIES = 100;
-let guestbookEntries: GuestbookEntry[] = [];
+// Re-export for existing consumers importing the type from this route.
+export type { GuestbookEntry };
 
 // Lightweight in-memory rate limiter (5 requests per IP per minute)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -41,7 +41,8 @@ function checkRateLimit(ip: string): boolean {
 }
 
 export async function GET() {
-  return NextResponse.json(guestbookEntries);
+  const entries = await listEntries();
+  return NextResponse.json(entries);
 }
 
 export async function POST(req: Request) {
@@ -57,19 +58,18 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, role, message } = body;
+    const { name, role, message } = body ?? {};
 
-    if (!name || !name.trim()) {
+    if (!name || typeof name !== "string" || !name.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
-    if (!message || !message.trim()) {
+    if (!message || typeof message !== "string" || !message.trim()) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
     const sanitizedName = name.trim().slice(0, 40);
     const sanitizedMsg = message.trim().slice(0, 280);
-    const validRoles: GuestbookEntry["role"][] = ["Recruiter", "Engineer", "Designer", "Visitor"];
-    const validRole = validRoles.includes(role) ? role : "Visitor";
+    const validRole = GUESTBOOK_ROLES.includes(role) ? role : "Visitor";
 
     const colors = ["#e94560", "#a855f7", "#06b6d4", "#22c55e", "#f59e0b"];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -83,11 +83,11 @@ export async function POST(req: Request) {
       avatarColor: randomColor,
     };
 
-    // Prepend to list and cap total entries
-    guestbookEntries = [newEntry, ...guestbookEntries].slice(0, MAX_ENTRIES);
+    const entries = await addEntry(newEntry);
 
-    return NextResponse.json({ success: true, entry: newEntry, entries: guestbookEntries });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to post message" }, { status: 500 });
+    return NextResponse.json({ success: true, entry: newEntry, entries });
+  } catch (err: unknown) {
+    const messageText = err instanceof Error ? err.message : "Failed to post message";
+    return NextResponse.json({ error: messageText }, { status: 500 });
   }
 }

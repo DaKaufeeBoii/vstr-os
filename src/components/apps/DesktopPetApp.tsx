@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useOSSettings } from "@/store/osSettingsStore";
-import { PawIcon, CatIcon, SleepingCatIcon } from "@/components/icons";
+import { CatIcon, SleepingCatIcon } from "@/components/icons";
 import { Sparkles } from "lucide-react";
 
 type PetMood = "walk" | "sleep" | "chase" | "idle";
@@ -28,12 +28,24 @@ function PetOverlay() {
   const [mood, setMood] = useState<PetMood>("walk");
   const [dir, setDir] = useState(1); // 1=right, -1=left
   const [message, setMessage] = useState<string | null>(null);
-  const [visible, setVisible] = useState(true);
   const mouseRef = useRef({ x: 0, y: 0 });
   const posRef = useRef({ x: 120, y: 300 });
   const rafRef = useRef<number>(0);
   const moodRef = useRef<PetMood>("walk");
   const dirRef = useRef(1);
+  const petTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const messageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handlePet = () => {
+    setMessage("Purrr... thanks!");
+    moodRef.current = "idle";
+    setMood("idle");
+    if (petTimerRef.current) clearTimeout(petTimerRef.current);
+    petTimerRef.current = setTimeout(() => {
+      petTimerRef.current = null;
+      setMessage(null);
+    }, 2000);
+  };
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
@@ -60,10 +72,18 @@ function PetOverlay() {
       if (Math.random() > 0.6) {
         const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
         setMessage(msg);
-        setTimeout(() => setMessage(null), 3500);
+        if (messageTimerRef.current) clearTimeout(messageTimerRef.current);
+        messageTimerRef.current = setTimeout(() => {
+          messageTimerRef.current = null;
+          setMessage(null);
+        }, 3500);
       }
     }, 8000);
-    return () => clearInterval(drop);
+    return () => {
+      clearInterval(drop);
+      if (messageTimerRef.current) clearTimeout(messageTimerRef.current);
+      if (petTimerRef.current) clearTimeout(petTimerRef.current);
+    };
   }, []);
 
   // Animation loop
@@ -179,9 +199,21 @@ function PetOverlay() {
         </AnimatePresence>
 
         <motion.span
+          onClick={handlePet}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handlePet();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Pet the desktop companion"
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
           animate={mood === "sleep" ? { rotate: [0, -5, 5, 0] } : mood === "walk" ? { y: [0, -2, 0] } : {}}
           transition={{ repeat: Infinity, duration: mood === "sleep" ? 3 : 0.4 }}
-          style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
         >
           {mood === "sleep" ? (
             <SleepingCatIcon size="md" color="var(--os-amber)" />

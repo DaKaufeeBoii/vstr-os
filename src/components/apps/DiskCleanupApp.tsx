@@ -2,9 +2,8 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
-import { Wrench, Zap, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Wrench, CheckCircle2, AlertTriangle } from "lucide-react";
 
 type Phase = "select" | "scan" | "game" | "win" | "lose";
 type ScanMode = "quick" | "deep" | "full";
@@ -326,10 +325,27 @@ export default function DiskCleanupApp() {
                   Array.from({ length: cfg.cols }, () => ({ isMine: false, neighborCount: 0, state: "hidden" as CellState }))
                 )).map((row, r) =>
                   row.map((cell, c) => (
-                    <div
+                    <button
                       key={`${r}-${c}`}
+                      role="gridcell"
+                      aria-label={`Sector ${r},${c}`}
                       onClick={() => handleCellClick(r, c)}
                       onContextMenu={(e) => handleRightClick(e, r, c)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleCellClick(r, c);
+                        } else if (e.key === "f") {
+                          e.preventDefault();
+                          const synthetic: React.MouseEvent = {
+                            ...e,
+                            button: 2,
+                            buttons: 2,
+                            preventDefault: () => {},
+                          } as unknown as React.MouseEvent;
+                          handleRightClick(synthetic, r, c);
+                        }
+                      }}
                       style={{
                         width: cellSize,
                         height: cellSize,
@@ -345,21 +361,18 @@ export default function DiskCleanupApp() {
                             ? cell.isMine ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.04)"
                             : "rgba(255,255,255,0.08)",
                         border: `1px solid ${
-                          cell.state === "revealed"
-                            ? cell.isMine ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.06)"
-                            : "rgba(255,255,255,0.1)"
+                          cell.state === "flagged" 
+                            ? "var(--os-amber)" 
+                            : "rgba(255,255,255,0.15)"
                         }`,
-                        color: cell.state === "revealed" && cell.neighborCount > 0 && !cell.isMine
-                          ? NEIGHBOR_COLORS[cell.neighborCount] ?? "#fff"
-                          : "var(--os-text)",
-                        transition: "background 0.1s",
-                        userSelect: "none",
+                        padding: 0,
+                        color: cell.state === "revealed" && !cell.isMine ? (NEIGHBOR_COLORS[cell.neighborCount] || "var(--os-text)") : "var(--os-text)",
                       }}
                     >
-                      {cell.state === "flagged" && <Wrench size={cellSize <= 22 ? 10 : 13} color="var(--os-amber)" />}
-                      {cell.state === "revealed" && cell.isMine && <Zap size={cellSize <= 22 ? 10 : 13} color="var(--os-red)" />}
-                      {cell.state === "revealed" && !cell.isMine && cell.neighborCount > 0 && cell.neighborCount}
-                    </div>
+                      {cell.state === "revealed" && cell.isMine ? "💣" :
+                        cell.state === "revealed" && !cell.isMine && cell.neighborCount > 0 ? cell.neighborCount :
+                        cell.state === "flagged" ? "🚩" : ""}
+                    </button>
                   ))
                 )}
               </div>
