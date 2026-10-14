@@ -352,6 +352,8 @@ export default function MusicPlayerApp() {
           background: "#000",
         }}
       >
+        {/* Load the player eagerly: its OS window may be hidden when mounted,
+            and lazy loading can leave Spotify's iframe unloaded when opened. */}
         <iframe
           key={currentEmbedUrl}
           src={currentEmbedUrl}
@@ -359,7 +361,7 @@ export default function MusicPlayerApp() {
           height="100%"
           frameBorder="0"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"
+          loading="eager"
           style={{
             position: "absolute",
             top: 0,
