@@ -45,6 +45,7 @@ export interface OSNotification {
   title: string;
   description: string;
   icon: string;
+  type?: "mission" | "system";
 }
 
 export type WindowId =

@@ -233,9 +233,9 @@ interface OSSettingsContextValue {
   setBrightness:        (brightness: number) => void;
   setTheme:             (theme: string) => void;
   setHighContrast:      (enabled: boolean) => void;
-  addNotification:      (title: string, description: string, icon: string) => void;
+  addNotification:      (title: string, description: string, icon: string, type?: "mission" | "system") => void;
   dismissNotification:  (id: string) => void;
-  clearNotifications:    () => void;
+  clearNotifications:   () => void;
   unlockMission:        (id: string) => void;
   toggleWidgetBoard:    (widgetId: string) => void;
   toggleWidgetDesktop:  (widgetId: string) => void;
@@ -248,10 +248,34 @@ const OSSettingsContext = createContext<OSSettingsContextValue | null>(null);
 export function OSSettingsProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, buildInitial);
 
+  /* — Deduplication & Mission Guards — */
+  const recentNotificationsRef = useRef<Map<string, number>>(new Map());
+  const unlockedMissionsRef = useRef<Set<string>>(new Set());
+  const notifiedRef = useRef<Set<string>>(new Set());
+
+  // Synchronize state.unlockedMissions into the ref set
+  useEffect(() => {
+    state.unlockedMissions.forEach((id) => unlockedMissionsRef.current.add(id));
+  }, [state.unlockedMissions]);
+
   /* — Actions — */
-  const addNotification = useCallback((title: string, description: string, icon: string) => {
+  const addNotification = useCallback((
+    title: string,
+    description: string,
+    icon: string,
+    type: "mission" | "system" = "system"
+  ) => {
+    const key = `${title}::${description}`;
+    const now = Date.now();
+    const lastTime = recentNotificationsRef.current.get(key);
+    // Deduplicate: If an identical notification was triggered in the last 3 seconds, ignore
+    if (lastTime && now - lastTime < 3000) {
+      return;
+    }
+    recentNotificationsRef.current.set(key, now);
+
     const id = Math.random().toString(36).substring(2, 9);
-    const notification: OSNotification = { id, title, description, icon };
+    const notification: OSNotification = { id, title, description, icon, type };
     dispatch({ type: "ADD_NOTIFICATION", notification });
     setTimeout(() => dispatch({ type: "DISMISS_NOTIFICATION", notificationId: id }), 4500);
   }, []);
@@ -264,20 +288,24 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     dispatch({ type: "CLEAR_NOTIFICATIONS" });
   }, []);
 
-  // Ref guard: a double-invocation of unlockMission for the same id (e.g.
-  // React StrictMode double-effects, racing intervals) must fire exactly one
-  // toast. State + localStorage lag one render behind, so they can't dedupe
-  // synchronous repeats — the ref can.
-  const notifiedRef = useRef<Set<string>>(new Set());
-
   const unlockMission = useCallback((missionId: string) => {
-    let alreadyCompleted = state.unlockedMissions.includes(missionId);
+    // 1. Immediate in-memory check to prevent duplicates in current session / racing calls
+    if (unlockedMissionsRef.current.has(missionId) || notifiedRef.current.has(missionId)) {
+      return;
+    }
+
+    // 2. Check localStorage to prevent unlocking already-completed missions across reloads
     try {
       const saved = JSON.parse(localStorage.getItem(KEYS.missions) ?? "[]");
-      if (Array.isArray(saved) && saved.includes(missionId)) alreadyCompleted = true;
+      if (Array.isArray(saved) && saved.includes(missionId)) {
+        unlockedMissionsRef.current.add(missionId);
+        notifiedRef.current.add(missionId);
+        return;
+      }
     } catch {}
-    if (alreadyCompleted) return;
-    const shouldNotify = !notifiedRef.current.has(missionId);
+
+    // Mark immediately to synchronously block subsequent calls in this tick
+    unlockedMissionsRef.current.add(missionId);
     notifiedRef.current.add(missionId);
 
     dispatch({ type: "UNLOCK_MISSION", missionId });
@@ -288,15 +316,14 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
       try { const p = JSON.parse(savedMissions ?? "[]"); if (Array.isArray(p)) parsed = p; } catch {}
       const nextMissions = parsed.includes(missionId) ? parsed : [...parsed, missionId];
       localStorage.setItem(KEYS.missions, JSON.stringify(nextMissions));
-      if (shouldNotify) {
-        const notified = JSON.parse(localStorage.getItem(KEYS.notified) ?? "[]");
-        localStorage.setItem(KEYS.notified, JSON.stringify(Array.from(new Set([...(Array.isArray(notified) ? notified : []), missionId]))));
-      }
+      localStorage.setItem(KEYS.notified, JSON.stringify(nextMissions));
     } catch {}
 
     const mission = systemMissions.find((m) => m.id === missionId);
-    if (mission && shouldNotify) addNotification(mission.title, mission.description, mission.icon);
-  }, [state.unlockedMissions, addNotification]);
+    if (mission) {
+      addNotification(mission.title, mission.description, mission.icon, "mission");
+    }
+  }, [addNotification]);
 
   const setWallpaper = useCallback((wallpaper: string) => {
     dispatch({ type: "SET_WALLPAPER", wallpaper });
@@ -434,7 +461,7 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
       }
     }
 
-    // Missions
+    // Missions: Hydrate unlocked missions into state and refs quietly (do not replay toasts on page reload)
     try {
       const savedMissions = localStorage.getItem(KEYS.missions);
       if (savedMissions) {
@@ -444,27 +471,16 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
             typeof id === "string" && systemMissions.some((mission) => mission.id === id)
           )));
           dispatch({ type: "SET_MISSIONS", missionIds: completedIds });
-
-          // Fire notifications for missions not yet notified
-          const storedNotified: unknown = JSON.parse(localStorage.getItem(KEYS.notified) ?? "[]");
-          const notified = Array.isArray(storedNotified) ? storedNotified as string[] : [];
-          const unnotified = completedIds.filter((id) => !notified.includes(id));
-          completedIds.forEach((id) => notifiedRef.current.add(id));
-          unnotified.forEach((id, idx) => {
-            setTimeout(() => {
-              const mission = systemMissions.find((m) => m.id === id);
-              if (mission) addNotification(mission.title, mission.description, mission.icon);
-            }, 1200 + idx * 600);
+          completedIds.forEach((id) => {
+            unlockedMissionsRef.current.add(id);
+            notifiedRef.current.add(id);
           });
-          if (unnotified.length > 0) localStorage.setItem(KEYS.notified, JSON.stringify(Array.from(new Set([...notified, ...unnotified]))));
+          localStorage.setItem(KEYS.notified, JSON.stringify(completedIds));
         }
-      } else {
-        localStorage.setItem(KEYS.notified, "[]");
       }
     } catch (e) {
       console.error("Error parsing saved missions:", e);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

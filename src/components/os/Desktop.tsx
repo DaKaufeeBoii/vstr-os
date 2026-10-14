@@ -262,8 +262,7 @@ export default function Desktop() {
     playClick();
     setIsRefreshing(true);
     setTimeout(() => setIsRefreshing(false), 300);
-    addNotification?.("Desktop Refreshed", "Icons and cache synchronized.", "refresh");
-  }, [playClick, addNotification]);
+  }, [playClick]);
 
   const handleNextWallpaper = useCallback(() => {
     playClick();
