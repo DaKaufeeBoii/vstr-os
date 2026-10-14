@@ -5,7 +5,7 @@ export default function DocsPage() {
     <div className="p-8 max-w-4xl mx-auto font-sans">
       <h1 className="text-4xl font-bold mb-6">VSTR-OS Documentation</h1>
       <p className="text-lg mb-8 opacity-80">
-        Welcome to the technical documentation for VSTR-OS. Here you'll find guides for development, 
+        Welcome to the technical documentation for VSTR-OS. Here you&apos;ll find guides for development, 
         architecture overview, and user instructions.
       </p>
       

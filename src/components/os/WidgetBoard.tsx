@@ -11,7 +11,7 @@ import { useWidgetData } from "@/hooks/useWidgetData";
 import { ensureWidgetSync, refreshWidgetsNow } from "@/lib/widgets/widgetSync";
 
 export default function WidgetBoard() {
-  const { isWidgetBoardOpen, closeWidgetBoard, windows } = useOS();
+  const { isWidgetBoardOpen, closeWidgetBoard } = useOS();
   const { widgets, toggleWidgetBoard, toggleWidgetDesktop, setWidgets } = useOSSettings();
   const { playClick } = useSound();
 

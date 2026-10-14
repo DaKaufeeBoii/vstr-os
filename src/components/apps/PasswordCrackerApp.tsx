@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useOS } from "@/store/windowStore";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { UnlockIcon } from "@/components/icons";
 
@@ -28,11 +27,10 @@ const FIELD_H = 300;
 const BASE_SPEED = 0.4;
 
 export default function PasswordCrackerApp() {
-  const { openWindow } = useOS();
   const { unlockMission } = useOSSettings();
-  const [phase, setPhase] = useState<Phase>("connect");
+  const [phase, setPhase] = useState<Phase>(() => typeof window !== "undefined" && localStorage.getItem("vstr_cracker_granted") === "true" ? "granted" : "connect");
   const [connectLog, setConnectLog] = useState<string[]>([]);
-  const [access, setAccess] = useState(0);
+  const [access, setAccess] = useState(() => Number.parseInt(typeof window === "undefined" ? "0" : localStorage.getItem("vstr_cracker_access") ?? "0", 10));
   const [words, setWords] = useState<FallingWord[]>([]);
   const [typed, setTyped] = useState("");
   const [lastWord, setLastWord] = useState<{ word: string; ok: boolean } | null>(null);
@@ -40,19 +38,8 @@ export default function PasswordCrackerApp() {
   const inputRef = useRef<HTMLInputElement>(null);
   const rafRef = useRef<number>(0);
   const wordIdRef = useRef(0);
-  const accessRef = useRef(0);
+  const accessRef = useRef(access);
   const wordsRef = useRef<FallingWord[]>([]);
-
-  // Restore persisted state from localStorage (client only)
-  useEffect(() => {
-    const granted = localStorage.getItem("vstr_cracker_granted") === "true";
-    const savedAccess = parseInt(localStorage.getItem("vstr_cracker_access") ?? "0", 10);
-    if (granted) {
-      setPhase("granted");
-    }
-    setAccess(savedAccess);
-    accessRef.current = savedAccess;
-  }, []);
 
   // Trigger cracking missions upon successful crack
   useEffect(() => {
@@ -168,7 +155,7 @@ export default function PasswordCrackerApp() {
       height: "100%",
       display: "flex",
       flexDirection: "column",
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono), monospace",
       color: "var(--os-jade)",
       background: "rgba(0,0,0,0.4)",
       overflow: "hidden",
@@ -303,7 +290,7 @@ export default function PasswordCrackerApp() {
                 padding: "8px 12px",
                 color: "var(--os-jade)",
                 fontSize: 14,
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono), monospace",
                 outline: "none",
                 caretColor: "var(--os-amber)",
               }}
@@ -354,7 +341,7 @@ export default function PasswordCrackerApp() {
                 color: "var(--os-text-dim)",
                 fontSize: 11,
                 cursor: "pointer",
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono), monospace",
               }}
             >
               Reset access

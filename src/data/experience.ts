@@ -2,33 +2,22 @@ import { Experience } from "@/types";
 
 export const experiences: Experience[] = [
   {
-    title: "Secretary, Editorial Board",
-    organization: "Student Council",
-    period: "Aug 2025 – Present",
-    type: "leadership",
-    points: [
-      "Coordinate student communications and maintain event documentation for council initiatives.",
-      "Lead digital outreach and content for the student community across campus channels.",
-    ],
-  },
-  {
-    title: "Head of Publicity",
-    organization: "Artificial Intelligence Club",
-    period: "Oct 2024 – Aug 2025",
-    type: "leadership",
-    points: [
-      "Planned and executed promotional campaigns for AI workshops and technical events.",
-      "Managed event outreach, social content, and community engagement for club activities.",
-    ],
-  },
-  {
-    title: "Intern – IBM SkillsBuild",
-    organization: "CSRBOX",
-    period: "Jul 2024",
+    title: "Backend AI Engineer Intern",
+    organization: "FlyRank AI",
+    period: "Jul 2026 – Present",
     type: "internship",
     points: [
-      "Completed industry training in AI fundamentals, cybersecurity, and WatsonX tooling.",
-      "Built chatbot prototypes and applied machine learning concepts to practical use cases.",
+      "Developed production-ready server-side AI systems with retrieval, structured outputs, API contracts, tool-calling workflows, and robust error handling.",
+      "Built lightweight evaluation datasets and harnesses to measure model performance against correctness and auditing rubrics.",
+    ],
+  },
+  {
+    title: "Python Developer Intern",
+    organization: "Hackveda Solutions Private Limited",
+    period: "Feb 2026 – May 2026",
+    type: "internship",
+    points: [
+      "Developed Python data-analysis programs to find and evaluate trading trends in investment companies.",
     ],
   },
 ];

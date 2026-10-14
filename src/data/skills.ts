@@ -2,45 +2,57 @@ import { SkillCategory } from "@/types";
 
 export const skills: SkillCategory[] = [
   {
-    title: "Languages",
+    title: "Languages & Data",
     icon: "terminal",
     skills: [
       { name: "Python" },
-      { name: "JavaScript" },
-      { name: "HTML & CSS" },
-      { name: "TypeScript" },
+      { name: "SQL" },
+      { name: "PostgreSQL" },
+      { name: "SQLite" },
     ],
   },
   {
-    title: "Frontend",
+    title: "Web Development",
     icon: "display",
     skills: [
-      { name: "React.js" },
+      { name: "React" },
       { name: "Next.js" },
-      { name: "Tailwind CSS" },
-    ],
-  },
-  {
-    title: "Backend & Database",
-    icon: "disk",
-    skills: [
-      { name: "Firebase" },
       { name: "REST APIs" },
-      { name: "DBMS" },
     ],
   },
   {
-    title: "AI & ML",
-    icon: "settings",
+    title: "AI & Agent Systems",
+    icon: "skills",
     skills: [
+      { name: "LLM Applications" },
+      { name: "AI Agents" },
+      { name: "Retrieval-Augmented Generation" },
       { name: "NLP" },
       { name: "Prompt Engineering" },
-      { name: "WatsonX" },
-      { name: "Chatbot Dev" },
+      { name: "Tool Calling" },
     ],
   },
   {
-    title: "Tools & Workflow",
+    title: "Backend & Data Access",
+    icon: "disk",
+    skills: [
+      { name: "FastAPI" },
+      { name: "Supabase" },
+    ],
+  },
+  {
+    title: "Project Technologies",
+    icon: "settings",
+    skills: [
+      { name: "Kotlin" },
+      { name: "Jetpack Compose" },
+      { name: "Prisma" },
+      { name: "Mistral AI" },
+      { name: "Ollama" },
+    ],
+  },
+  {
+    title: "Tools & Collaboration",
     icon: "settings",
     skills: [
       { name: "Git & GitHub" },

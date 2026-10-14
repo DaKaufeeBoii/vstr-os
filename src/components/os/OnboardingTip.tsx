@@ -168,7 +168,7 @@ export default function OnboardingTip() {
               }}
             >
               <p style={{ fontSize: 11, color: "var(--os-amber)", opacity: 0.85, margin: "0 0 2px" }}>
-                // Conflict-Free System Shortcuts
+                {"// Conflict-Free System Shortcuts"}
               </p>
               {SHORTCUT_ITEMS.map((item) => (
                 <div

@@ -15,7 +15,7 @@ export default function NotepadApp({
   instanceId,
   initialFilePath = "/home/saitarun/portfolio/README.md",
 }: NotepadAppProps) {
-  const { readFile, writeFile, readDir, normalizePath, exists, isReady } = useVFS();
+  const { readFile, writeFile, readDir, normalizePath, isReady } = useVFS();
   const { setWindowTitle } = useOS();
   const { addNotification } = useOSSettings();
 
@@ -45,7 +45,7 @@ export default function NotepadApp({
           setSavedContent(text);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (!isCancelled) {
           setContent(`# New File\n\n`);
           setSavedContent("");
@@ -85,12 +85,6 @@ export default function NotepadApp({
     [readDir]
   );
 
-  useEffect(() => {
-    if (showOpenDialog && isReady) {
-      loadDialogDir(dialogDir);
-    }
-  }, [showOpenDialog, dialogDir, isReady, loadDialogDir]);
-
   // Handle Save
   const handleSave = async () => {
     if (!currentPath) {
@@ -102,8 +96,8 @@ export default function NotepadApp({
       await writeFile(currentPath, content);
       setSavedContent(content);
       addNotification("File Saved", `Successfully saved to ${currentPath}`, "notepad");
-    } catch (err: any) {
-      addNotification("Save Failed", err.message || "Failed to save file", "shield");
+    } catch (err: unknown) {
+      addNotification("Save Failed", err instanceof Error ? err.message : "Failed to save file", "shield");
     } finally {
       setIsSaving(false);
     }
@@ -124,8 +118,8 @@ export default function NotepadApp({
       setSavedContent(content);
       setShowSaveAsDialog(false);
       addNotification("File Created", `Created and saved ${fullPath}`, "notepad");
-    } catch (err: any) {
-      addNotification("Save Failed", err.message || "Failed to save file", "shield");
+    } catch (err: unknown) {
+      addNotification("Save Failed", err instanceof Error ? err.message : "Failed to save file", "shield");
     }
   };
 
@@ -233,7 +227,7 @@ export default function NotepadApp({
             outline: "none",
             resize: "none",
             padding: "12px 16px",
-            fontFamily: "'JetBrains Mono', 'Consolas', monospace",
+            fontFamily: "var(--font-mono), 'Consolas', monospace",
             fontSize: "13px",
             lineHeight: "1.6",
             tabSize: 2,

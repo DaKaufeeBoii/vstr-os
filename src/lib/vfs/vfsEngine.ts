@@ -8,7 +8,6 @@ import {
   dbPutNode,
   dbDeleteNode,
   dbGetChildren,
-  dbGetAllNodes,
 } from "./vfsDatabase";
 
 type VFSEventListener = (event: VFSEvent) => void;
@@ -201,9 +200,11 @@ export async function writeFile(
  */
 export async function mkdir(
   pathStr: string,
-  user: "guest" | "root" = "guest",
-  recursive = false
+  _user: "guest" | "root" = "guest",
+  _recursive = false
 ): Promise<VFSNode> {
+  void _user;
+  void _recursive;
   throw new Error(`mkdir: cannot create directory '${pathStr}': folder creation is disabled`);
 }
 
@@ -256,8 +257,9 @@ export async function exists(pathStr: string): Promise<boolean> {
 export async function remove(
   pathStr: string,
   user: "guest" | "root" = "guest",
-  recursive = false
+  _recursive = false
 ): Promise<boolean> {
+  void _recursive;
   const normPath = normalizePath(pathStr);
   if (normPath === "/") {
     throw new Error(`rm: cannot remove root directory '/'`);

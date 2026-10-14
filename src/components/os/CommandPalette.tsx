@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import { WINDOW_CONFIGS } from "@/store/windowStore";
@@ -10,6 +10,10 @@ export default function CommandPalette() {
   const { isCommandPaletteOpen, closeCommandPalette, openWindow } = useOS();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const closePalette = useCallback(() => {
+    setQuery("");
+    closeCommandPalette();
+  }, [closeCommandPalette]);
 
   // Command definitions
   const commands = useMemo(() => [
@@ -17,7 +21,7 @@ export default function CommandPalette() {
       name: "View Resume (PDF)",
       action: () => {
         window.open("/assets/resume/Sai_Tarun_Reddy_Velagala_Resume.pdf", "_blank");
-        closeCommandPalette();
+        closePalette();
       },
       icon: "document",
     },
@@ -25,7 +29,7 @@ export default function CommandPalette() {
       name: "View Keyboard Shortcuts (Alt+/)",
       action: () => {
         window.dispatchEvent(new CustomEvent("toggle-shortcuts-guide"));
-        closeCommandPalette();
+        closePalette();
       },
       icon: "keyboard",
     },
@@ -35,7 +39,7 @@ export default function CommandPalette() {
       icon: cfg.fluentIcon || cfg.icon
     })),
     { name: "Toggle Terminal", action: () => openWindow("terminal"), icon: "terminal" },
-  ], [openWindow, closeCommandPalette]);
+  ], [openWindow, closePalette]);
 
   const filteredCommands = useMemo(() => {
     return commands.filter(cmd => 
@@ -46,8 +50,6 @@ export default function CommandPalette() {
   useEffect(() => {
     if (isCommandPaletteOpen) {
       inputRef.current?.focus();
-    } else {
-      setQuery("");
     }
   }, [isCommandPaletteOpen]);
 
@@ -72,7 +74,7 @@ export default function CommandPalette() {
           justifyContent: "center",
           paddingTop: "10vh",
         }}
-        onClick={closeCommandPalette}
+        onClick={closePalette}
       >
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
@@ -111,7 +113,7 @@ export default function CommandPalette() {
                 key={idx}
                 onClick={() => {
                   cmd.action();
-                  closeCommandPalette();
+                  closePalette();
                 }}
                 style={{
                   padding: "12px 16px",

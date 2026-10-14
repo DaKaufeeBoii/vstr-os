@@ -24,6 +24,10 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
   ];
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      onComplete();
+      return;
+    }
     let currentStep = 0;
     const interval = setInterval(() => {
       if (currentStep < BOOT_SEQUENCE.length) {
@@ -57,7 +61,6 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
     <AnimatePresence>
       {loading && (
         <motion.div
-          onClick={onComplete}
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
@@ -66,7 +69,7 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
             inset: 0,
             background: "#000",
             color: "#fff",
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono), monospace",
             padding: 40,
             zIndex: 9999,
             display: "flex",
@@ -74,6 +77,13 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
             justifyContent: "flex-end",
           }}
         >
+          <button
+            type="button"
+            onClick={onComplete}
+            style={{ position: "absolute", top: 20, right: 20, minHeight: 44, padding: "0 16px", borderRadius: 8, border: "1px solid rgba(245,158,11,0.5)", background: "rgba(245,158,11,0.1)", color: "#fbbf24", font: "inherit", cursor: "pointer" }}
+          >
+            Skip boot
+          </button>
           <div style={{ flex: 1 }}>
             {bootLog.map((line, i) => (
               <div

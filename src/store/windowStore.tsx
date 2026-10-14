@@ -10,24 +10,24 @@ import type { WindowId, WindowConfig, SnapZone, Workspace, WindowState } from "@
 
 /* ── Window Configs ─────────────────────────────────────────────── */
 export const WINDOW_CONFIGS: WindowConfig[] = [
-  { id: "about",            title: "About.app",           icon: "user",     fluentIcon: "user",             defaultW: 520, defaultH: 460 },
-  { id: "projects",         title: "Projects/",           icon: "folder",   fluentIcon: "folder",           defaultW: 600, defaultH: 500 },
-  { id: "skills",           title: "Skills.sys",          icon: "skills",   fluentIcon: "skills",           defaultW: 480, defaultH: 520 },
-  { id: "experience",       title: "Experience.log",      icon: "log",      fluentIcon: "log",              defaultW: 500, defaultH: 480 },
-  { id: "achievements",     title: "Achievements.txt",    icon: "trophy",   fluentIcon: "trophy",           defaultW: 480, defaultH: 380 },
+  { id: "about",            title: "About",           icon: "user",     fluentIcon: "user",             defaultW: 520, defaultH: 460 },
+  { id: "projects",         title: "Projects",           icon: "folder",   fluentIcon: "folder",           defaultW: 600, defaultH: 500 },
+  { id: "skills",           title: "Skills",          icon: "skills",   fluentIcon: "skills",           defaultW: 480, defaultH: 520 },
+  { id: "experience",       title: "Experience",      icon: "log",      fluentIcon: "log",              defaultW: 500, defaultH: 480 },
+  { id: "achievements",     title: "Achievements",    icon: "trophy",   fluentIcon: "trophy",           defaultW: 480, defaultH: 380 },
   { id: "terminal",         title: "Terminal",            icon: "terminal", fluentIcon: "terminal",         defaultW: 580, defaultH: 420, allowMultipleInstances: true },
-  { id: "notepad",          title: "Notepad.app",         icon: "notepad",  fluentIcon: "notepad",         defaultW: 540, defaultH: 450, allowMultipleInstances: true },
-  { id: "guestbook",        title: "Guestbook.app",       icon: "guestbook",fluentIcon: "guestbook",        defaultW: 580, defaultH: 520 },
-  { id: "contact",          title: "Contact.app",         icon: "mail",     fluentIcon: "mail",             defaultW: 400, defaultH: 360 },
-  { id: "flappy",           title: "Flappy.exe",          icon: "bird",     fluentIcon: "bird",             defaultW: 450, defaultH: 550 },
-  { id: "hintmaster",       title: "HintMaster.app",      icon: "coins",    fluentIcon: "coins",            defaultW: 480, defaultH: 420 },
-  { id: "settings",         title: "Settings.sys",        icon: "settings", fluentIcon: "settings",         defaultW: 420, defaultH: 580 },
-  { id: "photo_viewer",     title: "real.png",            icon: "photo",    fluentIcon: "photo",            defaultW: 360, defaultH: 480 },
-  { id: "disk_cleanup",     title: "Disk Cleanup.app",    icon: "disk",     fluentIcon: "disk",             defaultW: 560, defaultH: 520 },
-  { id: "desktop_pet",      title: "Desktop Pet.app",     icon: "cat",      fluentIcon: "cat",              defaultW: 460, defaultH: 380 },
-  { id: "password_cracker", title: "PwnTool 3.0.app",     icon: "unlock",   fluentIcon: "unlock",           defaultW: 600, defaultH: 540 },
-  { id: "app_gallery",      title: "App Gallery.app",      icon: "store",    fluentIcon: "store",            defaultW: 600, defaultH: 500 },
-  { id: "music_player",     title: "MusicPlayer.app",     icon: "music",    fluentIcon: "music",            defaultW: 420, defaultH: 520 },
+  { id: "notepad",          title: "Notepad",         icon: "notepad",  fluentIcon: "notepad",         defaultW: 540, defaultH: 450, allowMultipleInstances: true },
+  { id: "guestbook",        title: "Guestbook",       icon: "guestbook",fluentIcon: "guestbook",        defaultW: 580, defaultH: 520 },
+  { id: "contact",          title: "Contact",         icon: "mail",     fluentIcon: "mail",             defaultW: 400, defaultH: 360 },
+  { id: "flappy",           title: "Flappy",          icon: "bird",     fluentIcon: "bird",             defaultW: 450, defaultH: 550 },
+  { id: "hintmaster",       title: "HintMaster",      icon: "coins",    fluentIcon: "coins",            defaultW: 480, defaultH: 420 },
+  { id: "settings",         title: "Settings",        icon: "settings", fluentIcon: "settings",         defaultW: 420, defaultH: 580 },
+  { id: "photo_viewer",     title: "Photo Viewer",            icon: "photo",    fluentIcon: "photo",            defaultW: 360, defaultH: 480 },
+  { id: "disk_cleanup",     title: "Disk Cleanup",    icon: "disk",     fluentIcon: "disk",             defaultW: 560, defaultH: 520 },
+  { id: "desktop_pet",      title: "Desktop Pet",     icon: "cat",      fluentIcon: "cat",              defaultW: 460, defaultH: 380 },
+  { id: "password_cracker", title: "Password Cracker",     icon: "unlock",   fluentIcon: "unlock",           defaultW: 600, defaultH: 540 },
+  { id: "app_gallery",      title: "App Gallery",      icon: "store",    fluentIcon: "store",            defaultW: 600, defaultH: 500 },
+  { id: "music_player",     title: "Music Player",     icon: "music",    fluentIcon: "music",            defaultW: 420, defaultH: 520 },
 ];
 
 /* ── Workspaces ──────────────────────────────────────────────────── */
@@ -60,7 +60,7 @@ export type OpenWindowTarget =
       instanceId?: string;
       title?: string;
       desktopId?: number;
-      customData?: Record<string, any>;
+      customData?: Record<string, unknown>;
     };
 
 export type OSAction =
@@ -303,25 +303,40 @@ function reducer(state: OSState, action: OSAction): OSState {
       };
     }
 
-    case "MINIMIZE":
+    case "MINIMIZE": {
+      const win = state.windows.find((w) => w.instanceId === action.instanceId || w.id === action.instanceId);
+      if (!win) return state;
       return {
         ...state,
+        stack: state.stack.filter((id) => id !== win.instanceId),
         windows: state.windows.map((w) =>
-          w.instanceId === action.instanceId || w.id === action.instanceId
-            ? { ...w, isMinimized: true }
-            : w
+          w.instanceId === win.instanceId ? { ...w, isMinimized: true } : w
         ),
       };
+    }
 
     case "MAXIMIZE": {
       const targetId = action.instanceId;
       const win = state.windows.find((w) => w.instanceId === targetId || w.id === targetId);
       if (!win) return state;
+      if (win.snapZone === "maximize") {
+        const restored = win.previousRect;
+        if (!restored) return state;
+        const newZ = state.topZ + 1;
+        return {
+          ...state,
+          topZ: newZ,
+          stack: bringToFront(state.stack, win.instanceId),
+          windows: state.windows.map((w) => w.instanceId === win.instanceId
+            ? { ...w, isMinimized: false, x: restored.x, y: restored.y, width: restored.width, height: restored.height, zIndex: newZ, snapZone: null, previousRect: undefined }
+            : w),
+        };
+      }
       const vw = typeof window !== "undefined" ? window.innerWidth : 1200;
       const vh = typeof window !== "undefined" ? window.innerHeight - 48 : 800;
       const newZ = state.topZ + 1;
       const actualInstanceId = win.instanceId;
-      const prevRect = win.snapZone === "maximize"
+      const prevRect = win.snapZone
         ? win.previousRect
         : { x: win.x, y: win.y, width: win.width, height: win.height };
       return {
@@ -342,16 +357,13 @@ function reducer(state: OSState, action: OSAction): OSState {
       if (!win) return state;
       const newZ = state.topZ + 1;
       const actualInstanceId = win.instanceId;
-      const restoredBounds = win.previousRect
-        ? { x: win.previousRect.x, y: win.previousRect.y, width: win.previousRect.width, height: win.previousRect.height, snapZone: null }
-        : {};
       return {
         ...state,
         topZ: newZ,
         stack: bringToFront(state.stack, actualInstanceId),
         windows: state.windows.map((w) =>
           w.instanceId === actualInstanceId
-            ? { ...w, isMinimized: false, zIndex: newZ, ...restoredBounds }
+            ? { ...w, isMinimized: false, zIndex: newZ }
             : w
         ),
       };

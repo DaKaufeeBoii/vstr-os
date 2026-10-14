@@ -1,96 +1,67 @@
-// Service Worker for VSTR-OS
-// Provides offline caching for static assets
+// VSTR.OS shell cache. Wallpaper videos remain available to the UI, but are
+// fetched directly so install/update never downloads them or stores huge files.
+const CACHE_PREFIX = "vstr-os-";
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const PRECACHE_URLS = ["/", "/manifest.json", "/favicon.ico", "/wallpapers/static/os_wallpaper.png"];
 
-const CACHE_NAME = 'vstr-os-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/manifest.json',
-  '/favicon.ico',
-  '/wallpapers/static/os_wallpaper.png',
-  '/wallpapers/video/Dawn-cycling.mp4',
-  '/wallpapers/video/Lake-of-Rage.mp4',
-  '/wallpapers/video/Rayquaza.mp4',
-  '/wallpapers/video/yuji-sleepy.mp4',
-];
-
-// Install event - cache static assets
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching static assets');
-      return cache.addAll(STATIC_ASSETS);
-    })
-  );
-  self.skipWaiting();
+self.addEventListener("install", (event) => {
+  event.waitUntil((async () => {
+    let cache;
+    try {
+      cache = await caches.open(CACHE_NAME);
+    } catch (error) {
+      console.warn("[SW] Cache Storage unavailable; installing without offline cache:", error);
+      await self.skipWaiting();
+      return;
+    }
+    // Optional shell assets must not block service-worker installation.
+    await Promise.all(PRECACHE_URLS.map(async (url) => {
+      try {
+        const response = await fetch(url, { cache: "reload" });
+        if (response.ok) await cache.put(url, response);
+      } catch (error) {
+        console.warn("[SW] Optional precache failed:", url, error);
+      }
+    }));
+    await self.skipWaiting();
+  })());
 });
 
-// Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
-    })
-  );
-  self.clients.claim();
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys
+      .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+      .map((key) => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
 
-// Fetch event - serve from cache, fallback to network
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
-  
-  // Skip external requests
-  const url = new URL(event.request.url);
-  if (url.origin !== location.origin) return;
-  
-  // Skip video files for now (too large for cache)
-  if (url.pathname.match(/\.(mp4|webm|ogg)$/i)) {
-    event.respondWith(networkFirst(event.request));
-    return;
-  }
-  
-  event.respondWith(cacheFirst(event.request));
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // APIs and video wallpapers always use the network. Do not persist videos
+  // in Cache Storage; normal HTTP caching and the browser media pipeline remain.
+  if (url.pathname.startsWith("/api/") || /\.(mp4|webm|ogg)$/i.test(url.pathname)) return;
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    try {
+      const response = await fetch(request);
+      if (response.ok && (url.pathname === "/" || url.pathname === "/manifest.json" || url.pathname === "/favicon.ico" || url.pathname.startsWith("/_next/static/"))) {
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch {
+      if (request.mode === "navigate" && url.pathname === "/") {
+        return (await cache.match("/")) || new Response("Offline", { status: 503 });
+      }
+      return new Response("Offline", { status: 503 });
+    }
+  })());
 });
-
-// Cache-first strategy
-async function cacheFirst(request) {
-  const cachedResponse = await caches.match(request);
-  if (cachedResponse) {
-    return cachedResponse;
-  }
-  
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    console.error('[SW] Fetch failed:', error);
-    return new Response('Offline', { status: 503 });
-  }
-}
-
-// Network-first strategy (for videos)
-async function networkFirst(request) {
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    console.error('[SW] Network-first fetch failed:', error);
-    return new Response('Offline', { status: 503 });
-  }
-}

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Phone, MessageSquare, FileText } from "lucide-react";
 
@@ -26,8 +27,8 @@ const CONTACTS = [
   {
     icon: "/assets/resume/icons/logo-Lin.jpg",
     label: "LinkedIn",
-    value: "linkedin.com/in/sai-tarun-reddy-velagala-24135229b/",
-    href: "https://linkedin.com/in/sai-tarun-reddy-velagala-24135229b/",
+    value: "linkedin.com/in/vstr",
+    href: "https://linkedin.com/in/vstr",
     color: "#a78bfa",
     bg: "var(--os-purple-dim)",
     border: "rgba(124,58,237,0.3)",
@@ -86,7 +87,7 @@ export default function ContactApp() {
             }}
           >
             {c.icon.includes('.') ? (
-              <img src={c.icon} alt={c.label} style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} />
+              <Image src={c.icon} alt="" width={24} height={24} style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} />
             ) : (
               <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 24, height: 24 }}>
                 <Phone size={22} color="var(--os-jade)" />

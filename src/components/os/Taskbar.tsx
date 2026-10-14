@@ -8,7 +8,7 @@ import { systemMissions } from "@/data/systemMissions";
 import StartMenu from "./StartMenu";
 import { OsIcon } from "@/components/icons/OsIcon";
 import { VolumeIcon, WifiIcon, BatteryIcon, VstrIcon } from "@/components/icons";
-import { X, Lock, Check, LayoutGrid, Trophy, Keyboard } from "lucide-react";
+import { X, Lock, Check, LayoutGrid, Trophy, Keyboard, BriefcaseBusiness, FileText } from "lucide-react";
 import { useSound } from "@/utils/useSound";
 import type { WindowId } from "@/types";
 
@@ -24,7 +24,6 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
     restoreWindow,
     focusWindow,
     minimizeWindow,
-    activeWorkspaceId,
     toggleExposé,
     isExposéOpen,
     toggleWidgetBoard,
@@ -64,10 +63,6 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-
-  const openWindows = windows.filter(
-    (w) => w.isOpen && (w.desktopId === undefined || w.desktopId === activeWorkspaceId || w.isSticky)
-  );
 
   return (
     <>
@@ -111,7 +106,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           >
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: "12px", fontWeight: "bold", color: "var(--os-amber)" }}>// OS MISSIONS</span>
+              <span style={{ fontSize: "12px", fontWeight: "bold", color: "var(--os-amber)" }}>{"// OS MISSIONS"}</span>
               <button
                 onClick={() => setShowMissionsWidget(false)}
                 style={{
@@ -318,6 +313,10 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
           <span className="taskbar-search-text">Search</span>
         </div>
 
+        <a href="/recruiter" className="taskbar-recruiter-mode" title="Open recruiter view" aria-label="Open recruiter view">
+          <BriefcaseBusiness size={15} aria-hidden="true" /><span>Recruiter</span>
+        </a>
+
         {/* Resume PDF Link */}
         <a
           href="/assets/resume/Sai_Tarun_Reddy_Velagala_Resume.pdf"
@@ -356,7 +355,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
             e.currentTarget.style.boxShadow = "none";
           }}
         >
-          <span style={{ fontSize: 13 }}>📄</span>
+          <FileText size={15} aria-hidden="true" />
           <span>Resume (PDF)</span>
         </a>
 
@@ -370,14 +369,38 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
               const cfg = WINDOW_CONFIGS.find(c => c.id === appId);
               if (!cfg) return null;
               
-              const isRunning = windows.some(w => w.id === appId && w.isOpen);
-              
+              const openWins = windows.filter(w => w.id === appId && w.isOpen);
+              const isRunning = openWins.length > 0;
+              const maxZ = Math.max(0, ...windows.map(w => w.isOpen && !w.isMinimized ? w.zIndex : 0));
+              const focusedWin = openWins.find(w => !w.isMinimized && w.zIndex === maxZ);
+              const isFocused = Boolean(focusedWin);
+
+              const handlePinnedClick = () => {
+                playClick();
+                if (!isRunning) {
+                  openWindow(appId);
+                  return;
+                }
+                if (isFocused && focusedWin) {
+                  minimizeWindow(focusedWin.instanceId);
+                } else {
+                  const targetWin = focusedWin || openWins[openWins.length - 1];
+                  if (targetWin.isMinimized) {
+                    restoreWindow(targetWin.instanceId);
+                  } else {
+                    focusWindow(targetWin.instanceId);
+                  }
+                }
+              };
+
               return (
                 <button
                   key={`pinned-${appId}`}
-                  onClick={() => { playClick(); openWindow(appId); }}
-                  className={`taskbar-app-btn ${isRunning ? 'active' : ''}`}
+                  onClick={handlePinnedClick}
+                  className={`taskbar-app-btn ${isFocused ? 'active' : ''} ${isRunning && !isFocused && openWins.every(w => w.isMinimized) ? 'minimized' : ''}`}
                   title={cfg.title}
+                  aria-label={cfg.title}
+                  aria-pressed={isFocused}
                   style={{ position: 'relative' }}
                 >
                   <OsIcon name={cfg.fluentIcon || cfg.icon} size="md" />
@@ -412,7 +435,6 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
                   title={win.title || cfg.title}
                   aria-label={win.title || cfg.title}
                   aria-pressed={isFocused}
-                  role="tab"
                 >
                   {/* App Fluent SVG icon */}
                   <span style={{ fontSize: 20, zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -518,7 +540,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
               gap: 10,
               color: "var(--os-text-muted)",
               fontSize: 11,
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono), monospace",
               userSelect: "none",
               padding: "4px 8px",
               borderRadius: 6,
@@ -557,7 +579,7 @@ export default function Taskbar({ onContextMenu }: TaskbarProps = {}) {
               alignItems: "flex-end",
               justifyContent: "center",
               fontSize: 11,
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono), monospace",
               color: "var(--os-text)",
               lineHeight: 1.25,
               userSelect: "none",

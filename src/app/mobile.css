@@ -140,6 +140,13 @@
     display: none !important;
   }
 
+  .taskbar-recruiter-mode {
+    width: 36px;
+    min-width: 36px;
+    padding: 0;
+  }
+  .taskbar-recruiter-mode span { display: none; }
+
   /* Open / Pinned Apps on mobile */
   .taskbar-apps {
     overflow-x: auto !important;
@@ -184,12 +191,11 @@
 
   /* Start Menu on Mobile */
   #start-menu {
-    width: calc(100vw - 12px) !important;
+    width: min(640px, calc(100vw - 24px)) !important;
     max-height: calc(100dvh - var(--taskbar-h) - 12px) !important;
     height: auto !important;
     border-radius: 14px !important;
     padding: 14px 12px !important;
-    bottom: calc(var(--taskbar-h) + 6px) !important;
   }
 
   /* Panels on Mobile */

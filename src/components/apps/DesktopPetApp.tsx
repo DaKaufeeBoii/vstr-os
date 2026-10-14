@@ -176,7 +176,7 @@ function PetOverlay() {
                 fontSize: 10,
                 color: "var(--os-text)",
                 whiteSpace: "nowrap",
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono), monospace",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
                 pointerEvents: "none",
               }}
@@ -283,7 +283,7 @@ export default function DesktopPetApp() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        fontFamily: "'JetBrains Mono', monospace",
+        fontFamily: "var(--font-mono), monospace",
         color: "var(--os-text)",
         padding: 24,
         gap: 16,
@@ -350,7 +350,7 @@ export default function DesktopPetApp() {
                   color: "var(--os-red)",
                   cursor: "pointer",
                   fontSize: 12,
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-mono), monospace",
                 }}
               >
                 Uninstall

@@ -8,7 +8,7 @@ import { OsIcon } from "@/components/icons/OsIcon";
 export default function AchievementsApp() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%", overflowY: "auto", fontFamily: "var(--font-mono)", color: "var(--os-text)" }}>
-      <p className="section-heading">// Achievements &amp; Awards</p>
+      <p className="section-heading">{"// Achievements & Awards"}</p>
 
       {achievements.map((ach, i) => (
         <motion.div

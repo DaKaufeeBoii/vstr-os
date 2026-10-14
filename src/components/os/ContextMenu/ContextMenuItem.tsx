@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { OsIcon } from "@/components/icons/OsIcon";
@@ -21,6 +21,9 @@ interface ContextMenuItemProps extends ContextMenuAction {
 }
 
 const SUBMENU_WIDTH = 200;
+const subscribeToMount = () => () => {};
+const getClientMountSnapshot = () => true;
+const getServerMountSnapshot = () => false;
 
 export function ContextMenuItem({
   label,
@@ -39,7 +42,7 @@ export function ContextMenuItem({
   const itemId = label || "";
 
   const [isHovered, setIsHovered] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeToMount, getClientMountSnapshot, getServerMountSnapshot);
   const [menuPos, setMenuPos] = useState<{
     top: number;
     left: number;
@@ -47,7 +50,6 @@ export function ContextMenuItem({
   }>({ top: 0, left: 0, side: "right" });
 
   useEffect(() => {
-    setMounted(true);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };

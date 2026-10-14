@@ -5,7 +5,6 @@
 import type { VFSNode } from "./vfsTypes";
 import { projects } from "@/data/projects";
 import { skills } from "@/data/skills";
-import { experiences } from "@/data/experience";
 import { achievements } from "@/data/achievements";
 
 const DB_NAME = "vstr_os_vfs_db";
@@ -26,7 +25,7 @@ export function getIndexedDB(): Promise<IDBDatabase> {
   initPromise = new Promise((resolve, reject) => {
     const request = window.indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NODES)) {
         const store = db.createObjectStore(STORE_NODES, { keyPath: "id" });
@@ -207,16 +206,15 @@ async function seedDefaultFileSystem(db: IDBDatabase): Promise<void> {
       content: JSON.stringify(
         {
           name: "Sai Tarun Reddy Velagala",
-          title: "CS Undergrad & AI Developer",
-          location: "Hyderabad, Telangana, India",
+          title: "Computer Science Undergraduate · AI/ML",
           education: {
-            institution: "KG Reddy College of Engg & Technology",
-            degree: "B.Tech CSE (AI & ML)",
-            cgpa: 8.41,
-            graduationYear: 2027,
+            institution: "KG Reddy College of Engineering and Technology",
+            location: "Moinabad, Telangana",
+            degree: "Bachelor of Computer Science and Engineering, AI/ML Specialization",
+            cgpa: 8.49,
+            period: "September 2023 – Present",
           },
-          leadership: "Secretary, Student Council Editorial Board",
-          awards: ["First Prize - IKARUS 2024 Hackathon"],
+          awards: ["First Prize Winner, IKARUS 2024", "Best Student Award 2025, CSE-AIML"],
         },
         null,
         2
@@ -264,7 +262,7 @@ async function seedDefaultFileSystem(db: IDBDatabase): Promise<void> {
       name: "contact.txt",
       parentId: "/home/saitarun/portfolio",
       type: "file",
-      content: `Email: saitarunrdy@gmail.com\nPhone: +91 7043692980\nLocation: Hyderabad, Telangana, India\nLinkedIn: https://linkedin.com/in/sai-tarun-reddy\nGitHub: https://github.com/DaKaufeeBoii`,
+      content: `Email: saitarunrdy@gmail.com\nPhone: +91 7043692980\nLinkedIn: https://linkedin.com/in/vstr\nGitHub: https://github.com/DaKaufeeBoii`,
       size: 195,
       mimeType: "text/plain",
       createdAt: now,
@@ -402,7 +400,7 @@ export async function dbPutNode(node: VFSNode): Promise<void> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NODES, "readwrite");
     const store = tx.objectStore(STORE_NODES);
-    const req = store.put(node);
+    store.put(node);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });

@@ -110,8 +110,6 @@ export default function DiskCleanupApp() {
   // Animate fake scan
   useEffect(() => {
     if (phase !== "scan") return;
-    setScanProgress(0);
-    setScanIssues([]);
     const issues = [
       "Reading sector map...",
       "Checking filesystem integrity...",
@@ -145,6 +143,8 @@ export default function DiskCleanupApp() {
   const startScan = () => {
     setFirstClick(true);
     setFlagCount(0);
+    setScanProgress(0);
+    setScanIssues([]);
     setBoard([]);
     setPhase("scan");
   };
@@ -195,7 +195,7 @@ export default function DiskCleanupApp() {
   const cellSize = cfg.cols <= 8 ? 40 : cfg.cols <= 12 ? 30 : 22;
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", fontFamily: "'JetBrains Mono', monospace", color: "var(--os-text)" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column", fontFamily: "var(--font-mono), monospace", color: "var(--os-text)" }}>
       <AnimatePresence mode="wait">
         {/* SELECT MODE */}
         {phase === "select" && (

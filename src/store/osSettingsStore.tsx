@@ -24,6 +24,7 @@ import React, {
 } from "react";
 import type { OSNotification } from "@/types";
 import { systemMissions } from "@/data/systemMissions";
+import { setUiSoundVolume } from "@/utils/useSound";
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 export type VideoWallpaperId = "none" | "dawn" | "lake" | "rayquaza" | "yuji-sleepy";
@@ -159,7 +160,7 @@ function reducer(state: OSSettingsState, action: OSSettingsAction): OSSettingsSt
     }
 
     case "SET_MISSIONS":
-      return { ...state, unlockedMissions: action.missionIds };
+      return { ...state, unlockedMissions: Array.from(new Set(action.missionIds)) };
 
     case "SET_THEME":
       if (typeof window !== "undefined") {
@@ -270,8 +271,13 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
   const notifiedRef = useRef<Set<string>>(new Set());
 
   const unlockMission = useCallback((missionId: string) => {
-    if (state.unlockedMissions.includes(missionId)) return;
-    if (notifiedRef.current.has(missionId)) return;
+    let alreadyCompleted = state.unlockedMissions.includes(missionId);
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEYS.missions) ?? "[]");
+      if (Array.isArray(saved) && saved.includes(missionId)) alreadyCompleted = true;
+    } catch {}
+    if (alreadyCompleted) return;
+    const shouldNotify = !notifiedRef.current.has(missionId);
     notifiedRef.current.add(missionId);
 
     dispatch({ type: "UNLOCK_MISSION", missionId });
@@ -282,11 +288,14 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
       try { const p = JSON.parse(savedMissions ?? "[]"); if (Array.isArray(p)) parsed = p; } catch {}
       const nextMissions = parsed.includes(missionId) ? parsed : [...parsed, missionId];
       localStorage.setItem(KEYS.missions, JSON.stringify(nextMissions));
-      localStorage.setItem(KEYS.notified, JSON.stringify(nextMissions));
+      if (shouldNotify) {
+        const notified = JSON.parse(localStorage.getItem(KEYS.notified) ?? "[]");
+        localStorage.setItem(KEYS.notified, JSON.stringify(Array.from(new Set([...(Array.isArray(notified) ? notified : []), missionId]))));
+      }
     } catch {}
 
     const mission = systemMissions.find((m) => m.id === missionId);
-    if (mission) addNotification(mission.title, mission.description, mission.icon);
+    if (mission && shouldNotify) addNotification(mission.title, mission.description, mission.icon);
   }, [state.unlockedMissions, addNotification]);
 
   const setWallpaper = useCallback((wallpaper: string) => {
@@ -307,6 +316,7 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
 
   const setVolume = useCallback((volume: number) => {
     dispatch({ type: "SET_VOLUME", volume });
+    setUiSoundVolume(volume);
   }, []);
 
   const setBrightness = useCallback((brightness: number) => {
@@ -396,7 +406,10 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
     const savedVolume = localStorage.getItem(KEYS.volume);
     if (savedVolume) {
       const vol = parseFloat(savedVolume);
-      if (!isNaN(vol)) dispatch({ type: "SET_VOLUME", volume: vol });
+      if (!isNaN(vol)) {
+        dispatch({ type: "SET_VOLUME", volume: vol });
+        setUiSoundVolume(vol);
+      }
     }
 
     // Brightness
@@ -427,18 +440,23 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
       if (savedMissions) {
         const parsed = JSON.parse(savedMissions);
         if (Array.isArray(parsed)) {
-          dispatch({ type: "SET_MISSIONS", missionIds: parsed });
+          const completedIds = Array.from(new Set(parsed.filter((id): id is string =>
+            typeof id === "string" && systemMissions.some((mission) => mission.id === id)
+          )));
+          dispatch({ type: "SET_MISSIONS", missionIds: completedIds });
 
           // Fire notifications for missions not yet notified
-          const notified = JSON.parse(localStorage.getItem(KEYS.notified) ?? "[]");
-          const unnotified = (parsed as string[]).filter((id) => !notified.includes(id));
+          const storedNotified: unknown = JSON.parse(localStorage.getItem(KEYS.notified) ?? "[]");
+          const notified = Array.isArray(storedNotified) ? storedNotified as string[] : [];
+          const unnotified = completedIds.filter((id) => !notified.includes(id));
+          completedIds.forEach((id) => notifiedRef.current.add(id));
           unnotified.forEach((id, idx) => {
             setTimeout(() => {
               const mission = systemMissions.find((m) => m.id === id);
               if (mission) addNotification(mission.title, mission.description, mission.icon);
             }, 1200 + idx * 600);
           });
-          if (unnotified.length > 0) localStorage.setItem(KEYS.notified, JSON.stringify(parsed));
+          if (unnotified.length > 0) localStorage.setItem(KEYS.notified, JSON.stringify(Array.from(new Set([...notified, ...unnotified]))));
         }
       } else {
         localStorage.setItem(KEYS.notified, "[]");

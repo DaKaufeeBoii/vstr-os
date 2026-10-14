@@ -36,7 +36,6 @@ export default function VideoWallpaper({
 }: VideoWallpaperProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasError, setHasError] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   const resolvedSrc = videoSrc === "none" ? null : BUILTIN_VIDEOS[videoSrc] ?? videoSrc;
 
@@ -46,14 +45,12 @@ export default function VideoWallpaper({
     if (video && !hasError) {
       video.play().catch(() => {
         // Autoplay blocked - user needs to interact first
-        setIsPlaying(false);
       });
     }
   }, [hasError]);
 
   const pause = useCallback(() => {
     videoRef.current?.pause();
-    setIsPlaying(false);
   }, []);
 
   // Effect: play/pause based on props
@@ -80,10 +77,11 @@ export default function VideoWallpaper({
 
   // Cleanup on unmount
   useEffect(() => {
+    const video = videoRef.current;
     return () => {
-      videoRef.current?.pause();
-      videoRef.current?.removeAttribute("src");
-      videoRef.current?.load();
+      video?.pause();
+      video?.removeAttribute("src");
+      video?.load();
     };
   }, []);
 
@@ -101,7 +99,6 @@ export default function VideoWallpaper({
       if (video && !paused && !hasError && video.readyState >= 2) {
         video.currentTime = 0;
         video.play().catch(() => {
-          setIsPlaying(false);
         });
       }
     }, 5000); // Check every 5 seconds
@@ -133,7 +130,6 @@ export default function VideoWallpaper({
         transition: "filter 0.5s ease, opacity 0.3s ease",
       }}
       onLoadedData={() => {
-        setIsPlaying(true);
         onLoad?.();
       }}
       onError={(e) => {
@@ -141,15 +137,12 @@ export default function VideoWallpaper({
         setHasError(true);
         onError?.(new Error(`Failed to load video: ${resolvedSrc}`));
       }}
-      onPause={() => setIsPlaying(false)}
-      onPlay={() => setIsPlaying(true)}
       onEnded={() => {
         // Force loop restart - some browsers may stop looping under memory pressure
         const video = videoRef.current;
         if (video && !paused && !hasError) {
           video.currentTime = 0;
           video.play().catch(() => {
-            setIsPlaying(false);
           });
         }
       }}

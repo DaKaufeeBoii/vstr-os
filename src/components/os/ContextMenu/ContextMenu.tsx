@@ -94,22 +94,13 @@ export function ContextMenu({ isOpen, position, groups, onClose }: ContextMenuPr
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Reset focused index and active submenu when menu opens/closes
-  useEffect(() => {
-    if (!isOpen) {
-      setFocusedIndex(-1);
-      setActiveSubmenuId(null);
-    }
-  }, [isOpen]);
-
   // Map group items to their flat index for the focused-item highlight
-  let flatCounter = 0;
-  const groupsWithIndex = groups.map((group) => {
-    const startIdx = flatCounter;
-    const enabledCount = group.items.filter((i) => !i.disabled).length;
-    flatCounter += enabledCount;
-    return { group, startIdx };
-  });
+  const groupsWithIndex = groups.reduce<Array<{ group: (typeof groups)[number]; startIdx: number }>>((result, group) => {
+    const startIdx = result.length === 0
+      ? 0
+      : result[result.length - 1].startIdx + result[result.length - 1].group.items.filter((item) => !item.disabled).length;
+    return [...result, { group, startIdx }];
+  }, []);
 
   return (
     <AnimatePresence>

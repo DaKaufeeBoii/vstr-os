@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Headphones, Zap, Sparkles, Gamepad2, Coffee, Link2, Star, Info, Flame } from "lucide-react";
 
 interface PresetPlaylist {
@@ -92,25 +92,21 @@ function parseSpotifyUrl(input: string): string | null {
 }
 
 export default function MusicPlayerApp() {
-  const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>(PRESET_PLAYLISTS[0].embedUrl);
-  const [activePresetId, setActivePresetId] = useState<string>("damn-good");
+  const [savedPreferences] = useState(() => {
+    try {
+      return {
+        url: typeof window === "undefined" ? null : localStorage.getItem(STORAGE_KEY),
+        preset: typeof window === "undefined" ? null : localStorage.getItem(STORAGE_PRESET_KEY),
+      };
+    } catch {
+      return { url: null, preset: null };
+    }
+  });
+  const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>(savedPreferences.url || PRESET_PLAYLISTS[0].embedUrl);
+  const [activePresetId, setActivePresetId] = useState<string>(savedPreferences.url ? savedPreferences.preset || "custom" : "damn-good");
   const [customInput, setCustomInput] = useState<string>("");
   const [showCustomBar, setShowCustomBar] = useState<boolean>(false);
   const [inputError, setInputError] = useState<string | null>(null);
-
-  // Load saved preference from localStorage
-  useEffect(() => {
-    try {
-      const savedUrl = localStorage.getItem(STORAGE_KEY);
-      const savedPreset = localStorage.getItem(STORAGE_PRESET_KEY);
-      if (savedUrl) {
-        setCurrentEmbedUrl(savedUrl);
-        setActivePresetId(savedPreset || "custom");
-      }
-    } catch {
-      // Local storage unavailable
-    }
-  }, []);
 
   const handleSelectPreset = (preset: PresetPlaylist) => {
     setCurrentEmbedUrl(preset.embedUrl);

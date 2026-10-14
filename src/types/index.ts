@@ -6,7 +6,8 @@ export interface Project {
   stack: string[];
   github?: string;
   demo?: string;
-  icon: string;
+  category?: string;
+  featured?: boolean;
 }
 
 export interface SkillCategory {
@@ -101,5 +102,5 @@ export interface WindowState {
   previousRect?: { x: number; y: number; width: number; height: number };
   desktopId?: number;
   isSticky?: boolean;
-  customData?: Record<string, any>;
+  customData?: Record<string, unknown>;
 }

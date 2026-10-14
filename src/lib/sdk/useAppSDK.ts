@@ -13,6 +13,7 @@ import { useVFS } from "@/lib/vfs/useVFS";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useOS } from "@/store/windowStore";
 import type { WindowId } from "@/types";
+import type { VFSNode } from "@/lib/vfs/vfsTypes";
 
 export function useAppSDK(appId: string): SDKContext {
   const manifest = useMemo(() => {
@@ -53,7 +54,7 @@ export function useAppSDK(appId: string): SDKContext {
   );
 
   const writeFile = useCallback(
-    async (path: string, content: string): Promise<any> => {
+    async (path: string, content: string): Promise<VFSNode> => {
       if (!hasPermission("vfs:write")) {
         throw new Error(`[SDK SecurityException] App '${manifest.name}' lacks 'vfs:write' permission.`);
       }
@@ -74,7 +75,7 @@ export function useAppSDK(appId: string): SDKContext {
   );
 
   const openWin = useCallback(
-    (id: WindowId, data?: any) => {
+    (id: WindowId, data?: Record<string, unknown>) => {
       if (!hasPermission("window:manage")) {
         console.warn(`[SDK Warning] App '${manifest.name}' lacks 'window:manage' permission to open windows.`);
         return;

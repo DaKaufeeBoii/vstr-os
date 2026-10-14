@@ -8,9 +8,9 @@ export interface ContextMenuPosition {
 
 export interface ContextMenuState {
   isOpen: boolean;
+  sessionId: number;
   position: ContextMenuPosition;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  contextData: any;
+  contextData: unknown;
 }
 
 export interface ContextMenuTriggerEvent {
@@ -24,12 +24,12 @@ export interface ContextMenuTriggerEvent {
 export function useContextMenu() {
   const [state, setState] = useState<ContextMenuState>({
     isOpen: false,
+    sessionId: 0,
     position: { x: 0, y: 0 },
     contextData: null,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const openMenu = useCallback((e: ContextMenuTriggerEvent | React.MouseEvent, data?: any) => {
+  const openMenu = useCallback((e: ContextMenuTriggerEvent | React.MouseEvent, data?: unknown) => {
     e.preventDefault?.();
     e.stopPropagation?.();
 
@@ -38,10 +38,11 @@ export function useContextMenu() {
 
     setState({
       isOpen: true,
+      sessionId: state.sessionId + 1,
       position: { x: e.clientX, y: e.clientY },
       contextData: data ?? null,
     });
-  }, []);
+  }, [state.sessionId]);
 
   const closeMenu = useCallback(() => {
     setState((s) => ({ ...s, isOpen: false, contextData: null }));

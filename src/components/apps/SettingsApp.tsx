@@ -192,7 +192,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
       letterSpacing: "0.08em",
       textTransform: "uppercase",
       marginBottom: 8,
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono), monospace",
       display: "flex",
       alignItems: "center",
       gap: 6,
@@ -217,7 +217,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
         <h2 style={{
           color: "var(--os-amber)",
           margin: "0 0 4px",
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-mono), monospace",
           fontSize: 18,
           display: "flex",
           alignItems: "center",
@@ -253,7 +253,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "var(--os-text)" }}>Brightness</span>
-                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--os-amber)" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "var(--font-mono), monospace", color: "var(--os-amber)" }}>
                   {Math.round(brightness * 100)}%
                 </span>
               </div>
@@ -283,7 +283,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "var(--os-text)" }}>Volume</span>
-                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: "var(--os-amber)" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "var(--font-mono), monospace", color: "var(--os-amber)" }}>
                   {Math.round(volume * 100)}%
                 </span>
               </div>
@@ -342,7 +342,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
               borderRadius: 6,
               fontWeight: 700,
               fontSize: 12,
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono), monospace",
               cursor: "pointer",
               transition: "all 0.15s ease",
               whiteSpace: "nowrap",
@@ -401,7 +401,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                   fontSize: 11,
                   fontWeight: isActive ? "bold" : "normal",
                   color: isActive ? "var(--os-amber)" : "var(--os-text)",
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-mono), monospace",
                 }}>
                   {p.name}
                 </span>
@@ -549,7 +549,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                       border: "1px solid rgba(255,255,255,0.15)",
                       borderRadius: 4,
                       padding: "1px 5px",
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "var(--font-mono), monospace",
                       letterSpacing: "0.02em",
                     }}
                   >
@@ -567,7 +567,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                         borderRadius: 4,
                         padding: "1px 6px",
                         fontWeight: 800,
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontFamily: "var(--font-mono), monospace",
                         boxShadow: "0 2px 6px rgba(245,158,11,0.5)",
                       }}
                     >
@@ -593,7 +593,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                       fontSize: 12,
                       fontWeight: 700,
                       color: isActive ? "var(--os-amber)" : "var(--os-text)",
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "var(--font-mono), monospace",
                     }}
                   >
                     {v.name}
@@ -654,7 +654,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
             borderRadius: 8,
             cursor: "pointer",
             color: performanceMode ? "#ef4444" : "var(--os-text-muted)",
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono), monospace",
             fontSize: 11,
             textAlign: "center",
             transition: "all 0.15s",
@@ -696,7 +696,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                 color: appFilter === cat ? "#000" : "var(--os-text-muted)",
                 fontWeight: appFilter === cat ? 700 : 500,
                 border: "1px solid rgba(255,255,255,0.1)",
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono), monospace",
                 textTransform: "capitalize",
               }}
             >
@@ -746,7 +746,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                       background: "rgba(245,158,11,0.1)",
                       color: "var(--os-amber)",
                       border: "1px solid rgba(245,158,11,0.3)",
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "var(--font-mono), monospace",
                     }}
                   >
                     READY
@@ -773,7 +773,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                           background: "rgba(255,255,255,0.06)",
                           color: "var(--os-cyan)",
                           border: "1px solid rgba(255,255,255,0.1)",
-                          fontFamily: "'JetBrains Mono', monospace",
+                          fontFamily: "var(--font-mono), monospace",
                         }}
                       >
                         {p}
@@ -809,7 +809,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
               border: "1px solid var(--os-border)",
               borderRadius: 6,
               color: "#38bdf8",
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono), monospace",
               fontSize: 10.5,
               padding: "8px",
               boxSizing: "border-box",
@@ -821,7 +821,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
               <span style={{
                 fontSize: 10,
                 color: pluginStatus.startsWith("Error") || pluginStatus.startsWith("JSON") ? "#ef4444" : "#22c55e",
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono), monospace",
               }}>
                 {pluginStatus}
               </span>
@@ -838,7 +838,7 @@ export default function SettingsApp({ initialSection }: SettingsAppProps = {}) {
                 fontWeight: 700,
                 fontSize: 11,
                 cursor: "pointer",
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono), monospace",
               }}
             >
               + Install Manifest

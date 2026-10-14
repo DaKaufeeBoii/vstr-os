@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useOSSettings } from "@/store/osSettingsStore";
 
 interface BsodScreenProps {
@@ -16,6 +16,7 @@ export default function BsodScreen({ onClose, errorInfo }: BsodScreenProps) {
     "Kernel Debugger connected via WebAssembly Loopback.",
     "Symbol search path: srv*https://msdl.microsoft.com/download/symbols",
     'Type "help" or "!analyze -v" to inspect the crash dump.',
+    ...(errorInfo ? [`BUGCHECK_CONTEXT: ${errorInfo}`] : []),
   ]);
   const [isPatched, setIsPatched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -160,7 +161,7 @@ export default function BsodScreen({ onClose, errorInfo }: BsodScreenProps) {
           marginBottom: "24px",
         }}
       >
-        Your PC ran into a problem and needs to restart. We're just collecting some error info,
+        Your PC ran into a problem and needs to restart. We&apos;re just collecting some error info,
         and then you can inspect or reboot the kernel.
       </h1>
 
@@ -240,7 +241,7 @@ export default function BsodScreen({ onClose, errorInfo }: BsodScreenProps) {
             background: "rgba(255, 255, 255, 0.08)",
             borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
             fontSize: "12px",
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono), monospace",
           }}
         >
           <span>WinDbg (x64) • Kernel Debugger Console</span>
@@ -255,7 +256,7 @@ export default function BsodScreen({ onClose, errorInfo }: BsodScreenProps) {
             padding: "12px 14px",
             maxHeight: "260px",
             overflowY: "auto",
-            fontFamily: "'JetBrains Mono', Consolas, monospace",
+            fontFamily: "var(--font-mono), Consolas, monospace",
             fontSize: "12px",
             lineHeight: 1.5,
             color: "#e0f2fe",
@@ -298,7 +299,7 @@ export default function BsodScreen({ onClose, errorInfo }: BsodScreenProps) {
         >
           <span
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono), monospace",
               fontSize: "12px",
               color: "#38bdf8",
               fontWeight: 700,
@@ -319,7 +320,7 @@ export default function BsodScreen({ onClose, errorInfo }: BsodScreenProps) {
               border: "none",
               outline: "none",
               color: "#ffffff",
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono), monospace",
               fontSize: "12px",
             }}
           />

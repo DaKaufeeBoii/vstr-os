@@ -72,6 +72,7 @@ export function useFocusTrap({
 
     // Store previously focused element
     previouslyFocusedRef.current = document.activeElement as HTMLElement;
+    const returnFocusTarget = returnFocusRef?.current;
 
     // Set initial focus
     const container = containerRef.current;
@@ -94,8 +95,8 @@ export function useFocusTrap({
       document.removeEventListener("mousedown", handleClickOutside, true);
 
       // Return focus to previously focused element
-      if (returnFocusRef?.current) {
-        returnFocusRef.current.focus();
+      if (returnFocusTarget) {
+        returnFocusTarget.focus();
       } else if (previouslyFocusedRef.current) {
         previouslyFocusedRef.current.focus();
       }

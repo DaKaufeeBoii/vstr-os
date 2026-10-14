@@ -86,25 +86,11 @@ export default function GuestbookApp() {
 
   return (
     <div
-      style={{
-        display: "flex",
-        height: "100%",
-        width: "100%",
-        background: "rgba(14, 11, 35, 0.95)",
-        color: "#f8fafc",
-        fontFamily: "'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif",
-        fontSize: "13px",
-      }}
+      className="guestbook-app-container"
     >
       {/* Left Column: Message Feed */}
       <div
-        style={{
-          width: "280px",
-          borderRight: "1px solid rgba(255, 255, 255, 0.08)",
-          display: "flex",
-          flexDirection: "column",
-          background: "rgba(0, 0, 0, 0.2)",
-        }}
+        className="guestbook-app-sidebar"
       >
         <div
           style={{
@@ -212,7 +198,7 @@ export default function GuestbookApp() {
       </div>
 
       {/* Right Column: Message Detail & Composition Form */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "transparent" }}>
+      <div className="guestbook-app-main">
         {/* Selected Message Preview */}
         <div
           style={{

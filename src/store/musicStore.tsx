@@ -1,7 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, useCallback } from "react";
-import type { WindowId } from "@/types";
+import React, { createContext, useContext, useReducer } from "react";
 
 export interface Track {
   id: string;

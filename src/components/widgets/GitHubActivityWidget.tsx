@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { DesktopWidgetShell } from "./DesktopWidgetShell";
 import { useWidgetData } from "@/hooks/useWidgetData";
 import { GitBranch, ExternalLink, RefreshCw } from "lucide-react";
@@ -148,9 +149,12 @@ export function GitHubActivityWidget({
             </div>
           ) : (
             /* Real SVG graph fetched from ghchart directly */
-            <img
+            <Image
               src={GH_CHART_URL}
               alt={`${GITHUB_USERNAME} GitHub contributions`}
+              width={720}
+              height={200}
+              unoptimized
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
               onError={() => setHasError(true)}

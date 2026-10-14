@@ -6,6 +6,10 @@ import { useOSSettings } from "@/store/osSettingsStore";
 import { systemMissions } from "@/data/systemMissions";
 import * as vfs from "@/lib/vfs/vfsEngine";
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 interface TerminalLine {
   type: "input" | "output" | "error" | "success" | "dim";
   text: string;
@@ -49,13 +53,13 @@ Available commands:
 
 const WHOAMI_BIO = `
 > Sai Tarun Reddy Velagala
-> CS Undergrad & AI Developer — Hyderabad, Telangana
-> KG Reddy College of Engg & Technology (Expected: 2027)
-> CGPA: 8.41 | B.Tech CSE (AI & ML)
+> Computer Science Undergraduate — AI/ML
+> KG Reddy College of Engineering and Technology (Sep 2023 – Present)
+> CGPA: 8.49 | Bachelor of Computer Science and Engineering, AI/ML
 >
 > Building: intelligent software, web apps, AI tools.
 > Hackathons won: 1 (IKARUS 2024 - First Prize)
-> Currently: Secretary, Student Council Editorial Board
+> Experience: Backend AI Engineer Intern at FlyRank AI; Python Developer Intern at Hackveda Solutions
 `.trim();
 
 const VER_STRING = `Microsoft Windows [Version 10.0.22631.3880]
@@ -141,6 +145,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
 
   const runCommand = useCallback(
     async (raw: string) => {
+      async function executeCommand(command: string): Promise<void> {
+      const raw = command;
       const rawTrimmed = raw.trim();
 
       // Handle password entry for sudo
@@ -154,7 +160,7 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
           if (awaitingSudoPass.pendingCmd) {
             const pending = awaitingSudoPass.pendingCmd;
             setAwaitingSudoPass(null);
-            await runCommand(pending);
+            await executeCommand(pending);
             return;
           }
         } else {
@@ -206,8 +212,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
             push({ type: "success", text: `Wrote output to ${targetPath}` });
             push({ type: "dim", text: "" });
             return;
-          } catch (err: any) {
-            push({ type: "error", text: err.message });
+          } catch (err) {
+            push({ type: "error", text: errorMessage(err) });
             push({ type: "dim", text: "" });
             return;
           }
@@ -219,7 +225,7 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
         if (currentUser === "root") {
           push({ type: "dim", text: "Already running as root superuser." });
           if (args.length > 0) {
-            await runCommand(args.join(" "));
+          await executeCommand(args.join(" "));
             return;
           }
         } else {
@@ -283,8 +289,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
             });
             push({ type: "success", text: rows.join("\n") });
           }
-        } catch (err: any) {
-          push({ type: "error", text: err.message });
+        } catch (err) {
+          push({ type: "error", text: errorMessage(err) });
         }
 
       // ── CD ──────────────────────────────────────────────────────────
@@ -302,8 +308,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
           } else {
             setCwd(resolved);
           }
-        } catch (err: any) {
-          push({ type: "error", text: err.message });
+        } catch (err) {
+          push({ type: "error", text: errorMessage(err) });
         }
 
       // ── CAT ─────────────────────────────────────────────────────────
@@ -318,8 +324,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
             if (resolved.includes("flag.txt") && currentUser === "root") {
               unlockMission("root-access");
             }
-          } catch (err: any) {
-            push({ type: "error", text: err.message });
+          } catch (err) {
+            push({ type: "error", text: errorMessage(err) });
           }
         }
 
@@ -341,8 +347,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
             } else {
               push({ type: "dim", text: `Updated timestamp for ${resolved}` });
             }
-          } catch (err: any) {
-            push({ type: "error", text: err.message });
+          } catch (err) {
+            push({ type: "error", text: errorMessage(err) });
           }
         }
 
@@ -361,8 +367,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
               await vfs.remove(resolved, currentUser, false);
               push({ type: "success", text: `Removed: ${resolved}` });
             }
-          } catch (err: any) {
-            push({ type: "error", text: err.message });
+          } catch (err) {
+            push({ type: "error", text: errorMessage(err) });
           }
         }
 
@@ -372,8 +378,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
         try {
           const treeStr = await vfs.generateTree(target, currentUser);
           push({ type: "success", text: treeStr });
-        } catch (err: any) {
-          push({ type: "error", text: err.message });
+        } catch (err) {
+          push({ type: "error", text: errorMessage(err) });
         }
 
       // ── NOTEPAD / NANO ──────────────────────────────────────────────
@@ -397,8 +403,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
           try {
             await vfs.chmod(resolved, mode, currentUser);
             push({ type: "success", text: `Updated permissions on ${resolved}` });
-          } catch (err: any) {
-            push({ type: "error", text: err.message });
+          } catch (err) {
+            push({ type: "error", text: errorMessage(err) });
           }
         }
 
@@ -412,8 +418,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
           try {
             await vfs.chown(resolved, owner, currentUser);
             push({ type: "success", text: `Changed owner of ${resolved} to ${owner}` });
-          } catch (err: any) {
-            push({ type: "error", text: err.message });
+          } catch (err) {
+            push({ type: "error", text: errorMessage(err) });
           }
         }
 
@@ -580,8 +586,8 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
             } else {
               push({ type: "success", text: matches.join("\n") });
             }
-          } catch (err: any) {
-            push({ type: "error", text: err.message });
+          } catch (err) {
+            push({ type: "error", text: errorMessage(err) });
           }
         }
 
@@ -593,6 +599,9 @@ export default function TerminalApp({ instanceId = "terminal", initialCwd }: Ter
       }
 
       push({ type: "dim", text: "" });
+      }
+
+      await executeCommand(raw);
     },
     [
       push,

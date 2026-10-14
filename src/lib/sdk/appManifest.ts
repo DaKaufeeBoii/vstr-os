@@ -5,6 +5,7 @@
  */
 
 import type { WindowId } from "@/types";
+import type { VFSNode } from "@/lib/vfs/vfsTypes";
 
 export type AppPermission =
   | "vfs:read"
@@ -47,11 +48,11 @@ export interface SDKContext {
   hasPermission: (permission: AppPermission) => boolean;
   fs: {
     readFile: (path: string) => Promise<string>;
-    writeFile: (path: string, content: string) => Promise<any>;
+    writeFile: (path: string, content: string) => Promise<VFSNode>;
   };
   notify: (title: string, message: string, icon?: string) => void;
   windows: {
-    open: (id: WindowId, data?: any) => void;
+    open: (id: WindowId, data?: Record<string, unknown>) => void;
     close: (instanceId: string) => void;
   };
 }

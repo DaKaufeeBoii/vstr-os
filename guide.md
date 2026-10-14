@@ -29,11 +29,12 @@ Welcome to VSTR-OS, an interactive desktop environment portal based on a persist
 ## 📁 System Management
 *   **Desktop Icons**: Right-click any icon to manipulate its instance state (Minimize/Maximize, Close, Pin to Taskbar) or get app properties.
 *   **File Management**: You can create and manage custom `.txt` documents and shortcuts directly on the Desktop.
-*   **Desktop Widgets**: Pinned widgets display live system telemetry (FPS, memory, developer stats) synced with background processes.
-*   **Window Management**: Windows are fully draggable and resizable. Fixed window spawning logic: maximizing or opening an already running app now correctly brings the existing instance to the foreground instead of spawning a new, resized window.
+*   **Desktop Widgets**: Pinned movable/minimizable widgets display real-time system telemetry (FPS, memory), live GitHub activity, LeetCode metrics, X/Twitter posts, and Spotify player synced with background services.
+*   **Window Management**: Windows are fully draggable, resizable, and snappable. Opening or maximizing an already running application focuses the existing instance rather than spawning duplicates. On mobile devices (<768px), windows automatically adapt into fullscreen touch sheets.
+*   **Guestbook**: A persistent visitor wall where recruiters, engineers, and visitors can leave messages, backed by durable storage.
 
 ## 📟 Command Line & Power User
-*   **Terminal (Terminal.app)**: A fully functional virtual terminal supporting `ls`, `cd`, `cat`, `rm`, `touch`, and sudo operations on the sandboxed VFS.
+*   **Terminal (Terminal.app)**: A fully functional virtual terminal supporting `ls`, `cd`, `cat`, `rm`, `touch`, `mkdir`, and sudo operations on the sandboxed VFS.
 *   **Hotkeys** (conflict-free — safe on Windows and all browsers):
     *   `Alt + S` / `Alt + M` — Start Menu
     *   `Alt + K` — Command Palette / Search

@@ -133,7 +133,7 @@ export default function NotificationCenter() {
                   fontWeight: 600,
                   letterSpacing: "0.05em",
                   color: "var(--os-amber)",
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-mono), monospace",
                 }}
               >
                 NOTIFICATIONS
@@ -307,7 +307,7 @@ export default function NotificationCenter() {
                   fontSize: "12px",
                   fontWeight: 600,
                   color: "var(--os-text)",
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-mono), monospace",
                 }}
               >
                 {monthYearString}

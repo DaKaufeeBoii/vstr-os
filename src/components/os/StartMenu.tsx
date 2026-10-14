@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { WINDOW_CONFIGS, useOS } from "@/store/windowStore";
 import type { WindowId } from "@/types";
@@ -17,7 +18,22 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
   const [confirmShutdown, setConfirmShutdown] = useState(false);
+  const [placement, setPlacement] = useState({ left: 12, bottom: 64 });
   const { windows } = useOS();
+
+  useEffect(() => {
+    const positionMenu = () => {
+      const anchor = document.getElementById("taskbar-start-btn");
+      const rect = anchor?.getBoundingClientRect();
+      const width = Math.min(640, window.innerWidth - 24);
+      const anchorCenter = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+      const left = Math.max(12, Math.min(anchorCenter - width / 2, window.innerWidth - width - 12));
+      setPlacement({ left, bottom: rect ? Math.max(12, window.innerHeight - rect.top + 8) : 64 });
+    };
+    positionMenu();
+    window.addEventListener("resize", positionMenu);
+    return () => window.removeEventListener("resize", positionMenu);
+  }, []);
 
   // Focus trap for the start menu
   const focusTrapRef = useFocusTrap({
@@ -74,8 +90,6 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
       position: "fixed",
       inset: 0,
       display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
       zIndex: 9500,
       pointerEvents: "none",
     }}>
@@ -93,9 +107,11 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ type: "spring", stiffness: 350, damping: 28 }}
         style={{
-          width: "min(640px, 95vw)",
-          height: "720px",
-          maxHeight: "85vh",
+          left: placement.left,
+          bottom: placement.bottom,
+          width: "min(640px, calc(100vw - 24px))",
+          height: "min(720px, calc(100dvh - var(--taskbar-h) - 24px))",
+          maxHeight: "calc(100dvh - var(--taskbar-h) - 24px)",
           background: "rgba(10, 14, 20, 0.97)",
           backdropFilter: "blur(40px)",
           WebkitBackdropFilter: "blur(40px)",
@@ -107,7 +123,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
           color: "var(--os-text)",
           fontFamily: "'Inter', sans-serif",
           pointerEvents: "auto",
-          position: "relative",
+          position: "fixed",
         }}
       >
         {/* Reset Confirmation Overlay */}
@@ -135,7 +151,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               }}
             >
               <AlertTriangle size={48} color="var(--os-red)" style={{ filter: "drop-shadow(0 0 12px var(--os-red))" }} />
-              <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, fontFamily: "'JetBrains Mono', monospace", color: "var(--os-red)" }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, fontFamily: "var(--font-mono), monospace", color: "var(--os-red)" }}>
                 Clear all progress?
               </h3>
               <p style={{ fontSize: 13, color: "var(--os-text-muted)", textAlign: "center", lineHeight: 1.6, maxWidth: 380, margin: 0 }}>
@@ -161,7 +177,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                     color: "#ff6b6b",
                     fontWeight: "bold",
                     cursor: "pointer",
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-mono), monospace",
                     fontSize: 13,
                     transition: "all 0.15s",
                   }}
@@ -184,7 +200,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                     color: "var(--os-text)",
                     fontWeight: "bold",
                     cursor: "pointer",
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-mono), monospace",
                     fontSize: 13,
                     transition: "all 0.15s",
                   }}
@@ -218,8 +234,6 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search applications"
-              aria-expanded="true"
-              aria-controls="start-menu-results"
               style={{
                 flex: 1,
                 background: "transparent",
@@ -237,14 +251,14 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
           {/* Pinned Section */}
           <div style={{ marginTop: 8 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-mono), monospace" }}>
                 {search ? "Results" : "Pinned"}
               </span>
             </div>
 
             <div 
               id="start-menu-results"
-              role="listbox"
+              role="group"
               aria-label="Applications"
               style={{
                 display: "grid",
@@ -253,12 +267,10 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                 justifyItems: "center",
               }}>
               {filteredApps.map((cfg) => (
-                <div
+                <button
                   key={cfg.id}
-                  role="option"
-                  tabIndex={0}
+                  type="button"
                   onClick={() => { onOpen(cfg.id); onClose(); }}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(cfg.id); onClose(); } }}
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -269,6 +281,10 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                     cursor: "pointer",
                     width: 84,
                     transition: "background 0.15s, transform 0.15s",
+                    border: 0,
+                    color: "inherit",
+                    font: "inherit",
+                    background: "transparent",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = "rgba(245,158,11,0.08)";
@@ -301,7 +317,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                   }}>
                     {cfg.title.replace(".app", "").replace(".sys", "").replace(".exe", "").replace(".txt", "").replace(".log", "").replace("/", "")}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -310,23 +326,21 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
           {!search && (
             <div style={{ marginTop: 36, marginBottom: 20 }}>
               <div style={{ marginBottom: 16 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--os-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-mono), monospace" }}>
                   Quick Links
                 </span>
               </div>
 
-              <div role="listbox" aria-label="Quick Links" style={{
+              <div role="group" aria-label="Quick Links" style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
                 gap: 12,
               }}>
                 {recommendedApps.map((app, idx) => (
-                  <div
+                  <button
                     key={idx}
-                    role="option"
-                    tabIndex={0}
+                    type="button"
                     onClick={() => { onOpen(app.id); onClose(); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(app.id); onClose(); } }}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -336,6 +350,10 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                       cursor: "pointer",
                       border: "1px solid transparent",
                       transition: "background 0.15s, border-color 0.15s",
+                      textAlign: "left",
+                      color: "inherit",
+                      font: "inherit",
+                      background: "transparent",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = "rgba(245,158,11,0.06)";
@@ -348,7 +366,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                   >
                     <div style={{ width: 28, height: 28, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {app.img
-                        ? <img src={app.img} alt={app.title} style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 4 }} />
+                        ? <Image src={app.img} alt="" width={28} height={28} style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 4 }} />
                         : <OsIcon name="terminal" size="sm" />
                       }
                     </div>
@@ -356,7 +374,7 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
                       <span style={{ fontSize: 13, color: "var(--os-text)", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.title}</span>
                       <span style={{ fontSize: 11, color: "var(--os-text-muted)", marginTop: 1 }}>{app.subtitle}</span>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -374,11 +392,9 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
           borderBottomLeftRadius: 16,
           borderBottomRightRadius: 16,
         }}>
-          <div
-            role="button"
-            tabIndex={0}
+          <button
+            type="button"
             onClick={() => { onOpen("about"); onClose(); }}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen("about"); onClose(); } }}
             style={{
               display: "flex",
               alignItems: "center",
@@ -387,6 +403,10 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               padding: "6px 10px 6px 6px",
               borderRadius: 8,
               transition: "background 0.15s",
+              border: 0,
+              color: "inherit",
+              font: "inherit",
+              background: "transparent",
             }}
             onMouseEnter={(e) => e.currentTarget.style.background = "rgba(245,158,11,0.08)"}
             onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
@@ -400,10 +420,10 @@ export default function StartMenu({ onClose, onOpen }: StartMenuProps) {
               border: "1px solid rgba(245,158,11,0.2)",
               background: "#1a1f2e",
             }}>
-              <img src="/assets/images/pix_image.png" alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" }} />
+              <Image src="/assets/images/pix_image.png" alt="" width={32} height={32} style={{ width: "100%", height: "100%", objectFit: "cover", imageRendering: "pixelated" }} />
             </div>
             <span style={{ fontSize: 12, fontWeight: 500, color: "var(--os-text)" }}>Sai Tarun Reddy Velagala</span>
-          </div>
+          </button>
 
           <button
             title="Shut Down"

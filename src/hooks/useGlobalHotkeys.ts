@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 
 export interface HotkeyAction {
   /** A single chord like ["Alt", "w"] or multiple alternative chords like [["Alt", "w"], ["Meta", "w"]] */
@@ -110,6 +110,7 @@ function isTypingElement(element: HTMLElement | null): boolean {
 
 let globalRegistry: HotkeyEntry[] = [];
 let listenerAttached = false;
+let globalKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
 function attachGlobalListener() {
   if (listenerAttached || typeof window === "undefined") return;
@@ -134,23 +135,20 @@ function attachGlobalListener() {
   };
 
   window.addEventListener("keydown", handler, { passive: false });
-  (window as any).__vstrHotkeyHandler = handler;
+  globalKeydownHandler = handler;
 }
 
 function detachGlobalListener() {
   if (!listenerAttached) return;
-  const handler = (window as any).__vstrHotkeyHandler;
-  if (handler) {
-    window.removeEventListener("keydown", handler);
+  if (globalKeydownHandler) {
+    window.removeEventListener("keydown", globalKeydownHandler);
   }
+  globalKeydownHandler = null;
   listenerAttached = false;
   globalRegistry = [];
 }
 
 export function useGlobalHotkeys(actions: HotkeyAction[]) {
-  const actionsRef = useRef(actions);
-  actionsRef.current = actions;
-
   useEffect(() => {
     // Register actions with stable IDs for this hook instance
     const ids = actions.map((action, index) => {

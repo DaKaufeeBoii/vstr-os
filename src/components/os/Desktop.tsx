@@ -118,6 +118,24 @@ interface CustomDesktopItem {
   createdAt: number;
 }
 
+interface DesktopPreferences {
+  iconSize: "small" | "medium" | "large";
+  autoArrange: boolean;
+  alignToGrid: boolean;
+  showDesktopIcons: boolean;
+}
+
+function readDesktopStartupState(): { preferences: Partial<DesktopPreferences>; customItems: CustomDesktopItem[] } {
+  if (typeof window === "undefined") return { preferences: {}, customItems: [] };
+  try {
+    const preferences = JSON.parse(localStorage.getItem("vstr_desktop_prefs") ?? "{}") as Partial<DesktopPreferences>;
+    const items = JSON.parse(localStorage.getItem("vstr_desktop_custom_items") ?? "[]") as CustomDesktopItem[];
+    return { preferences, customItems: Array.isArray(items) ? items : [] };
+  } catch {
+    return { preferences: {}, customItems: [] };
+  }
+}
+
 export default function Desktop() {
   const {
     openWindow,
@@ -170,38 +188,20 @@ export default function Desktop() {
   const { playClick } = useSound();
 
   const [booting, setBooting] = useState(true);
+  const [startupState] = useState(readDesktopStartupState);
+  const shortcutHandled = useRef(false);
   const [showBsod, setShowBsod] = useState(false);
 
   // Desktop View and Options State
-  const [iconSize, setIconSize] = useState<"small" | "medium" | "large">("medium");
-  const [autoArrange, setAutoArrange] = useState(true);
-  const [alignToGrid, setAlignToGrid] = useState(true);
-  const [showDesktopIcons, setShowDesktopIcons] = useState(true);
+  const [iconSize, setIconSize] = useState<"small" | "medium" | "large">(startupState.preferences.iconSize ?? "medium");
+  const [autoArrange, setAutoArrange] = useState(startupState.preferences.autoArrange ?? true);
+  const [alignToGrid, setAlignToGrid] = useState(startupState.preferences.alignToGrid ?? true);
+  const [showDesktopIcons, setShowDesktopIcons] = useState(startupState.preferences.showDesktopIcons ?? true);
   const [sortBy, setSortBy] = useState<"name" | "size" | "type" | "date" | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
-  const [customItems, setCustomItems] = useState<CustomDesktopItem[]>([]);
+  const [customItems, setCustomItems] = useState<CustomDesktopItem[]>(startupState.customItems);
   const [propertiesModalItem, setPropertiesModalItem] = useState<PropertiesItemInfo | null>(null);
-
-  // Load persisted desktop preferences from localStorage
-  useEffect(() => {
-    try {
-      const savedPrefs = localStorage.getItem("vstr_desktop_prefs");
-      if (savedPrefs) {
-        const parsed = JSON.parse(savedPrefs);
-        if (parsed.iconSize) setIconSize(parsed.iconSize);
-        if (typeof parsed.autoArrange === "boolean") setAutoArrange(parsed.autoArrange);
-        if (typeof parsed.alignToGrid === "boolean") setAlignToGrid(parsed.alignToGrid);
-        if (typeof parsed.showDesktopIcons === "boolean") setShowDesktopIcons(parsed.showDesktopIcons);
-      }
-      const savedCustom = localStorage.getItem("vstr_desktop_custom_items");
-      if (savedCustom) {
-        setCustomItems(JSON.parse(savedCustom));
-      }
-    } catch {
-      // Ignore JSON parse errors
-    }
-  }, []);
 
   // Save desktop preferences when updated
   const savePreferences = useCallback(
@@ -233,6 +233,7 @@ export default function Desktop() {
 
   const {
     isOpen: isContextMenuOpen,
+    sessionId: contextMenuSessionId,
     position: contextMenuPos,
     openMenu: triggerContextMenu,
     closeMenu: closeContextMenu,
@@ -585,7 +586,7 @@ export default function Desktop() {
           },
         })
       );
-      triggerContextMenu(e as any);
+      triggerContextMenu(e);
     },
     [
       windows,
@@ -632,9 +633,11 @@ export default function Desktop() {
 
   // Stable refs for hotkey handler to avoid rebuilding actions on every window drag
   const windowsRef = useRef(windows);
-  windowsRef.current = windows;
   const activeWorkspaceIdRef = useRef(activeWorkspaceId);
-  activeWorkspaceIdRef.current = activeWorkspaceId;
+  useEffect(() => {
+    windowsRef.current = windows;
+    activeWorkspaceIdRef.current = activeWorkspaceId;
+  }, [windows, activeWorkspaceId]);
 
   // Global hotkeys (configured to avoid any collisions with Windows OS or browser shortcuts)
   const desktopHotkeys = useMemo(
@@ -780,6 +783,15 @@ export default function Desktop() {
   );
   useGlobalHotkeys(desktopHotkeys);
 
+  useEffect(() => {
+    if (booting || shortcutHandled.current) return;
+    shortcutHandled.current = true;
+    const appId = new URLSearchParams(window.location.search).get("app");
+    if (appId && WINDOW_CONFIGS.some((config) => config.id === appId)) {
+      openWindow(appId as WindowId);
+    }
+  }, [booting, openWindow]);
+
   // Trigger "First Boot" mission once boot finishes and notify user of keyboard shortcuts
   useEffect(() => {
     if (!booting) {
@@ -918,6 +930,10 @@ export default function Desktop() {
           {windows.map((win) => {
             const cfg = WINDOW_CONFIGS.find((c: WindowConfig) => c.id === win.id) || appRegistry.getApp(win.id);
             if (!cfg) return null;
+            const componentPath = "componentPath" in cfg ? cfg.componentPath : undefined;
+            const title = "title" in cfg ? cfg.title : cfg.name;
+            const defaultW = "defaultW" in cfg ? cfg.defaultW : cfg.defaultConfig.width;
+            const defaultH = "defaultH" in cfg ? cfg.defaultH : cfg.defaultConfig.height;
             if (
               win.desktopId !== undefined &&
               win.desktopId !== activeWorkspaceId &&
@@ -926,24 +942,24 @@ export default function Desktop() {
               return null;
             }
 
-            const AppContent = (cfg as any).componentPath ? (
+            const AppContent = componentPath ? (
               <DynamicAppLoader appId={win.id} key={win.instanceId} instanceId={win.instanceId} />
             ) : win.id === "terminal" ? (
               <TerminalApp
                 key={win.instanceId}
                 instanceId={win.instanceId}
-                initialCwd={win.customData?.initialCwd}
+                initialCwd={typeof win.customData?.initialCwd === "string" ? win.customData.initialCwd : undefined}
               />
             ) : win.id === "notepad" ? (
               <NotepadApp
                 key={win.instanceId}
                 instanceId={win.instanceId}
-                initialFilePath={win.customData?.filePath || "/home/saitarun/portfolio/README.md"}
+                initialFilePath={typeof win.customData?.filePath === "string" ? win.customData.filePath : "/home/saitarun/portfolio/README.md"}
               />
             ) : win.id === "settings" ? (
               <SettingsApp
                 key={win.instanceId}
-                initialSection={win.customData?.section}
+                initialSection={typeof win.customData?.section === "string" ? win.customData.section : undefined}
               />
             ) : (
               APP_CONTENT[win.id]
@@ -954,11 +970,11 @@ export default function Desktop() {
                 key={win.instanceId}
                 id={win.id}
                 instanceId={win.instanceId}
-                title={win.title || (cfg as any).title || (cfg as any).name}
+                title={win.title || title}
                 icon={cfg.icon}
                 fluentIcon={cfg.fluentIcon}
-                defaultW={(cfg as any).defaultConfig?.width ?? (cfg as any).defaultW}
-                defaultH={(cfg as any).defaultConfig?.height ?? (cfg as any).defaultH}
+                defaultW={defaultW}
+                defaultH={defaultH}
                 noPadding={win.id === "terminal" || win.id === "notepad" || win.id === "music_player"}
               >
                 {AppContent}
@@ -970,9 +986,14 @@ export default function Desktop() {
           <CommandPalette />
           <TaskView />
           <Taskbar onContextMenu={handleTaskbarContextMenu} />
-          <QuickSettings isOpen={isQuickSettingsOpen} onClose={closeQuickSettings} />
+          <QuickSettings
+            isOpen={isQuickSettingsOpen}
+            onClose={closeQuickSettings}
+            onOpenDisplaySettings={() => openWindow({ id: "settings", customData: { section: "display" } })}
+          />
           <NotificationCenter />
           <ContextMenu
+            key={contextMenuSessionId}
             isOpen={isContextMenuOpen}
             position={contextMenuPos}
             groups={contextMenuGroups}

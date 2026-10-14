@@ -4,12 +4,17 @@ import { useCallback } from "react";
 
 let sharedAudioCtx: AudioContext | null = null;
 let listenerAttached = false;
+let uiSoundVolume = 0.7;
+
+export function setUiSoundVolume(volume: number) {
+  uiSoundVolume = Math.max(0, Math.min(1, volume));
+}
 
 function initSharedAudio() {
   if (typeof window === "undefined") return;
   if (!sharedAudioCtx) {
     try {
-      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtxClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (AudioCtxClass) {
         sharedAudioCtx = new AudioCtxClass();
       }
@@ -51,7 +56,7 @@ export function useSound() {
       osc.frequency.setValueAtTime(800, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
 
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
+      gain.gain.setValueAtTime(0.05 * uiSoundVolume, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
 
       osc.connect(gain);
@@ -76,7 +81,7 @@ export function useSound() {
       osc.frequency.setValueAtTime(150, ctx.currentTime);
       osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.2);
 
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1 * uiSoundVolume, ctx.currentTime);
       gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.2);
 
       osc.connect(gain);

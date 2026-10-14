@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { DesktopWidgetShell } from "./DesktopWidgetShell";
-import { Play, Pause, ExternalLink, Music2, Disc3 } from "lucide-react";
+import { Play, ExternalLink, Music2 } from "lucide-react";
 import { useOS } from "@/store/windowStore";
 
 const PLAYLIST_ID = "2k0uLgndnQEJ440RTFFJ0F";
@@ -33,7 +34,7 @@ export function SpotifyWidget({
 }: SpotifyWidgetProps) {
   const { openWindow } = useOS();
   const [showEmbed, setShowEmbed] = useState(false);
-  const [isPlayingPreview, setIsPlayingPreview] = useState(true);
+  const isPlayingPreview = true;
 
   const handleOpenApp = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -153,9 +154,12 @@ export function SpotifyWidget({
               backgroundColor: "#121212",
             }}
           >
-            <img
+            <Image
               src={PLAYLIST_COVER}
               alt="DAMN GOOD. playlist cover"
+              width={240}
+              height={240}
+              unoptimized
               style={{
                 width: "100%",
                 height: "100%",

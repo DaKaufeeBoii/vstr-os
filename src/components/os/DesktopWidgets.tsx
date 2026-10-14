@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { SpotifyWidget } from "@/components/widgets/SpotifyWidget";
 import { GitHubActivityWidget } from "@/components/widgets/GitHubActivityWidget";
@@ -10,6 +10,9 @@ import { LeetCodeWidget } from "@/components/widgets/LeetCodeWidget";
 
 const POSITIONS_STORAGE_KEY = "vstr_widget_positions";
 const MINIMIZED_STORAGE_KEY = "vstr_widget_minimized";
+const subscribeToClientMount = () => () => {};
+const getClientMountSnapshot = () => true;
+const getServerMountSnapshot = () => false;
 
 interface Position {
   x: number;
@@ -19,12 +22,6 @@ interface Position {
 export function DesktopWidgets() {
   const { widgets, toggleWidgetDesktop } = useOSSettings();
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Position map per widget ID
-  const [positions, setPositions] = useState<Record<string, Position>>({});
-  // Minimized map per widget ID
-  const [minimizedMap, setMinimizedMap] = useState<Record<string, boolean>>({});
-  const [isMounted, setIsMounted] = useState(false);
 
   // Default coordinate calculation: stacked on the top-right of the desktop
   const getDefaultPositions = useCallback((): Record<string, Position> => {
@@ -43,33 +40,30 @@ export function DesktopWidgets() {
     };
   }, []);
 
-  // Initialize and hydrate saved layout from localStorage
-  useEffect(() => {
-    setIsMounted(true);
+  // The component renders nothing until hydration completes, so loading saved
+  // layout in state initializers avoids an effect-driven second render.
+  const [positions, setPositions] = useState<Record<string, Position>>(() => {
     const defaults = getDefaultPositions();
-
-    // Hydrate positions
+    if (typeof window === "undefined") return defaults;
     try {
-      const savedPos = localStorage.getItem(POSITIONS_STORAGE_KEY);
-      if (savedPos) {
-        const parsed = JSON.parse(savedPos);
-        setPositions({ ...defaults, ...parsed });
-      } else {
-        setPositions(defaults);
-      }
+      const saved = localStorage.getItem(POSITIONS_STORAGE_KEY);
+      return saved ? { ...defaults, ...JSON.parse(saved) as Record<string, Position> } : defaults;
     } catch {
-      setPositions(defaults);
+      return defaults;
     }
-
-    // Hydrate minimized states
+  });
+  const [minimizedMap, setMinimizedMap] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
     try {
-      const savedMin = localStorage.getItem(MINIMIZED_STORAGE_KEY);
-      if (savedMin) {
-        setMinimizedMap(JSON.parse(savedMin));
-      }
-    } catch {}
+      return JSON.parse(localStorage.getItem(MINIMIZED_STORAGE_KEY) ?? "{}") as Record<string, boolean>;
+    } catch {
+      return {};
+    }
+  });
+  const isMounted = useSyncExternalStore(subscribeToClientMount, getClientMountSnapshot, getServerMountSnapshot);
 
-    // Listen to custom reset layout event
+  // Listen to custom reset layout event
+  useEffect(() => {
     const handleReset = () => {
       const freshDefaults = getDefaultPositions();
       setPositions(freshDefaults);

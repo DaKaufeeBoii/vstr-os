@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { Coins, Scroll } from "lucide-react";
@@ -18,28 +18,18 @@ export default function HintMasterApp() {
   const { unlockMission } = useOSSettings();
   const [guess, setGuess] = useState<"heads" | "tails" | null>(null);
   const [result, setResult] = useState<"heads" | "tails" | null>(null);
-  const [message, setMessage] = useState("I am the HintMaster. Beat me in a coin toss, and I shall reveal a secret.");
   const [flipping, setFlipping] = useState(false);
-  const [wins, setWins] = useState(0);
-  const [winStreak, setWinStreak] = useState(0);
-  const [loseStreak, setLoseStreak] = useState(0);
+  const [wins, setWins] = useState(() => Number.parseInt(typeof window === "undefined" ? "0" : localStorage.getItem("vstr_hint_wins") ?? "0", 10));
+  const [winStreak, setWinStreak] = useState(() => Number.parseInt(typeof window === "undefined" ? "0" : localStorage.getItem("vstr_hint_win_streak") ?? "0", 10));
+  const [loseStreak, setLoseStreak] = useState(() => Number.parseInt(typeof window === "undefined" ? "0" : localStorage.getItem("vstr_hint_lose_streak") ?? "0", 10));
   const [showHintsWidget, setShowHintsWidget] = useState(false);
 
-  // Load persisted stats on client mount
-  useEffect(() => {
-    const savedWins = parseInt(localStorage.getItem("vstr_hint_wins") ?? "0", 10);
-    const savedWinStreak = parseInt(localStorage.getItem("vstr_hint_win_streak") ?? "0", 10);
-    const savedLoseStreak = parseInt(localStorage.getItem("vstr_hint_lose_streak") ?? "0", 10);
-
-    setWins(savedWins);
-    setWinStreak(savedWinStreak);
-    setLoseStreak(savedLoseStreak);
-
-    // If they already unlocked all hints, show initial task fulfilled message
-    if (savedWins >= 5) {
-      setMessage("I am the HintMaster. My task here is fulfilled, but I am always down for a coin toss!");
-    }
-  }, []);
+  const [message, setMessage] = useState(() => {
+    const savedWins = Number.parseInt(typeof window === "undefined" ? "0" : localStorage.getItem("vstr_hint_wins") ?? "0", 10);
+    return savedWins >= 5
+      ? "I am the HintMaster. My task here is fulfilled, but I am always down for a coin toss!"
+      : "I am the HintMaster. Beat me in a coin toss, and I shall reveal a secret.";
+  });
 
   const allHintsUnlocked = wins >= 5;
 
@@ -122,7 +112,7 @@ export default function HintMasterApp() {
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono), monospace",
       color: "var(--os-text)",
       gap: 20,
       overflow: "hidden",

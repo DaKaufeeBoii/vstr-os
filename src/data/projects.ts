@@ -3,36 +3,37 @@ import { Project } from "@/types";
 export const projects: Project[] = [
   {
     title: "VSTR-OS",
+    category: "Web & Interface Systems",
+    featured: true,
     subtitle: "Interactive OS Portfolio",
     description:
-      "A custom desktop environment portfolio with draggable windows, a terminal, hidden mini-games, and theme switching — built to showcase full-stack UI engineering.",
+      "An interactive desktop-style portfolio with draggable windows, a terminal, mini-games, theme switching, and video wallpapers.",
     highlights: [
       "Custom window manager with drag, minimize, focus stacking, and taskbar",
-      "14 interactive apps including terminal easter eggs and canvas games",
-      "Three themes, mobile fullscreen windows, and persisted user preferences",
+      "Built-in portfolio apps, terminal commands, and mini-games",
+      "Multiple themes, mobile layouts, persisted preferences, and live video wallpapers",
     ],
     stack: ["Next.js", "React 19", "TypeScript", "Framer Motion", "Tailwind CSS"],
     github: "https://github.com/DaKaufeeBoii/vstr-os",
     demo: "https://vstr-os.vercel.app",
-    icon: "🖥️",
   },
   {
     title: "EventOS",
+    category: "Web Applications",
     subtitle: "Event Management Platform",
     description:
-      "Full-stack event management platform for organizing campus events with registration flows, responsive UI, and Firebase-backed data storage.",
+      "Campus event platform built for the CodeQuesters Summer Hackathon. See the repository and live project for current functionality.",
     highlights: [
       "Responsive organizer and attendee interfaces built with Next.js",
-      "Supabase integration for auth and real-time event data",
-      "Deployed on Vercel with collaborative GitHub-based workflow",
     ],
-    stack: ["Next.js", "React", "Tailwind CSS", "Vercel"],
+    stack: ["Next.js"],
     github: "https://github.com/DaKaufeeBoii/eventos",
-    demo: "https://eventos-em.vercel.app",
-    icon: "🎪",
+    demo: "https://eventos-iota-beige.vercel.app",
   },
   {
-    title: "BharatVaani-Offline",
+    title: "BharatVaani",
+    category: "AI & Local-First Applications",
+    featured: true,
     subtitle: "Offline Translation App for Indian Languages",
     description:
       "A fully offline Android app for translating between Indian languages using Google's ML Kit. Supports English, Hindi, Telugu, Tamil, Marathi, and more with voice input/output capabilities.",
@@ -44,10 +45,10 @@ export const projects: Project[] = [
     ],
     stack: ["Kotlin", "Android", "ML Kit", "Vosk"],
     github: "https://github.com/DaKaufeeBoii/BharatVaani-Offline",
-    icon: "🌐",
   },
   {
     title: "DropPin",
+    category: "Location & Utility Apps",
     subtitle: "Location Sharing App",
     description:
       "A full-stack location sharing platform for users to share their live location with delivery persons and vice versa.",
@@ -61,28 +62,41 @@ export const projects: Project[] = [
     ],
     stack: ["Next.js", "React", "Tailwind CSS", "Supabase"],
     github: "https://github.com/DaKaufeeBoii/DropPin",
-    icon: "📍",
   },
   {
     title: "ProjectPulse",
+    category: "AI & Full-Stack Applications",
+    featured: true,
     subtitle: "AI-Powered Project Management Tool",
     description:
-      "An AI-powered project management tool for teams to track projects, tasks, budgets, and risks.",
+      "AI-powered project management app with project tracking, Kanban workflows, budget monitoring, and real-time collaboration.",
     highlights: [
-      "Full-stack dashboard with real-time updates and AI-assisted insights",
-      "Role-based access (Admin, Teacher, Student) with secure authentication",
-      "AI-powered risk analysis and automated progress summaries",
-      "Customizable project workflows with milestones, tasks, and subtasks",
-      "Integrated budget tracking with expense logging and visual reports",
-      "Real-time notifications, team collaboration tools, and file sharing",
+      "Role-based access control and team management",
+      "AI project-risk assessment using Mistral AI with rule-based fallback",
+      "Project tracking, Kanban workflows, budget tracking, and team chat",
     ],
-    stack: ["TypeScript", "Vercel", "Supabase", "Google Gemini API", "Google GenAI"],
+    stack: ["Next.js 14", "PostgreSQL", "Prisma", "Mistral AI", "Tailwind CSS"],
     github: "https://github.com/DaKaufeeBoii/ProjectPulse",
     demo: "https://project-pulse-ver2.vercel.app",
-    icon: "📋",
+  },
+  {
+    title: "Kaufee-Home",
+    category: "AI & Local-First Applications",
+    featured: true,
+    subtitle: "Privacy-first local desktop AI agent",
+    description:
+      "A Windows desktop assistant using a local Ollama model for file search, application launching, system monitoring, and filesystem tasks, with permission-gated actions and voice workflows.",
+    highlights: [
+      "Local model runtime through Ollama",
+      "SQLite full-text search for file discovery",
+      "Permission checks for sensitive file and system actions",
+    ],
+    stack: ["Python", "Ollama", "SQLite", "Local Speech Recognition", "Text-to-Speech"],
+    github: "https://github.com/DaKaufeeBoii/Kaufee-Home",
   },
   {
     title: "LogicBlitz",
+    category: "Web Applications",
     subtitle: "Quiz Hosting Platform",
     description:
       "A quiz hosting platform for students to compete in quizzes.",
@@ -93,10 +107,10 @@ export const projects: Project[] = [
     stack: ["HTML", "JavaScript", "CSS", "Vercel", "TypeScript", "Supabase"],
     github: "https://github.com/DaKaufeeBoii/LogicBlitz",
     demo: "https://logic-blitz.vercel.app",
-    icon: "⚡",
   },
   {
     title: "Multi-Buzzer",
+    category: "Games & Interactive Tools",
     subtitle: "Quiz Buzzer Platform",
     description:
       "A quiz buzzer platform for students to compete in quizzes.",
@@ -108,10 +122,10 @@ export const projects: Project[] = [
     stack: ["Python", "Custom Tkinter", "Socket.io"],
     github: "https://github.com/DaKaufeeBoii/Multi-Buzzer",
     demo: "https://dakaufeeboii.itch.io/multi-buzzer",
-    icon: "🛎️",
   },
   {
     title: "HeartFund",
+    category: "Web Applications",
     subtitle: "Fundraising Platform",
     description:
       "Full-stack community fundraising platform enabling users to create and manage charitable campaigns.",
@@ -123,10 +137,10 @@ export const projects: Project[] = [
     stack: ["Next.js", "React", "Tailwind CSS", "Supabase", "Shadcn UI"],
     github: "https://github.com/DaKaufeeBoii/heartfund-fundraising",
     demo: "https://heartfund-fundraising.vercel.app",
-    icon: "💕",
   },
   {
     title: "Mission DRONA",
+    category: "Mobile Applications",
     subtitle: "Expo app for Product Design and Development course.",
     description:
       "An expo app for natural disaster victims and volunteers to order or deliver food, water and medicine at the requested location.",
@@ -137,10 +151,10 @@ export const projects: Project[] = [
     ],
     stack: ["React Native", "Expo", "Firebase", "Google Maps API"],
     github: "https://github.com/DaKaufeeBoii/mission-drona-EXPO",
-    icon: "🚁",
   },
   {
     title: "Disease-Inc",
+    category: "Games & Interactive Tools",
     subtitle: "Interactive Pandemic Strategy Simulation",
     description:
       "A web-based simulation inspired by Plague Inc. featuring animated infection dynamics and state visualization.",
@@ -152,10 +166,10 @@ export const projects: Project[] = [
     stack: ["HTML", "CSS", "JavaScript", "Vercel"],
     github: "https://github.com/DaKaufeeBoii/disease-inc",
     demo: "https://disease-inc.vercel.app",
-    icon: "🦠",
   },
   {
     title: "RAG Model",
+    category: "AI & Full-Stack Applications",
     subtitle: "Retrieval-Augmented Generation Model",
     description:
       "A RAG model that can answer questions based on the documents provided.",
@@ -167,10 +181,10 @@ export const projects: Project[] = [
     ],
     stack: ["Python", "RAG", "LLM", "TensorFlow"],
     github: "https://github.com/DaKaufeeBoii/RAG-pipeline-STuTribe",
-    icon: "🤖🧠",
   },
   {
     title: "Multiplayer Pong",
+    category: "Games & Interactive Tools",
     subtitle: "Real-time multiplayer pong game",
     description:
       "A simple multiplayer pong game built using Next.js and Socket.IO.",
@@ -180,10 +194,10 @@ export const projects: Project[] = [
     ],
     stack: ["Next.js", "React", "Tailwind CSS", "Socket.IO", "Vercel"],
     github: "https://github.com/DaKaufeeBoii/pong-room-test",
-    icon: "⚪",
   },
   {
     title: "Historytales.ai",
+    category: "AI & Full-Stack Applications",
     subtitle: "Fictional historical story generator.",
     description:
       "A website that generates stories based on the user prompts.",
@@ -194,10 +208,10 @@ export const projects: Project[] = [
     stack: ["Next.js", "React", "Tailwind CSS", "Google Gemini API"],
     github: "https://github.com/DaKaufeeBoii/Historytales.ai",
     demo: "https://historytales-ai.onrender.com",
-    icon: "📚",
   },
   {
     title: "PDNF-PCNF Calculator",
+    category: "Web Applications",
     subtitle: "PDNF and PCNF calculator webpage",
     description:
       "PDNF and PCNF calculator webpage ( Discrete Mathematics ), made using Python 3.13.",
@@ -209,10 +223,10 @@ export const projects: Project[] = [
     stack: ["Python 3.13", "Jinja2", "HTML", "CSS", "JavaScript"],
     github: "https://github.com/DaKaufeeBoii/pdnf-pcnf-web",
     demo: "https://pdnf-pcnf-web.onrender.com",
-    icon: "➕➖✖️➗",
   },
   {
     title: "MailGenius",
+    category: "AI & Full-Stack Applications",
     subtitle: "AI Email Automation Tool",
     description:
       "Python-based email assistant that drafts professional messages from bullet inputs using NLP and prompt engineering techniques.",
@@ -224,10 +238,10 @@ export const projects: Project[] = [
     stack: ["Python", "NLP", "Prompt Engineering", "REST APIs"],
     github: "https://github.com/DaKaufeeBoii/mailgenius-buddy",
     demo: "https://mailgenius-buddy.lovable.app",
-    icon: "✉️",
   },
   {
     title: "EchoLens",
+    category: "AI & Full-Stack Applications",
     subtitle: "Real-Time Sentiment Tracking Dashboard",
     description:
       "Sentiment analysis dashboard that visualizes opinion trends in real time, combining Python NLP backends with a React frontend.",
@@ -239,6 +253,5 @@ export const projects: Project[] = [
     stack: ["Python", "NLP", "Data Visualization", "React"],
     github: "https://github.com/DaKaufeeBoii/EchoLens2",
     demo: "https://echolens.lovable.app",
-    icon: "📡",
   },
 ];

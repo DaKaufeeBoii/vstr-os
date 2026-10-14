@@ -1,153 +1,79 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { projects as staticProjects } from "@/data/projects";
-import { useVFS } from "@/lib/vfs/useVFS";
+import React, { useMemo, useState } from "react";
+import { ArrowUpRight, BrainCircuit, CalendarDays, ChevronDown, Code2, ExternalLink, FolderKanban, Globe2, MapPin, Monitor, Search } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { projects } from "@/data/projects";
 import type { Project } from "@/types";
 
-export default function ProjectsApp() {
-  const [selected, setSelected] = useState<Project | null>(null);
-  const [projects, setProjects] = useState<Project[]>(staticProjects);
-  const vfs = useVFS();
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  "Web & Interface Systems": Monitor,
+  "AI & Full-Stack Applications": BrainCircuit,
+  "AI & Local-First Applications": BrainCircuit,
+  "Games & Interactive Tools": Code2,
+  "Web Applications": Globe2,
+  "Mobile Applications": Code2,
+  "Location & Utility Apps": MapPin,
+  "Events & Tools": CalendarDays,
+};
 
-  useEffect(() => {
-    async function loadProjects() {
-      if (vfs.isReady) {
-        try {
-          const content = await vfs.readFile("/home/saitarun/portfolio/projects.json");
-          if (content) {
-            setProjects(JSON.parse(content));
-          }
-        } catch (e) {
-          console.error("Failed to load projects from VFS, using static fallback:", e);
-          setProjects(staticProjects);
-        }
-      }
-    }
-    loadProjects();
-  }, [vfs.isReady]);
-
+function ProjectTile({ project, expanded, onToggle }: { project: Project; expanded: boolean; onToggle: () => void }) {
+  const Icon = CATEGORY_ICONS[project.category ?? ""] ?? FolderKanban;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <p className="section-heading">// {projects.length} projects found</p>
-
-      {/* File list */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {projects.map((proj) => (
-          <motion.div
-            key={proj.title}
-            id={`project-item-${proj.title.replace(/\s+/g, "-").toLowerCase()}`}
-            className="glass-card"
-            style={{
-              cursor: "pointer",
-              borderColor: selected?.title === proj.title
-                ? "rgba(0,212,255,0.4)"
-                : "var(--os-border)",
-              background: selected?.title === proj.title
-                ? "rgba(0,212,255,0.06)"
-                : "rgba(22, 27, 34, 0.6)",
-              transition: "all 0.2s",
-            }}
-            whileHover={{ scale: 1.01, borderColor: "rgba(0,212,255,0.25)" }}
-            onClick={() => setSelected(selected?.title === proj.title ? null : proj)}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 24 }}>{proj.icon}</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--os-text)" }}>
-                  {proj.title}
-                </p>
-                <p style={{ fontSize: 12, color: "var(--os-text-muted)", marginTop: 2 }}>
-                  {proj.subtitle}
-                </p>
-              </div>
-              <span style={{ fontSize: 11, color: "var(--os-cyan)", fontFamily: "var(--font-mono)" }}>
-                {selected?.title === proj.title ? "▲" : "▼"}
-              </span>
-            </div>
-
-            <AnimatePresence>
-              {selected?.title === proj.title && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  style={{ overflow: "hidden" }}
-                >
-                  <div style={{ paddingTop: 14, borderTop: "1px solid var(--os-border)", marginTop: 12 }}>
-                    <p style={{ fontSize: 12, color: "var(--os-text-muted)", lineHeight: 1.7, marginBottom: 12 }}>
-                      {proj.description}
-                    </p>
-                    {proj.highlights && proj.highlights.length > 0 && (
-                      <ul style={{ marginBottom: 12, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 4 }}>
-                        {proj.highlights.map((h: string) => (
-                          <li key={h} style={{ fontSize: 12, color: "var(--os-text-muted)", lineHeight: 1.6 }}>
-                            {h}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-                      {proj.stack.map((tech: string) => (
-                        <span key={tech} className="tag">{tech}</span>
-                      ))}
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      {proj.github && (
-                        <a
-                          href={proj.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={btnStyle("border")}
-                        >
-                          🔗 GitHub
-                        </a>
-                      )}
-                      {proj.demo && (
-                        <a
-                          href={proj.demo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={btnStyle("primary")}
-                        >
-                          🚀 Live Demo
-                        </a>
-                      )}
-                      {!proj.github && !proj.demo && (
-                        <span style={{ fontSize: 11, color: "var(--os-text-dim)", fontFamily: "var(--font-mono)" }}>
-                          // links coming soon
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        ))}
-      </div>
-    </div>
+    <article className={`project-tile${project.featured ? " featured" : ""}`}>
+      <button type="button" className="project-tile-trigger" aria-expanded={expanded} onClick={onToggle}>
+        <span className="project-tile-icon"><Icon size={19} aria-hidden="true" /></span>
+        <span className="project-tile-copy">
+          <span className="project-tile-title">{project.title}{project.featured && <span className="project-featured-tag">FEATURED</span>}</span>
+          <span className="project-tile-subtitle">{project.subtitle}</span>
+        </span>
+        <ChevronDown size={16} className={`project-chevron${expanded ? " open" : ""}`} aria-hidden="true" />
+      </button>
+      {expanded && (
+        <div className="project-tile-details">
+          <p>{project.description}</p>
+          {project.highlights?.length ? <ul>{project.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}</ul> : null}
+          {project.stack.length > 0 && <div className="project-tech-list" aria-label="Technologies">{project.stack.map((item) => <span key={item}>{item}</span>)}</div>}
+          <div className="project-links">
+            {project.github && <a href={project.github} target="_blank" rel="noreferrer"><Code2 size={14} aria-hidden="true" /> Repository <ArrowUpRight size={13} aria-hidden="true" /></a>}
+            {project.demo && <a href={project.demo} target="_blank" rel="noreferrer"><ExternalLink size={14} aria-hidden="true" /> Live demo <ArrowUpRight size={13} aria-hidden="true" /></a>}
+          </div>
+        </div>
+      )}
+    </article>
   );
 }
 
-function btnStyle(variant: "primary" | "border"): React.CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 6,
-    padding: "5px 12px",
-    borderRadius: 6,
-    fontSize: 12,
-    fontFamily: "var(--font-mono)",
-    textDecoration: "none",
-    background: variant === "primary" ? "var(--os-cyan-dim)" : "transparent",
-    border: variant === "primary"
-      ? "1px solid rgba(0,212,255,0.3)"
-      : "1px solid var(--os-border)",
-    color: variant === "primary" ? "var(--os-cyan)" : "var(--os-text-muted)",
-    cursor: "pointer",
-    transition: "all 0.15s",
-  };
+export default function ProjectsApp() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All projects");
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const categories = useMemo(() => ["All projects", ...Array.from(new Set(projects.map((project) => project.category).filter((value): value is string => Boolean(value))))], []);
+  const filtered = useMemo(() => projects.filter((project) => {
+    const matchesCategory = category === "All projects" || project.category === category;
+    const text = `${project.title} ${project.subtitle} ${project.description} ${project.stack.join(" ")}`.toLowerCase();
+    return matchesCategory && (!query.trim() || text.includes(query.trim().toLowerCase()));
+  }).sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))), [category, query]);
+  const featured = filtered.filter((project) => project.featured);
+  const other = filtered.filter((project) => !project.featured);
+
+  const renderTile = (project: Project) => (
+    <ProjectTile key={project.title} project={project} expanded={expanded === project.title} onToggle={() => setExpanded(expanded === project.title ? null : project.title)} />
+  );
+
+  return (
+    <main className="projects-explorer">
+      <header className="projects-explorer-header">
+        <div><p className="projects-eyebrow">PORTFOLIO / FILE INDEX</p><h2>Project Explorer</h2><p>Selected builds, grouped for discovery.</p></div>
+        <span className="projects-count">{filtered.length}<small> / {projects.length}</small></span>
+      </header>
+      <label className="projects-search"><Search size={16} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects or technologies" aria-label="Search projects or technologies" /></label>
+      <div className="projects-categories" role="group" aria-label="Filter projects by category">
+        {categories.map((item) => <button type="button" key={item} className={category === item ? "active" : ""} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}
+      </div>
+      {featured.length > 0 && <section className="projects-group"><h3><span>01</span> Featured work</h3><div className="projects-list">{featured.map(renderTile)}</div></section>}
+      {other.length > 0 && <section className="projects-group"><h3><span>{featured.length ? "02" : "01"}</span> More projects</h3><div className="projects-list">{other.map(renderTile)}</div></section>}
+      {filtered.length === 0 && <p className="projects-empty">No projects match this filter. Try a broader search.</p>}
+    </main>
+  );
 }

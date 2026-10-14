@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useOS } from "@/store/windowStore";
-import { Eye, MapPin, GraduationCap, Calendar, Award, Mail, FileText } from "lucide-react";
+import { Eye, GraduationCap, Award, Mail, FileText } from "lucide-react";
 
 export default function AboutApp() {
   const { openWindow } = useOS();
@@ -79,15 +79,14 @@ export default function AboutApp() {
             Sai Tarun Reddy Velagala
           </h2>
           <p style={{ marginTop: 4, fontSize: 13, color: "var(--os-amber)", fontFamily: "var(--font-mono)" }}>
-            CS Undergrad &amp; AI Developer
+            Computer Science Undergraduate · AI/ML
           </p>
 
           <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
             {[
-              { icon: <MapPin size={14} color="var(--os-amber)" />, text: "Hyderabad, Telangana" },
-              { icon: <GraduationCap size={14} color="var(--os-amber)" />, text: "KG Reddy College of Engineering & Technology" },
-              { icon: <Calendar size={14} color="var(--os-amber)" />, text: "Expected Graduation: 2027" },
-              { icon: <Award size={14} color="var(--os-amber)" />, text: "CGPA: 8.41 · B.Tech CSE" },
+              { icon: <GraduationCap size={14} color="var(--os-amber)" />, text: "KG Reddy College of Engineering and Technology · Moinabad, Telangana" },
+              { icon: <GraduationCap size={14} color="var(--os-amber)" />, text: "Bachelor of Computer Science and Engineering, AI/ML Specialization · Sep 2023 – Present" },
+              { icon: <Award size={14} color="var(--os-amber)" />, text: "CGPA: 8.49" },
             ].map((item) => (
               <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 16 }}>{item.icon}</span>
@@ -100,13 +99,11 @@ export default function AboutApp() {
 
       {/* Summary */}
       <div className="glass-card">
-        <p className="section-heading">// Professional Summary</p>
+        <p className="section-heading">{"// Professional Summary"}</p>
         <p style={{ fontSize: 13, color: "var(--os-text-muted)", lineHeight: 1.7 }}>
-          Computer Science undergraduate specializing in AI and full-stack development
-          with experience building web applications, AI-powered tools, and collaborative
-          platforms. Strong background in hackathons, technical leadership, and rapid
-          product prototyping. Skilled in developing scalable, user-focused applications
-          using modern web technologies and AI integrations.
+          Computer Science undergraduate with a foundation in software development,
+          programming, databases, and problem solving. Experienced in building practical
+          projects with modern technologies across software and application development.
         </p>
       </div>
 
@@ -120,18 +117,18 @@ export default function AboutApp() {
           <Mail size={16} color="var(--os-amber)" /> saitarunrdy@gmail.com
         </a>
         <a
-          href="https://linkedin.com/in/sai-tarun-reddy-velagala-24135229b/"
+          href="https://linkedin.com/in/vstr"
           id="about-linkedin-link"
           style={linkStyle}
         >
-          <span><img src="/assets/resume/icons/logo-Lin.jpg" alt="LinkedIn" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> LinkedIn
+          <span><Image src="/assets/resume/icons/logo-Lin.jpg" alt="" width={24} height={24} style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> LinkedIn
         </a>
         <a
           href="https://github.com/DaKaufeeBoii"
           id="about-github-link"
           style={linkStyle}
         >
-          <span><img src="/assets/resume/icons/logo-GitHub.png" alt="GitHub" style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> GitHub
+          <span><Image src="/assets/resume/icons/logo-GitHub.png" alt="" width={24} height={24} style={{ width: 24, height: 24, objectFit: "contain", borderRadius: 4 }} /></span> GitHub
         </a>
         <a
           href="/assets/resume/Sai_Tarun_Reddy_Velagala_Resume.pdf"

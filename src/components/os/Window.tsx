@@ -7,6 +7,7 @@ import {
   useDragControls,
   useMotionValue,
 } from "framer-motion";
+import type { PanInfo } from "framer-motion";
 import { useOS } from "@/store/windowStore";
 import { useSound } from "@/utils/useSound";
 import type { WindowId } from "@/types";
@@ -46,8 +47,8 @@ export default function Window({
     focusWindow,
     moveWindow,
     maximizeWindow,
+    snapWindow,
     resizeWindow,
-    windows,
     stack,
   } = useOS();
   const { playClick } = useSound();
@@ -84,6 +85,13 @@ export default function Window({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    if (!win?.isOpen || win.snapZone !== "maximize") return;
+    const updateMaximizedBounds = () => snapWindow(targetId, "maximize");
+    window.addEventListener("resize", updateMaximizedBounds);
+    return () => window.removeEventListener("resize", updateMaximizedBounds);
+  }, [targetId, win, snapWindow]);
+
   /* ── Sync store -> motion values when changed externally ────────
      (snap, maximize, center-on-open). Skip while dragging or on mobile. */
   useEffect(() => {
@@ -95,7 +103,7 @@ export default function Window({
     }
     x.set(win.x);
     y.set(win.y);
-  }, [win?.x, win?.y, win?.isOpen, win?.isMinimized, x, y, isMobile]);
+  }, [win, x, y, isMobile]);
 
   /* ── Drag via titlebar (framer-motion drag controls) ──────────── */
   const onTitlePointerDown = useCallback(
@@ -104,13 +112,13 @@ export default function Window({
       if ((e.target as HTMLElement).closest(".os-traffic-light")) return;
       focusWindow(targetId);
       // Hand off pointer to framer-motion drag controls
-      (dragControls as any).start(e.nativeEvent);
+      dragControls.start(e.nativeEvent);
     },
-    [targetId, focusWindow, dragControls]
+    [targetId, focusWindow, dragControls, isMobile]
   );
 
   const onDragEnd = useCallback(
-    (_: any, info: any) => {
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
       isDragging.current = false;
       if (!win) return;
       // Calculate new position based on the delta from start
@@ -145,9 +153,11 @@ export default function Window({
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        if (entry.target === windowRef.current) {
-          const { width, height } = entry.contentRect;
-          if (width !== win?.width || height !== win?.height) {
+        if (entry.target === windowRef.current && win?.snapZone !== "maximize" && !isMobile) {
+          const element = entry.target as HTMLElement;
+          const width = element.offsetWidth;
+          const height = element.offsetHeight;
+          if (Math.abs(width - (win?.width ?? 0)) > 1 || Math.abs(height - (win?.height ?? 0)) > 1) {
             resizeWindow(targetId, width, height);
           }
         }
@@ -155,7 +165,7 @@ export default function Window({
     });
     if (windowRef.current) observer.observe(windowRef.current);
     return () => observer.disconnect();
-  }, [targetId, win?.width, win?.height, resizeWindow]);
+  }, [targetId, win?.width, win?.height, win?.snapZone, resizeWindow, isMobile]);
 
   if (!win || !win.isOpen) return null;
 
@@ -235,8 +245,8 @@ export default function Window({
                   e.stopPropagation();
                   maximizeWindow(targetId);
                 }}
-                title="Maximize"
-                aria-label="Maximize window"
+                title={win.snapZone === "maximize" ? "Restore" : "Maximize"}
+                aria-label={win.snapZone === "maximize" ? "Restore window" : "Maximize window"}
               />
             </div>
 

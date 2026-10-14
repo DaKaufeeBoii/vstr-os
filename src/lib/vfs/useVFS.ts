@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import type { VFSNode } from "./vfsTypes";
 import * as vfs from "./vfsEngine";
 
 export function useVFS() {

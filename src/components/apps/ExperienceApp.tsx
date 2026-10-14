@@ -12,7 +12,7 @@ const TYPE_COLORS = {
 export default function ExperienceApp() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <p className="section-heading">// Experience &amp; Leadership</p>
+      <p className="section-heading">{"// Experience & Leadership"}</p>
       <div style={{ position: "relative", paddingLeft: 24 }}>
         {/* Timeline line */}
         <div
