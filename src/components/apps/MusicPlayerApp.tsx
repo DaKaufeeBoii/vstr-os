@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Headphones, Zap, Sparkles, Gamepad2, Coffee, Link2, Star, Info, Flame } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Headphones, Zap, Sparkles, Gamepad2, Coffee, Link2, Star, Info, Flame, ExternalLink } from "lucide-react";
 
 interface PresetPlaylist {
   id: string;
@@ -107,8 +107,17 @@ export default function MusicPlayerApp() {
   const [customInput, setCustomInput] = useState<string>("");
   const [showCustomBar, setShowCustomBar] = useState<boolean>(false);
   const [inputError, setInputError] = useState<string | null>(null);
+  const [embedStatus, setEmbedStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setEmbedStatus((status) => status === "loading" ? "error" : status);
+    }, 15000);
+    return () => window.clearTimeout(timeout);
+  }, [currentEmbedUrl]);
 
   const handleSelectPreset = (preset: PresetPlaylist) => {
+    setEmbedStatus("loading");
     setCurrentEmbedUrl(preset.embedUrl);
     setActivePresetId(preset.id);
     setInputError(null);
@@ -131,6 +140,7 @@ export default function MusicPlayerApp() {
     }
 
     setCurrentEmbedUrl(parsed);
+    setEmbedStatus("loading");
     setActivePresetId("custom");
     setInputError(null);
     setShowCustomBar(false);
@@ -344,6 +354,7 @@ export default function MusicPlayerApp() {
 
       {/* Embed Iframe Container */}
       <div
+        aria-busy={embedStatus === "loading"}
         style={{
           position: "relative",
           flex: 1,
@@ -362,6 +373,8 @@ export default function MusicPlayerApp() {
           frameBorder="0"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="eager"
+          onLoad={() => setEmbedStatus("ready")}
+          onError={() => setEmbedStatus("error")}
           style={{
             position: "absolute",
             top: 0,
@@ -372,6 +385,52 @@ export default function MusicPlayerApp() {
           }}
           title="Spotify Embed Player"
         />
+        {embedStatus === "loading" && (
+          <div
+            role="status"
+            aria-live="polite"
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "grid",
+              placeItems: "center",
+              color: "var(--os-text-muted, #8b949e)",
+              fontSize: "13px",
+              pointerEvents: "none",
+            }}
+          >
+            Connecting to Spotify…
+          </div>
+        )}
+        {embedStatus === "error" && (
+          <div
+            role="status"
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              padding: "20px",
+              background: "rgba(0, 0, 0, 0.86)",
+              color: "var(--os-text, #f0f6fc)",
+              textAlign: "center",
+              fontSize: "13px",
+            }}
+          >
+            <span>Spotify is taking too long to respond. You can open this playlist directly.</span>
+            <a
+              href={getWebUrl(currentEmbedUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#1DB954", display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              Open in Spotify <ExternalLink size={14} />
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Footer Info Bar */}
@@ -387,23 +446,28 @@ export default function MusicPlayerApp() {
           color: "var(--os-text-dim, #8b949e)",
         }}
       >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-          <Info size={12} color="var(--os-amber, #e5a93c)" /> Log in to Spotify in your browser for full playback.
+        <span role="status" aria-live="polite" style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <Info size={12} color="var(--os-amber, #e5a93c)" />
+          {embedStatus === "loading"
+            ? "Connecting to Spotify…"
+            : "Press play in Spotify; sign-in may be required."}
         </span>
         <a
           href={getWebUrl(currentEmbedUrl)}
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="Open current playlist in Spotify in a new tab"
           style={{
             color: "#1DB954",
             textDecoration: "none",
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
             gap: "3px",
             fontWeight: 500,
+            flexShrink: 0,
           }}
         >
-          Open Spotify ↗
+          Open Spotify <ExternalLink size={12} />
         </a>
       </div>
     </div>

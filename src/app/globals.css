@@ -136,7 +136,7 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background-image: var(--wallpaper-url, url('/wallpapers/static/batman.jpg'));
+  background-image: var(--wallpaper-url, url('/wallpapers/static/os_wallpaper.png'));
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

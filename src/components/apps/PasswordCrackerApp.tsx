@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { UnlockIcon } from "@/components/icons";
+import DecryptedText from "@/components/ui/reactbits/DecryptedText";
 
 type Phase = "connect" | "crack" | "granted" | "locked";
 
@@ -168,7 +169,7 @@ export default function PasswordCrackerApp() {
             style={{ padding: 24, flex: 1, display: "flex", flexDirection: "column", gap: 6 }}
           >
             <div style={{ fontSize: 11, color: "var(--os-amber)", marginBottom: 12, letterSpacing: "0.12em" }}>
-              PWNTOOL 3.0 — CONNECTING
+              <DecryptedText text="PWNTOOL 3.0 — INITIALIZING CIPHER" speed={30} sequential={true} />
             </div>
             {connectLog.map((line, i) => (
               <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
@@ -191,7 +192,9 @@ export default function PasswordCrackerApp() {
           >
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 10, color: "var(--os-amber)", letterSpacing: "0.1em" }}>PWNTOOL 3.0 — TYPE WORDS TO CRACK</div>
+              <div style={{ fontSize: 10, color: "var(--os-amber)", letterSpacing: "0.1em" }}>
+                <DecryptedText text="PWNTOOL 3.0 — TYPE WORDS TO CRACK" speed={35} sequential={true} />
+              </div>
               <div style={{ fontSize: 10, color: missed > 5 ? "var(--os-red)" : "var(--os-text-muted)" }}>
                 {missed} missed
               </div>
@@ -314,7 +317,7 @@ export default function PasswordCrackerApp() {
               <UnlockIcon size="lg" color="var(--os-jade)" />
             </motion.div>
             <div style={{ fontSize: 18, fontWeight: 700, color: "var(--os-jade)", letterSpacing: "0.08em" }}>
-              ACCESS GRANTED
+              <DecryptedText text="ACCESS GRANTED — SECTOR UNLOCKED" speed={25} sequential={true} />
             </div>
             <div style={{
               fontSize: 11,

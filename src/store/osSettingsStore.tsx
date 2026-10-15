@@ -84,17 +84,48 @@ const VALID_VIDEOS: VideoWallpaperId[] = ["dawn", "lake", "rayquaza", "yuji-slee
 
 /* ── Initial state ──────────────────────────────────────────────────── */
 function buildInitial(): OSSettingsState {
+  let savedWp = "/wallpapers/static/os_wallpaper.png";
+  let savedVwp: VideoWallpaperId = "none";
+  let savedPerf = false;
+  let savedVol = 0.7;
+  let savedBri = 0.8;
+  let savedTheme = "anime";
+  let savedHc = false;
+  let savedMissions: string[] = [];
+  let savedWidgets = DEFAULT_WIDGETS;
+
+  if (typeof window !== "undefined") {
+    try {
+      const wp = localStorage.getItem(KEYS.wallpaper);
+      if (wp) savedWp = wp;
+      const vwp = localStorage.getItem(KEYS.videoWallpaper) as VideoWallpaperId | null;
+      if (vwp && VALID_VIDEOS.includes(vwp)) savedVwp = vwp;
+      savedPerf = localStorage.getItem(KEYS.perfMode) === "true";
+      const vol = localStorage.getItem(KEYS.volume);
+      if (vol !== null) savedVol = Math.max(0, Math.min(1, parseFloat(vol) || 0.7));
+      const bri = localStorage.getItem(KEYS.brightness);
+      if (bri !== null) savedBri = Math.max(0, Math.min(1, parseFloat(bri) || 0.8));
+      const th = localStorage.getItem(KEYS.theme);
+      if (th) savedTheme = th;
+      savedHc = localStorage.getItem(KEYS.highContrast) === "true";
+      const ms = localStorage.getItem(KEYS.missions);
+      if (ms) savedMissions = JSON.parse(ms);
+      const wg = localStorage.getItem(KEYS.widgets);
+      if (wg) savedWidgets = JSON.parse(wg);
+    } catch {}
+  }
+
   return {
-    wallpaper:        "/wallpapers/static/os_wallpaper.png",
-    videoWallpaper:   "none",
-    performanceMode:  false,
-    volume:           0.7,
-    brightness:       0.8,
-    theme:            "anime",
-    highContrast:     false,
+    wallpaper:        savedWp,
+    videoWallpaper:   savedVwp,
+    performanceMode:  savedPerf,
+    volume:           savedVol,
+    brightness:       savedBri,
+    theme:            savedTheme,
+    highContrast:     savedHc,
     notifications:    [],
-    unlockedMissions: [],
-    widgets: DEFAULT_WIDGETS,
+    unlockedMissions: savedMissions,
+    widgets:          savedWidgets,
   };
 }
 
@@ -111,7 +142,7 @@ export const DEFAULT_WIDGETS: WidgetConfig[] = [
 function reducer(state: OSSettingsState, action: OSSettingsAction): OSSettingsState {
   switch (action.type) {
     case "SET_WALLPAPER":
-      return { ...state, wallpaper: action.wallpaper };
+      return { ...state, wallpaper: action.wallpaper, videoWallpaper: "none" };
 
     case "SET_VIDEO_WALLPAPER":
       return { ...state, videoWallpaper: action.videoWallpaper };
@@ -327,13 +358,22 @@ export function OSSettingsProvider({ children }: { children: React.ReactNode }) 
 
   const setWallpaper = useCallback((wallpaper: string) => {
     dispatch({ type: "SET_WALLPAPER", wallpaper });
-    localStorage.setItem(KEYS.wallpaper, wallpaper);
+    try {
+      localStorage.setItem(KEYS.wallpaper, wallpaper);
+      localStorage.setItem(KEYS.videoWallpaper, "none");
+    } catch (e) {
+      console.warn("Storage error saving wallpaper:", e);
+    }
     unlockMission("wallpaper-artisan");
   }, [unlockMission]);
 
   const setVideoWallpaper = useCallback((videoWallpaper: VideoWallpaperId) => {
     dispatch({ type: "SET_VIDEO_WALLPAPER", videoWallpaper });
-    localStorage.setItem(KEYS.videoWallpaper, videoWallpaper);
+    try {
+      localStorage.setItem(KEYS.videoWallpaper, videoWallpaper);
+    } catch (e) {
+      console.warn("Storage error saving video wallpaper:", e);
+    }
     unlockMission("wallpaper-artisan");
   }, [unlockMission]);
 

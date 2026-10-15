@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useOSSettings } from "@/store/osSettingsStore";
 import { useSound } from "@/utils/useSound";
 import { Send } from "lucide-react";
@@ -12,7 +12,9 @@ export default function GuestbookApp() {
 
   const [entries, setEntries] = useState<GuestbookEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [postedMessage, setPostedMessage] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<GuestbookEntry | null>(null);
 
   // Form state
@@ -21,21 +23,32 @@ export default function GuestbookApp() {
   const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch("/api/guestbook")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data: GuestbookEntry[] | { entries?: GuestbookEntry[] }) => {
+  const loadEntries = useCallback(async () => {
+    try {
+      const res = await fetch("/api/guestbook", { cache: "no-store" });
+      if (!res.ok) throw new Error("The visitor wall could not be reached. Try again in a moment.");
+      const data = await res.json() as GuestbookEntry[] | { entries?: GuestbookEntry[] };
+      {
         const list = Array.isArray(data) ? data : data?.entries ?? [];
         setEntries(list);
-        if (list.length > 0) setSelectedEntry(list[0]);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+        setSelectedEntry((current) => list.find((entry) => entry.id === current?.id) ?? list[0] ?? null);
+      }
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "The visitor wall could not be loaded.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const request = window.setTimeout(() => { void loadEntries(); }, 0);
+    return () => window.clearTimeout(request);
+  }, [loadEntries]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setPostedMessage(null);
 
     if (!name.trim()) {
       setErrorMsg("Please enter your name or handle.");
@@ -70,6 +83,7 @@ export default function GuestbookApp() {
         setSelectedEntry(data.entry ?? data.entries[0] ?? null);
       }
 
+      setPostedMessage(`Your note is live. Thanks, ${data?.entry?.name ?? name.trim()}!`);
       setName("");
       setMessage("");
       addNotification(
@@ -118,23 +132,37 @@ export default function GuestbookApp() {
         <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
           {loading ? (
             <div style={{ padding: "20px", textAlign: "center", color: "var(--os-text-muted)" }}>
-              Loading messages...
+              <span role="status">Loading the visitor wall…</span>
+            </div>
+          ) : loadError ? (
+            <div style={{ padding: "20px", textAlign: "center", color: "var(--os-text-muted)" }}>
+              <p role="alert" style={{ marginBottom: 12 }}>{loadError}</p>
+              <button type="button" onClick={() => { setLoading(true); setLoadError(null); void loadEntries(); }} style={smallActionStyle}>Try again</button>
             </div>
           ) : entries.length === 0 ? (
-            <div style={{ padding: "20px", textAlign: "center", color: "var(--os-text-muted)" }}>
-              No messages yet. Be the first to leave one!
+            <div style={{ padding: "24px 18px", textAlign: "center", color: "var(--os-text-muted)" }}>
+              <div aria-hidden="true" style={{ fontSize: 28, marginBottom: 10 }}>✳</div>
+              <strong style={{ display: "block", color: "#f8fafc", marginBottom: 6 }}>A blank page, for now.</strong>
+              <span>Leave the first note for the next person who visits.</span>
             </div>
           ) : (
             entries.map((item) => {
               const isSelected = selectedEntry?.id === item.id;
               return (
-                <div
+                <button
                   key={item.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  aria-label={`Read message from ${item.name}, ${item.role}`}
                   onClick={() => {
                     playClick();
                     setSelectedEntry(item);
                   }}
                   style={{
+                    width: "100%",
+                    textAlign: "left",
+                    font: "inherit",
+                    color: "inherit",
                     padding: "10px 12px",
                     borderRadius: "8px",
                     marginBottom: "6px",
@@ -190,7 +218,7 @@ export default function GuestbookApp() {
                   >
                     {item.message}
                   </div>
-                </div>
+                </button>
               );
             })
           )}
@@ -208,6 +236,7 @@ export default function GuestbookApp() {
             overflowY: "auto",
           }}
         >
+          {postedMessage && <div role="status" style={{ padding: "9px 12px", marginBottom: 12, borderRadius: 8, border: "1px solid rgba(34,197,94,.25)", background: "rgba(34,197,94,.08)", color: "#86efac", fontSize: 12 }}>{postedMessage}</div>}
           {selectedEntry ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -251,7 +280,7 @@ export default function GuestbookApp() {
             </div>
           ) : (
             <div style={{ color: "var(--os-text-muted)", textAlign: "center", marginTop: "40px" }}>
-              Select a message on the left or write a new one below.
+              {entries.length === 0 ? "Your note will start the conversation." : "Choose a note from the wall to read it here."}
             </div>
           )}
         </div>
@@ -267,12 +296,16 @@ export default function GuestbookApp() {
             gap: "10px",
           }}
         >
-          <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--os-amber)" }}>
-            Leave a Message / Feedback
+          <div>
+            <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--os-amber)" }}>
+              Add a note to the wall
+            </div>
+            <div style={{ marginTop: 4, color: "var(--os-text-muted)", fontSize: 10 }}>A hello, a thought about the work, or an opportunity—all welcome.</div>
           </div>
 
           <div style={{ display: "flex", gap: "10px" }}>
             <input
+              aria-label="Your name or handle"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -291,6 +324,7 @@ export default function GuestbookApp() {
             />
 
             <select
+              aria-label="Your role"
               value={role}
               onChange={(e) => setRole(e.target.value as GuestbookEntry["role"])}
               style={{
@@ -312,6 +346,7 @@ export default function GuestbookApp() {
           </div>
 
           <textarea
+            aria-label="Your message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Write a message, opportunity, or feedback (max 280 chars)..."
@@ -331,17 +366,17 @@ export default function GuestbookApp() {
           />
 
           {errorMsg && (
-            <div style={{ fontSize: "11px", color: "#ef4444" }}>{errorMsg}</div>
+            <div role="alert" style={{ fontSize: "11px", color: "#fca5a5" }}>{errorMsg}</div>
           )}
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: "11px", color: "var(--os-text-muted)" }}>
-              {280 - message.length} characters left
+              {message.length}/280
             </span>
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || loading || !!loadError}
               style={{
                 padding: "6px 16px",
                 background: "var(--os-amber)",
@@ -367,3 +402,13 @@ export default function GuestbookApp() {
     </div>
   );
 }
+
+const smallActionStyle: React.CSSProperties = {
+  minHeight: 34,
+  padding: "0 12px",
+  color: "var(--os-text)",
+  background: "rgba(255,255,255,.06)",
+  border: "1px solid rgba(255,255,255,.14)",
+  borderRadius: 7,
+  cursor: "pointer",
+};

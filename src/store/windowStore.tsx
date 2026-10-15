@@ -106,10 +106,22 @@ function generateInstanceId(appId: WindowId): string {
   return `${appId}-${instanceCounter}`;
 }
 
-function cascadeOffset(openCount: number) {
-  const base = 80;
-  const step = 30;
-  return base + (openCount % 8) * step;
+function getInitialWindowPosition(defaultW = 500, defaultH = 420, openCount = 0) {
+  if (typeof window === "undefined") {
+    const base = 80;
+    const step = 30;
+    const offset = base + (openCount % 8) * step;
+    return { x: offset, y: offset };
+  }
+  const winW = window.innerWidth;
+  const winH = window.innerHeight - 48; // reserve space for taskbar
+  const centerX = Math.max(20, Math.round((winW - defaultW) / 2));
+  const centerY = Math.max(20, Math.round((winH - defaultH) / 2));
+  const step = 25;
+  const offset = ((openCount % 5) - 2) * step;
+  const x = Math.max(20, Math.min(centerX + offset, winW - defaultW - 20));
+  const y = Math.max(20, Math.min(centerY + offset, winH - defaultH - 20));
+  return { x, y };
 }
 
 function buildInitial(): OSState {
@@ -162,7 +174,7 @@ function reducer(state: OSState, action: OSAction): OSState {
 
       const newZ = state.topZ + 1;
       const openCount = state.windows.filter((w) => w.isOpen).length;
-      const offset = cascadeOffset(openCount);
+      const initialPos = getInitialWindowPosition(cfg?.defaultW ?? 500, cfg?.defaultH ?? 420, openCount);
       const currentWorkspace =
         typeof target === "object" && target.desktopId !== undefined
           ? target.desktopId
@@ -209,8 +221,8 @@ function reducer(state: OSState, action: OSAction): OSState {
                     isOpen: true,
                     isMinimized: false,
                     zIndex: newZ,
-                    x: w.hasBeenOpened ? w.x : offset,
-                    y: w.hasBeenOpened ? w.y : offset,
+                    x: w.hasBeenOpened ? w.x : initialPos.x,
+                    y: w.hasBeenOpened ? w.y : initialPos.y,
                     hasBeenOpened: true,
                     desktopId: currentWorkspace,
                     ...(customTitle ? { title: customTitle } : {}),
@@ -247,8 +259,8 @@ function reducer(state: OSState, action: OSAction): OSState {
                   isMinimized: false,
                   zIndex: newZ,
                   // Keep position unless it's a completely new open (not existing)
-                  x: w.hasBeenOpened ? w.x : offset,
-                  y: w.hasBeenOpened ? w.y : offset,
+                  x: w.hasBeenOpened ? w.x : initialPos.x,
+                  y: w.hasBeenOpened ? w.y : initialPos.y,
                   hasBeenOpened: true,
                   desktopId: currentWorkspace,
                   ...(customTitle ? { title: customTitle } : {}),
@@ -267,8 +279,8 @@ function reducer(state: OSState, action: OSAction): OSState {
         isOpen: true,
         isMinimized: false,
         zIndex: newZ,
-        x: offset,
-        y: offset,
+        x: initialPos.x,
+        y: initialPos.y,
         width: cfg?.defaultW ?? 500,
         height: cfg?.defaultH ?? 420,
         hasBeenOpened: true,

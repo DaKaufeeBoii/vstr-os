@@ -60,8 +60,9 @@ export default function Window({
   const isDragging = useRef(false);
 
   // Position is driven entirely by transform (framer-motion motion values)
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+  // Initialized to the store coordinates so frame 1 renders at target position without jumping
+  const x = useMotionValue(win?.x ?? 0);
+  const y = useMotionValue(win?.y ?? 0);
 
   // Focus trap for the window
   const focusTrapRef = useFocusTrap({
@@ -94,16 +95,18 @@ export default function Window({
 
   /* ── Sync store -> motion values when changed externally ────────
      (snap, maximize, center-on-open). Skip while dragging or on mobile. */
+  const winX = win?.x;
+  const winY = win?.y;
   useEffect(() => {
-    if (!win || isDragging.current) return;
+    if (winX === undefined || winY === undefined || isDragging.current) return;
     if (isMobile) {
       x.set(0);
       y.set(0);
       return;
     }
-    x.set(win.x);
-    y.set(win.y);
-  }, [win, x, y, isMobile]);
+    x.set(winX);
+    y.set(winY);
+  }, [winX, winY, isMobile, x, y]);
 
   /* ── Drag via titlebar (framer-motion drag controls) ──────────── */
   const onTitlePointerDown = useCallback(
@@ -139,15 +142,16 @@ export default function Window({
     [targetId, win, moveWindow, defaultW, defaultH]
   );
 
-  // Center on first open
+  // Center on first open fallback if coordinates uninitialized
   useEffect(() => {
     if (win?.isOpen && win.x === 0 && win.y === 0) {
       const cx = Math.max(40, (window.innerWidth - defaultW) / 2);
       const cy = Math.max(40, (window.innerHeight - defaultH - 48) / 2);
       moveWindow(targetId, cx, cy);
+      x.set(cx);
+      y.set(cy);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [win?.isOpen]);
+  }, [win?.isOpen, win?.x, win?.y, defaultW, defaultH, moveWindow, targetId, x, y]);
 
   // Handle native resize
   useEffect(() => {

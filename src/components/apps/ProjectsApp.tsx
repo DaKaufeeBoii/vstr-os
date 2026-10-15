@@ -5,6 +5,7 @@ import { ArrowUpRight, BrainCircuit, CalendarDays, ChevronDown, Code2, ExternalL
 import type { LucideIcon } from "lucide-react";
 import { projects } from "@/data/projects";
 import type { Project } from "@/types";
+import SpotlightCard from "@/components/ui/reactbits/SpotlightCard";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   "Web & Interface Systems": Monitor,
@@ -20,7 +21,10 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 function ProjectTile({ project, expanded, onToggle }: { project: Project; expanded: boolean; onToggle: () => void }) {
   const Icon = CATEGORY_ICONS[project.category ?? ""] ?? FolderKanban;
   return (
-    <article className={`project-tile${project.featured ? " featured" : ""}`}>
+    <SpotlightCard
+      spotlightColor={project.featured ? "rgba(229, 169, 60, 0.14)" : "rgba(255, 255, 255, 0.08)"}
+      className={`project-tile${project.featured ? " featured" : ""}`}
+    >
       <button type="button" className="project-tile-trigger" aria-expanded={expanded} onClick={onToggle}>
         <span className="project-tile-icon"><Icon size={19} aria-hidden="true" /></span>
         <span className="project-tile-copy">
@@ -40,7 +44,7 @@ function ProjectTile({ project, expanded, onToggle }: { project: Project; expand
           </div>
         </div>
       )}
-    </article>
+    </SpotlightCard>
   );
 }
 

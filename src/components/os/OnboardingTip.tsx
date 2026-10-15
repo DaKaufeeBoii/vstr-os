@@ -25,9 +25,29 @@ export default function OnboardingTip() {
   const [activeTab, setActiveTab] = useState<"shortcuts" | "tips">("shortcuts");
   const { playClick } = useSound();
 
+  const dismiss = React.useCallback(() => {
+    playClick();
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(STORAGE_KEY, "true");
+      } catch {}
+    }
+    setVisible(false);
+  }, [playClick]);
+
   useEffect(() => {
-    // Show on initial visit
-    if (localStorage.getItem(STORAGE_KEY) !== "true") {
+    if (typeof window === "undefined") return;
+    const isDismissed = localStorage.getItem(STORAGE_KEY) === "true";
+    let hasCompletedFirstBoot = false;
+    try {
+      const saved = JSON.parse(localStorage.getItem("vstr_missions") ?? "[]");
+      if (Array.isArray(saved) && saved.includes("first-boot")) {
+        hasCompletedFirstBoot = true;
+      }
+    } catch {}
+
+    // Only auto-open if neither dismissed nor already completed first boot
+    if (!isDismissed && !hasCompletedFirstBoot) {
       const timer = setTimeout(() => {
         setVisible(true);
         setActiveTab("shortcuts");
@@ -46,11 +66,17 @@ export default function OnboardingTip() {
     return () => window.removeEventListener("toggle-shortcuts-guide", handleToggle);
   }, []);
 
-  const dismiss = () => {
-    playClick();
-    localStorage.setItem(STORAGE_KEY, "true");
-    setVisible(false);
-  };
+  // Escape key closes and dismisses
+  useEffect(() => {
+    if (!visible) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        dismiss();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [visible, dismiss]);
 
   return (
     <AnimatePresence>

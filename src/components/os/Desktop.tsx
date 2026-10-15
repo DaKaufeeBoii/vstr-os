@@ -40,6 +40,8 @@ import AppGalleryApp      from "@/components/apps/AppGalleryApp";
 
 import VideoWallpaper          from "./VideoWallpaper";
 import BsodScreen              from "./BsodScreen";
+import Squares                 from "@/components/ui/reactbits/Squares";
+import ClickSpark              from "@/components/ui/reactbits/ClickSpark";
 import TaskView                from "./TaskView";
 import WidgetBoard             from "./WidgetBoard";
 import CommandPalette          from "./CommandPalette";
@@ -791,16 +793,39 @@ export default function Desktop() {
     }
   }, [booting, openWindow]);
 
-  // Trigger "First Boot" mission once boot finishes and notify user of keyboard shortcuts
+  // Trigger "First Boot" mission once boot finishes and notify user of keyboard shortcuts (first boot only)
   useEffect(() => {
-    if (!booting) {
+    if (booting) return;
+
+    let hasCompletedFirstBoot = false;
+    let hasNotifiedShortcuts = false;
+
+    if (typeof window !== "undefined") {
+      try {
+        const saved = JSON.parse(localStorage.getItem("vstr_missions") ?? "[]");
+        if (Array.isArray(saved) && saved.includes("first-boot")) {
+          hasCompletedFirstBoot = true;
+        }
+        if (localStorage.getItem("vstr_shortcuts_notified") === "true") {
+          hasNotifiedShortcuts = true;
+        }
+      } catch {}
+    }
+
+    if (!hasCompletedFirstBoot) {
       unlockMission("first-boot");
+    }
+
+    if (!hasCompletedFirstBoot && !hasNotifiedShortcuts) {
       const notifTimer = setTimeout(() => {
         addNotification(
           "System Shortcuts Ready",
           "Alt+S: Start | Alt+K: Search | Alt+V: Task View | Alt+/: All Shortcuts",
           "keyboard"
         );
+        try {
+          localStorage.setItem("vstr_shortcuts_notified", "true");
+        } catch {}
       }, 1600);
       return () => clearTimeout(notifTimer);
     }
@@ -879,7 +904,7 @@ export default function Desktop() {
           <div
             className="wallpaper"
             style={{
-              backgroundImage: wallpaper && videoWallpaper === "none" ? `url(${wallpaper})` : undefined,
+              backgroundImage: wallpaper && videoWallpaper === "none" ? `url("${wallpaper}")` : "none",
               opacity: videoWallpaper !== "none" ? 0 : 1,
               transition: "opacity 0.6s",
             }}
@@ -889,6 +914,25 @@ export default function Desktop() {
             videoSrc={videoWallpaper}
             opacity={0.92}
             paused={performanceMode}
+          />
+
+          {/* Interactive React Bits Grid Background */}
+          {!performanceMode && videoWallpaper === "none" && (
+            <Squares
+              speed={0.3}
+              squareSize={48}
+              borderColor="rgba(255, 255, 255, 0.035)"
+              hoverFillColor="rgba(229, 169, 60, 0.07)"
+            />
+          )}
+
+          {/* Micro-interaction Click Spark */}
+          <ClickSpark
+            sparkColor="#e5a93c"
+            sparkSize={9}
+            sparkRadius={18}
+            sparkCount={7}
+            duration={450}
           />
 
           {/* Desktop Widgets */}
